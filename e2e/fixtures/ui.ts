@@ -1,0 +1,33 @@
+import { expect, type Page } from '@playwright/test';
+
+export async function openShowcase(page: Page, baseURL: string | undefined) {
+  const url = new URL(baseURL ?? 'http://127.0.0.1:4173/');
+  url.port = '4174'; url.hash = '/dev/components';
+  await page.goto(url.href);
+  await expect(page.getByRole('heading', { name: 'Componenti UI', exact: true })).toBeVisible();
+}
+
+export async function setScale(page: Page, value: number) {
+  await page.getByRole('button', { name: /^Scala interfaccia/ }).click();
+  const slider = page.getByRole('slider');
+  await slider.focus();
+  await slider.press(value === 48 ? 'End' : 'Home');
+  if (value !== 48) for (let i = 4; i < value; i++) await slider.press('ArrowRight');
+  await expect(slider).toHaveAttribute('aria-valuetext', `${value} pt`);
+}
+
+export async function expectNoBleeding(page: Page) {
+  const failures = await page.evaluate(() => {
+    const errors: string[] = [];
+    if (document.documentElement.scrollWidth > innerWidth + 1) errors.push(`viewport: ${document.documentElement.scrollWidth}/${innerWidth}`);
+    for (const element of document.querySelectorAll<HTMLElement>('main button, main input, main .nf-card, main .nf-validation, main .nf-gallery, dialog[open]')) {
+      const box = element.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      if (box.left < -1 || box.right > innerWidth + 1) errors.push(`${element.tagName} outside viewport: ${box.left}/${box.right}`);
+      // Native single-line inputs scroll their editable value; their box must still fit.
+      if (!(element instanceof HTMLInputElement) && element.scrollWidth > element.clientWidth + 2) errors.push(`${element.tagName} clipping: ${element.scrollWidth}/${element.clientWidth}`);
+    }
+    return errors;
+  });
+  expect(failures).toEqual([]);
+}

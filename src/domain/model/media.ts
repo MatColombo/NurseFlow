@@ -52,3 +52,4 @@ export type StepMedia = z.infer<typeof stepMediaSchema>;
 export type Media = StepMedia;
 export type MediaAsset = z.infer<typeof mediaAssetSchema>;
 export type GalleryPrefs = z.infer<typeof galleryPrefsSchema>;
+export type GalleryStyle = z.infer<typeof galleryStyleSchema>;

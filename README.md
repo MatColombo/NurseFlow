@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00** e persistenza **F01**: React, Vite e TypeScript strict per hosting statico GitHub Pages; dominio, Dexie e comandi atomici separati dalla UI. Questa è un'anteprima tecnica, senza funzionalità cliniche o fixture precaricate. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01** e design system **F02**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -37,11 +37,13 @@ npm run test:e2e
 
 Su Linux installare anche le dipendenze di sistema con `npx playwright install --with-deps chromium firefox webkit`. Per eseguire un solo browser: `npm run test:e2e -- --project=chromium`.
 
-Gli smoke test verificano mount, tutte le route hash previste, parametri, reload dei deep link e recupero di route sconosciute. Gli E2E lavorano sull'origine del preview production e verificano anche IndexedDB reale, migrazioni, immutabilità, rollback e reload delle sessioni. Il codice di test storage è compilato in memoria e iniettato esclusivamente da Playwright, senza includerlo nella build applicativa. Il preview viene avviato automaticamente sulla porta `4173`, che deve essere libera. Il report HTML è in `playwright-report/`.
+Gli smoke test verificano mount, tutte le route hash previste, parametri, reload e recupero di route sconosciute. Gli E2E production verificano anche IndexedDB reale, migrazioni, immutabilità, rollback, sessioni e preferenze. Il codice di test storage è compilato in memoria e iniettato esclusivamente da Playwright. La matrice UI usa il catalogo dev e gli stessi componenti/CSS dell'app. Playwright avvia automaticamente preview su `4173` e Vite su `4174`: entrambe le porte devono essere libere. Il report HTML è in `playwright-report/`.
+
+Snapshot visivi 13pt: Chromium **Windows**, light/dark e Dialog/Sheet. Su Windows `npm run test:e2e` confronta anche le baseline versionate. Su Linux/macOS eseguire `npm run test:e2e -- --grep-invert '@visual'`; CI separa i test funzionali Linux dal confronto visuale Windows. Per aggiornare intenzionalmente le baseline su Windows: `npm run test:e2e -- --project=chromium --grep '@visual' --update-snapshots`, poi ispezionare i PNG prima del commit. Non generare automaticamente baseline mancanti in CI.
 
 ## Persistenza F01
 
-`src/domain/model` contiene schemi Zod e tipi inferiti per procedure, gruppi, revisioni Draft/Ready, DAG, destinazioni, media, impostazioni e sessioni. `src/storage/index.ts` espone la factory di composizione, comandi e repository di sola lettura. I componenti non ricevono Dexie o tabelle. Importare il modulo non apre il DB; la shell F00 non avvia ancora questi servizi.
+`src/domain/model` contiene schemi Zod e tipi inferiti per procedure, gruppi, revisioni Draft/Ready, DAG, destinazioni, media, impostazioni e sessioni. `src/storage/index.ts` espone la factory di composizione, comandi e repository di sola lettura. I componenti non ricevono Dexie o tabelle. Importare il modulo non apre il DB; da F02 il provider applicativo apre lo storage per leggere e salvare le preferenze, senza inserire procedure.
 
 ```ts
 import { createNurseFlowStorage } from '@storage/index';
@@ -64,6 +66,14 @@ storage.close();
 Il DB ha sette tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti senza cambiare snapshot, asset o preferenze. Ready e Blob non sono sovrascrivibili; F01 non esegue garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la futura UI deve mostrare successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
 Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in produzione. Dettagli e limiti: [ADR-002](docs/adr/002-domain-storage-transactions.md), [report F01](docs/reports/F01.md).
+
+## Design system F02
+
+`src/shared/components` esporta Button, Card, Badge, Search, Sheet, Dialog, Icon, List/ListItem, GalleryFrame e ValidationRow. Token colore in `shared/styles/tokens.css`, geometria/tipografia in `shared/design-tokens/scale.ts`. Usare i token anche nelle prossime feature; nessun `transform: scale()` sulla pagina. Button disabilitato richiede `disabledReason`; le icone decorative sono escluse dal nome accessibile. GalleryFrame non carica autonomamente risorse.
+
+`/#/settings` espone solo la sezione Interfaccia di F02: lingua IT/EN, tema System/Light/Dark, scala unica 4–48pt e ripristino 13pt. I selettori usano Sheet con focus trap, Escape e ritorno focus. Cambi immediati, persistenza locale mediante `saveAppearance`; su errore rollback e Retry. Le altre sezioni Page 10 arrivano in F12. I cataloghi i18next sono nel bundle, senza richieste HTTP o traduzione automatica dei contenuti authored.
+
+Solo con `npm run dev`, `/#/dev/components` mostra i componenti con fixture neutre per ispezione e test; non modifica la libreria. Gli snapshot sono in `e2e/journeys/components.visual.spec.ts-snapshots/`. I test coprono 320/390/768px × 4/13/30/48pt, offset, icone, target, overflow, contrasti, etichette, focus e preferenze dopo reload. [ADR-003](docs/adr/003-ui-theme-scale-i18n.md) e [report F02](docs/reports/F02.md) documentano scelte, prove e limiti.
 
 ## GitHub Pages e `base`
 
@@ -89,15 +99,15 @@ Il link risultante è `http://127.0.0.1:4173/nurseflow-preview/#/build/example/s
 
 Pubblicare il repository su GitHub con branch `main` e selezionare **Settings → Pages → Build and deployment → Source: GitHub Actions**. Il nome repository è passato automaticamente al workflow. Per un dominio custom impostare la variabile repository **VITE_BASE_PATH** a `/`; un diverso prefisso può essere impostato nella stessa variabile. Non sono richiesti token personali o secret applicativi.
 
-- `ci.yml`: controlli su pull request e avvio manuale; riusabile da altri workflow. Esegue `npm ci`, lint, typecheck, unit test, build, installazione dei tre browser ed E2E sotto la base del repository.
+- `ci.yml`: controlli su pull request e avvio manuale; riusabile da altri workflow. Esegue `npm ci`, lint, typecheck, unit test, build ed E2E sui tre browser Linux sotto la base repository; un job Windows/Chromium confronta gli snapshot visivi.
 - `deploy.yml`: su push a `main` richiama CI; solo dopo tutti i controlli pubblica lo stesso artefatto verificato nell'ambiente `github-pages`. Avvio manuale disponibile, deploy limitato a `main`.
 
 I workflow sono predisposti; una verifica GitHub Actions/Pages reale richiede un remote e il primo push. L'esito locale non costituisce un deploy già effettuato.
 
-## Moduli e limiti F00/F01
+## Moduli e limiti F00–F02
 
 ```text
-src/app/          routing HashRouter e bootstrap
+src/app/          HashRouter, provider appearance/i18n, error boundaries
 src/domain/       model e remapping; graph, validation e runtime nelle fasi successive
 src/storage/      DB, migrations, repositories, commands
 src/features/     first-launch, library, procedures, builder, step-editor,
@@ -110,8 +120,8 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Solo in sviluppo, le Pagine 00–11B mostrano **`not implemented`**, i parametri dell'hash e un elenco diagnostico di route. Questi componenti sono esclusi dalla build production, che mostra **Anteprima tecnica F00** sulle route riservate. La root apre `#/library` soltanto per lo smoke tecnico; il flusso di primo avvio verrà implementato in F03.
+Le Pagine 00–11B mostrano **Anteprima tecnica F02** e un avviso esplicito di funzionalità non implementata. Fanno eccezione le preferenze Interfaccia già operative in Settings. In sviluppo sono disponibili parametri hash, elenco diagnostico e catalogo componenti; questi strumenti sono esclusi dalla build production. La root apre `#/library` per lo smoke tecnico; il flusso di primo avvio verrà implementato in F03. Nessuna bottom navigation globale.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. Dexie e gli schemi dati sono implementati in F01; validator P/W, motore run, traduzioni e design system arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline o pronta all'uso.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).

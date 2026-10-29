@@ -1,37 +1,27 @@
-import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { routeDefinitions } from '@app/route-definitions';
-import { RouteNotFound } from '@app/routes';
-
-function DevelopmentPlaceholder({ title, page }: { title: string; page: string }) {
-  const parameters = useParams();
-
-  return (
-    <section aria-labelledby="placeholder-title">
-      <h2 id="placeholder-title">{title}</h2>
-      <p>Page {page}: <strong>not implemented</strong></p>
-      {Object.entries(parameters).map(([name, value]) => (
-        <p key={name}>{name}: <code>{value}</code></p>
-      ))}
-    </section>
-  );
-}
+import { RouteContent, RouteNotFound } from '@app/RouteContent';
+import ComponentShowcase from './ComponentShowcase';
 
 export default function DevelopmentRoutes() {
+  const { t } = useTranslation();
   return (
     <>
-      <p>F00 · Solo sviluppo · Nessuna funzionalità applicativa implementata.</p>
       <Routes>
         <Route path="/" element={<Navigate to="/library" replace />} />
-        {routeDefinitions.map(({ path, title, page }) => (
-          <Route key={path} path={path} element={<DevelopmentPlaceholder title={title} page={page} />} />
+        {routeDefinitions.map(({ path, page }) => (
+          <Route key={path} path={path} element={<RouteContent page={page} />} />
         ))}
+        <Route path="/dev/components" element={<ComponentShowcase />} />
         <Route path="*" element={<RouteNotFound />} />
       </Routes>
-      <nav aria-label="Route di sviluppo">
+      <nav aria-label={t('shell.development')}>
         <ul>
-          {routeDefinitions.map(({ path, example, page, title }) => (
-            <li key={path}><Link to={example}>{page} · {title}</Link></li>
+          {routeDefinitions.map(({ path, example, page }) => (
+            <li key={path}><Link to={example}>{page} · {t(`pages.${page}`)}</Link></li>
           ))}
+          <li><Link to="/dev/components">{t('shell.components')}</Link></li>
         </ul>
       </nav>
     </>

@@ -19,14 +19,20 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'firefox', testIgnore: '**/*.visual.spec.ts', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testIgnore: '**/*.visual.spec.ts', use: { ...devices['Desktop Safari'] } },
   ],
-  webServer: {
+  webServer: [{
     command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
     url: baseURL,
     reuseExistingServer: false,
     timeout: 120_000,
     env: { VITE_BASE_PATH: basePath },
-  },
+  }, {
+    command: 'npm run dev -- --host 127.0.0.1 --port 4174 --strictPort',
+    url: `http://127.0.0.1:4174${basePath}`,
+    reuseExistingServer: false,
+    timeout: 60_000,
+    env: { VITE_BASE_PATH: basePath },
+  }],
 });

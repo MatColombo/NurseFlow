@@ -1,46 +1,27 @@
 import { lazy, Suspense } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { routeDefinitions } from '@app/route-definitions';
+import { RouteContent, RouteNotFound } from './RouteContent';
+import { ErrorBoundary } from './error-boundaries';
 
 // Vite elimina questo import e i placeholder dal bundle production.
 const DevelopmentRoutes = import.meta.env.DEV
   ? lazy(() => import('@app/development/DevelopmentRoutes'))
   : null;
 
-function TechnicalPreview() {
-  return (
-    <section aria-labelledby="preview-title">
-      <h2 id="preview-title">Anteprima tecnica F00</h2>
-      <p>Bootstrap di NurseFlow. Le funzionalità applicative saranno aggiunte nelle prossime fasi.</p>
-    </section>
-  );
-}
-
-export function RouteNotFound() {
-  return (
-    <section aria-labelledby="not-found-title">
-      <h2 id="not-found-title">Pagina non trovata</h2>
-      <Link to="/library">Torna alla libreria</Link>
-    </section>
-  );
-}
-
 export function AppRoutes() {
-  if (DevelopmentRoutes) {
-    return (
-      <Suspense fallback={<p>Caricamento…</p>}>
-        <DevelopmentRoutes />
-      </Suspense>
-    );
-  }
-
-  return (
-    <Routes>
+  const location = useLocation();
+  const { t } = useTranslation();
+  return <ErrorBoundary resetKey={location.pathname}>
+    {DevelopmentRoutes ? <Suspense fallback={<p role="status">{t('common.loading')}</p>}>
+      <DevelopmentRoutes />
+    </Suspense> : <Routes>
       <Route path="/" element={<Navigate to="/library" replace />} />
-      {routeDefinitions.map(({ path }) => (
-        <Route key={path} path={path} element={<TechnicalPreview />} />
+      {routeDefinitions.map(({ path, page }) => (
+        <Route key={path} path={path} element={<RouteContent page={page} />} />
       ))}
       <Route path="*" element={<RouteNotFound />} />
-    </Routes>
-  );
+    </Routes>}
+  </ErrorBoundary>;
 }

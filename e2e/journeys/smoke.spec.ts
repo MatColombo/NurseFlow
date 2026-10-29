@@ -15,7 +15,7 @@ test('monta la build statica senza placeholder o richieste esterne', async ({ pa
 
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'NurseFlow', level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Anteprima tecnica F00' })).toBeVisible();
+  await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(`${baseURL}#/library`);
   await expect(page.getByText('not implemented')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Route di sviluppo' })).toHaveCount(0);
@@ -33,10 +33,10 @@ const deepLinks = [
 for (const path of deepLinks) {
   test(`apre e ricarica il deep link hash ${path}`, async ({ page, baseURL }) => {
     await page.goto(`./#${path}`);
-    await expect(page.getByRole('heading', { name: 'Anteprima tecnica F00' })).toBeVisible();
+    await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByRole('heading', { name: 'NurseFlow', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Anteprima tecnica F00' })).toBeVisible();
+    await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await expect(page).toHaveURL(`${baseURL}#${path}`);
   });
 }
@@ -46,7 +46,7 @@ test('recupera un hash sconosciuto', async ({ page, baseURL }) => {
   await expect(page.getByRole('heading', { name: 'Pagina non trovata' })).toBeVisible();
   await page.getByRole('link', { name: 'Torna alla libreria' }).click();
   await expect(page).toHaveURL(`${baseURL}#/library`);
-  await expect(page.getByRole('heading', { name: 'Anteprima tecnica F00' })).toBeVisible();
+  await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
 });
 
 test('F00 non registra service worker PWA', async ({ page }) => {
