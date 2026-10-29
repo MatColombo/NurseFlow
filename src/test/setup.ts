@@ -3,7 +3,7 @@ import { cleanup } from '@testing-library/react';
 import { afterEach, beforeEach } from 'vitest';
 
 beforeEach(() => {
-  window.history.replaceState(null, '', '/');
+  if (typeof window !== 'undefined') window.history.replaceState(null, '', '/');
 });
 
 afterEach(() => {

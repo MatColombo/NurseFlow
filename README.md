@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**: React, Vite e TypeScript strict per hosting statico GitHub Pages. Questa è un'anteprima tecnica, senza funzionalità cliniche, dati demo o persistenza. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00** e persistenza **F01**: React, Vite e TypeScript strict per hosting statico GitHub Pages; dominio, Dexie e comandi atomici separati dalla UI. Questa è un'anteprima tecnica, senza funzionalità cliniche o fixture precaricate. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -37,7 +37,33 @@ npm run test:e2e
 
 Su Linux installare anche le dipendenze di sistema con `npx playwright install --with-deps chromium firefox webkit`. Per eseguire un solo browser: `npm run test:e2e -- --project=chromium`.
 
-Gli smoke test verificano mount, tutte le route hash previste, parametri, reload dei deep link e recupero di route sconosciute. Gli E2E lavorano sulla build production, verificano l'assenza di placeholder di sviluppo, richieste esterne e service worker. Il preview viene avviato automaticamente sulla porta `4173`, che deve essere libera. Il report HTML è in `playwright-report/`.
+Gli smoke test verificano mount, tutte le route hash previste, parametri, reload dei deep link e recupero di route sconosciute. Gli E2E lavorano sull'origine del preview production e verificano anche IndexedDB reale, migrazioni, immutabilità, rollback e reload delle sessioni. Il codice di test storage è compilato in memoria e iniettato esclusivamente da Playwright, senza includerlo nella build applicativa. Il preview viene avviato automaticamente sulla porta `4173`, che deve essere libera. Il report HTML è in `playwright-report/`.
+
+## Persistenza F01
+
+`src/domain/model` contiene schemi Zod e tipi inferiti per procedure, gruppi, revisioni Draft/Ready, DAG, destinazioni, media, impostazioni e sessioni. `src/storage/index.ts` espone la factory di composizione, comandi e repository di sola lettura. I componenti non ricevono Dexie o tabelle. Importare il modulo non apre il DB; la shell F00 non avvia ancora questi servizi.
+
+```ts
+import { createNurseFlowStorage } from '@storage/index';
+
+const storage = createNurseFlowStorage(); // NurseFlowDB
+await storage.open();
+const { procedure, draft } = await storage.commands.createDraft({
+  metadata: { title: 'Esempio non clinico' },
+});
+// draft è incompleta: Start → unassigned; nessuna Ready viene creata.
+const persisted = await storage.repositories.revisions.get(draft.id);
+storage.close();
+```
+
+- `createDraft` aggiunge procedura, Draft e asset preparati atomicamente. Con `{ procedureId }` riapre la Draft esistente o ne crea una indipendente dalla Ready; `updateDraft` salva grafo/asset con controllo `expectedEditVersion`.
+- `markReadyUnitOfWork` richiede conferma personale, token aggiornato e un validatore sincrono fornito dal chiamante. Aggiunge sempre una nuova snapshot Ready e aggiorna il puntatore nella stessa transazione; mantiene la Draft indipendente. Non esiste un validatore permissivo predefinito: le regole P/W arrivano in F08.
+- `saveRun` controlla appartenenza e riferimenti alla Ready, vieta di cambiare la revisione pinnata e usa `saveVersion`/`expectedSaveVersion` contro salvataggi obsoleti. Per la prima scrittura passare `null` come versione attesa. Il motore e i checkpoint Back sono F09.
+- `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
+
+Il DB ha sette tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti senza cambiare snapshot, asset o preferenze. Ready e Blob non sono sovrascrivibili; F01 non esegue garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la futura UI deve mostrare successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
+
+Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in produzione. Dettagli e limiti: [ADR-002](docs/adr/002-domain-storage-transactions.md), [report F01](docs/reports/F01.md).
 
 ## GitHub Pages e `base`
 
@@ -68,12 +94,12 @@ Pubblicare il repository su GitHub con branch `main` e selezionare **Settings �
 
 I workflow sono predisposti; una verifica GitHub Actions/Pages reale richiede un remote e il primo push. L'esito locale non costituisce un deploy già effettuato.
 
-## Moduli e limiti F00
+## Moduli e limiti F00/F01
 
 ```text
 src/app/          routing HashRouter e bootstrap
-src/domain/       model, graph, validation, runtime, portability (F01+)
-src/storage/      migrations, repositories (F01+)
+src/domain/       model e remapping; graph, validation e runtime nelle fasi successive
+src/storage/      DB, migrations, repositories, commands
 src/features/     first-launch, library, procedures, builder, step-editor,
                   validation, run, map, settings, portability
 src/shared/       components, design-tokens, styles, i18n, icons, utils
@@ -86,6 +112,6 @@ Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@tes
 
 Solo in sviluppo, le Pagine 00–11B mostrano **`not implemented`**, i parametri dell'hash e un elenco diagnostico di route. Questi componenti sono esclusi dalla build production, che mostra **Anteprima tecnica F00** sulle route riservate. La root apre `#/library` soltanto per lo smoke tecnico; il flusso di primo avvio verrà implementato in F03.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. Dexie, validazione, traduzioni e design system saranno introdotti nelle rispettive fasi; PWA, cache offline e aggiornamenti differiti appartengono a **F15**. F00 non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline o pronta all'uso.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. Dexie e gli schemi dati sono implementati in F01; validator P/W, motore run, traduzioni e design system arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline o pronta all'uso.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).
