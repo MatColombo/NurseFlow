@@ -1,0 +1,35 @@
+/* Stile tecnico F00. Tema completo e scala UI appartengono a F02. */
+:root {
+  font-family: system-ui, sans-serif;
+  color: #142c38;
+  background: #f3f8fa;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: 1rem;
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: #076e79;
+}
+
+a:focus-visible {
+  outline: 0.2rem solid #075f91;
+  outline-offset: 0.15rem;
+}
+
+nav li {
+  margin-block: 0.5rem;
+}

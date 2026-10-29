@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+# I contratti originali mantengono i byte verificabili con SHA256SUMS.txt.
+docs/nurseflow/** -text
