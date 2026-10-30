@@ -91,7 +91,7 @@ export async function exerciseMigration() {
   const db = new NurseFlowDatabase(name);
   try {
     await db.open();
-    check(db.verno === 2 && (await db.revisions.get(revision.id))?.editVersion === 1, 'Migration failed');
+    check(db.verno === 3 && (await db.revisions.get(revision.id))?.editVersion === 1, 'Migration failed');
     check(JSON.stringify((await db.revisions.get(revision.id))?.graph) === JSON.stringify(revision.graph), 'Migration changed graph');
     return true;
   } finally { await db.delete(); }

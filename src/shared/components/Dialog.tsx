@@ -1,9 +1,10 @@
-import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
 
 export interface DialogProps {
   open: boolean; title: string; description?: string; children: ReactNode; onClose(): void;
+  className?: string; style?: CSSProperties;
 }
 
 function trapTab(event: KeyboardEvent<HTMLDialogElement>) {
@@ -26,7 +27,7 @@ function trapTab(event: KeyboardEvent<HTMLDialogElement>) {
 }
 
 /** Native modal provides inert background, focus containment and Escape. */
-export function Dialog({ open, title, description, children, onClose, sheet = false }: DialogProps & { sheet?: boolean }) {
+export function Dialog({ open, title, description, children, onClose, sheet = false, className = '', style }: DialogProps & { sheet?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
@@ -44,8 +45,12 @@ export function Dialog({ open, title, description, children, onClose, sheet = fa
     };
   }, [open]);
   return (
-    <dialog ref={dialogRef} className={`nf-dialog ${sheet ? 'nf-sheet' : ''}`} aria-labelledby={titleId}
+    <dialog ref={dialogRef} className={`nf-dialog ${sheet ? 'nf-sheet' : ''} ${className}`} style={style} aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined} aria-modal="true" onKeyDown={trapTab}
+      onClick={(event) => {
+        const box = event.currentTarget.getBoundingClientRect();
+        if (event.target === event.currentTarget && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom)) onClose();
+      }}
       onCancel={(event) => { event.preventDefault(); onClose(); }}>
       {open && <div className="nf-stack">
         <header className="nf-row"><h2 ref={titleRef} tabIndex={-1} id={titleId} className="nf-title">{title}</h2>

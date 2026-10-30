@@ -23,7 +23,10 @@ export async function expectNoBleeding(page: Page) {
     for (const element of document.querySelectorAll<HTMLElement>('main button, main input, main .nf-card, main .nf-validation, main .nf-gallery, dialog[open]')) {
       const box = element.getBoundingClientRect();
       if (!box.width || !box.height) continue;
-      if (box.left < -1 || box.right > innerWidth + 1) errors.push(`${element.tagName} outside viewport: ${box.left}/${box.right}`);
+      const carousel = element.closest('.nf-recent-tiles');
+      const bounds = carousel?.getBoundingClientRect() ?? box;
+      // Recent explicitly permits horizontal scrolling inside its single-row strip at large scales.
+      if (bounds.left < -1 || bounds.right > innerWidth + 1) errors.push(`${element.tagName} outside viewport: ${bounds.left}/${bounds.right}`);
       // Native single-line inputs scroll their editable value; their box must still fit.
       if (!(element instanceof HTMLInputElement) && element.scrollWidth > element.clientWidth + 2) errors.push(`${element.tagName} clipping: ${element.scrollWidth}/${element.clientWidth}`);
     }

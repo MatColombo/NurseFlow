@@ -71,7 +71,7 @@ export function AppearanceProvider({ service, children }: PropsWithChildren<{ se
   }, [service]);
 
   if (status === 'loading') return <p role="status">{t('common.loading')}</p>;
-  if (status === 'error') return <Card><p role="alert">{t('appearance.loadError')}</p>
+  if (status === 'error') return <Card><p role="alert">{t('library.loadError')}</p>
     <Button onClick={() => { setStatus('loading'); void load(); }}>{t('common.retry')}</Button></Card>;
   return (
     <AppearanceContext value={{ preferences, update, saveFailed, retry: () => { if (failed.current) update(failed.current); } }}>

@@ -17,6 +17,20 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    library: {
+      async getSnapshot(includeSteps?: boolean) {
+        return db.transaction('r', [db.procedures, db.groups, db.uiPreferences, db.revisions], async () => {
+          const view = uiPreferencesSchema.parse(await db.uiPreferences.get('main'));
+          const readSteps = includeSteps ?? view.filters?.['includeSteps'] === true;
+          const [procedures, groups, revisions] = await Promise.all([
+            db.procedures.toArray(), db.groups.toArray(),
+            readSteps ? db.revisions.toArray() : Promise.resolve([]),
+          ]);
+          return { procedures: z.array(procedureSchema).parse(procedures), groups: z.array(groupSchema).parse(groups),
+            view, revisions: z.array(revisionSchema).parse(revisions) };
+        });
+      },
+    },
     procedures: reader(db.procedures, procedureSchema),
     groups: reader(db.groups, groupSchema),
     revisions: {

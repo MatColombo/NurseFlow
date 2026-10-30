@@ -1,0 +1,17 @@
+# ADR-004 — Primo avvio e Library F03
+
+Data: 29 ottobre 2026. Stato: Accepted. Ambito: implementazione delle Pages 00/01 frozen, senza modifiche ai contratti.
+
+Lo schema IndexedDB v3 conserva i sette store precedenti. L'upgrade contrassegna come già inizializzata la lingua delle installazioni F02, preservando le scelte esistenti; le nuove installazioni scelgono la prima lingua supportata del browser, altrimenti English. Le nuove preferenze comprendono completamento del primo avvio, Recent collassati, scroll e ultimo esito della richiesta di persistenza. Nessuna procedura, revisione, media o sessione viene riscritta o eliminata dalla migrazione.
+
+`Start` invoca la richiesta di persistenza nel gesto dell'utente e salva il completamento del primo avvio prima di navigare. L'esito del permesso non blocca la navigazione. Settings verifica `persisted()` quando disponibile e mostra risultati granted/denied/unsupported/error, con Retry pertinente e senza promettere conservazione assoluta. L'apertura del DB fallita blocca l'accesso con Retry. Il link di import apre la futura 11B, ancora esplicitamente incompleta in questa fase.
+
+`domain/library.ts` contiene selezione, normalizzazione diacritici, termini in AND, facet OR/AND, ranking e ordinamenti puri. Le revisioni per la ricerca nei passaggi vengono lette soltanto se l'opzione è attiva. Il servizio serializza le scritture, usa repository/comandi e non espone Dexie ai componenti. Le preferenze vengono unite ai valori correnti, proteggendo il completamento del primo avvio e l'esito di persistenza dagli snapshot UI precedenti.
+
+`recordProcedureOpen` aggiorna timestamp e storia nello stesso commit, solo all'ingresso effettivo in una procedura esistente. Le route Details/Builder e Run usano questo confine anche prima delle rispettive implementazioni complete. Filtri, preferiti, import e `updateDraft` non modificano la recenza. La lista derivata esclude archiviati, cancellati e mai aperti; contiene al massimo venti identità. I recenti visibili sono tre scorciatoie con sola identità e titolo. Colori e icone usano allowlist locale con fallback neutro; nessun SVG/HTML/URL utente viene interpretato.
+
+Gruppi con ID stabile, controllo duplicati, ordine locale e cancellazione transazionale. Eliminare un gruppo riassegna i membri a Ungrouped e conserva procedure, revisioni e run. Testo, facet, quick filter, vista, gruppi chiusi, recenti chiusi e scroll sono persistenti; prima di aprire una procedura viene completato il salvataggio della posizione.
+
+Recent usa l'altezza naturale, senza padding per riempire il 20%. Un ResizeObserver imposta un minimo per l'area browse pari a cinque volte l'altezza effettiva della striscia: touch target e heading scalati restano integri nei viewport corti e alle scale estreme, consentendo scroll verticale della pagina. La Library occupa tutto lo spazio rimanente e il suo elenco scorre autonomamente. Ricerca, filtri, vista Recent e collapse rimuovono completamente la striscia. A 320px/48pt le righe vanno a capo e la colonna preferiti ha un limite responsive, con target di almeno 48px. Il foglio dei venti recenti è in basso su telefono e posizionato presso il controllo di apertura su desktop.
+
+Fixture fittizie solo sotto `src/test` e nel bundle E2E compilato in memoria, mai nell'entry applicativa o in `dist`. Nessun precaricamento della libreria di produzione. Le prove coprono selezione, ricerca, gruppi, recenti, rollback, riapertura del DB, filtri/scroll, permessi e 320px × 4/13/30/48pt. Esiti e limiti nel [report F03](../reports/F03.md).

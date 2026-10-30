@@ -10,7 +10,7 @@ export const schemaV1 = {
   settings: 'id',
   uiPreferences: 'id',
 };
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 3;
 
 export async function addVersionTokens(transaction: Transaction): Promise<void> {
   await transaction.table('revisions').toCollection().modify((record: { editVersion?: number }) => {
@@ -24,4 +24,8 @@ export async function addVersionTokens(transaction: Transaction): Promise<void> 
 export function configureMigrations(db: Dexie): void {
   db.version(1).stores(schemaV1);
   db.version(2).stores(schemaV1).upgrade(addVersionTokens);
+  db.version(3).stores(schemaV1).upgrade(async (transaction) => {
+    // Preserve the language already chosen in F02 databases. Fresh databases detect it once.
+    await transaction.table('uiPreferences').toCollection().modify({ initialLocaleSet: true });
+  });
 }

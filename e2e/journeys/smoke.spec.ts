@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { completeSetup } from '../fixtures/library';
 
 test('monta la build statica senza placeholder o richieste esterne', async ({ page, baseURL }) => {
   const errors: string[] = [];
@@ -15,8 +16,8 @@ test('monta la build statica senza placeholder o richieste esterne', async ({ pa
 
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'NurseFlow', level: 1 })).toBeVisible();
-  await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
-  await expect(page).toHaveURL(`${baseURL}#/library`);
+  await expect(page.getByRole('button', { name: 'Inizia', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(`${baseURL}#/setup`);
   await expect(page.getByText('not implemented')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Route di sviluppo' })).toHaveCount(0);
   expect(errors).toEqual([]);
@@ -32,21 +33,23 @@ const deepLinks = [
 
 for (const path of deepLinks) {
   test(`apre e ricarica il deep link hash ${path}`, async ({ page, baseURL }) => {
+    if (path !== '/setup') await completeSetup(page);
     await page.goto(`./#${path}`);
-    await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
+    if (!['/setup', '/library'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'NurseFlow', level: 1 })).toBeVisible();
-    await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: path === '/library' ? 'Procedure' : 'NurseFlow', level: 1 })).toBeVisible();
+    if (!['/setup', '/library'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await expect(page).toHaveURL(`${baseURL}#${path}`);
   });
 }
 
 test('recupera un hash sconosciuto', async ({ page, baseURL }) => {
+  await completeSetup(page);
   await page.goto('./#/missing');
   await expect(page.getByRole('heading', { name: 'Pagina non trovata' })).toBeVisible();
   await page.getByRole('link', { name: 'Torna alla libreria' }).click();
   await expect(page).toHaveURL(`${baseURL}#/library`);
-  await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Procedure', exact: true })).toBeVisible();
 });
 
 test('F00 non registra service worker PWA', async ({ page }) => {

@@ -11,7 +11,11 @@ function selectAppearance({ locale, theme, uiScalePt }: Settings): Appearance { 
 
 export function createAppearanceService(storage = createNurseFlowStorage()): AppearanceService {
   return {
-    async load() { await storage.open(); return selectAppearance(await storage.repositories.settings.get()); },
+    async load() {
+      await storage.open();
+      await storage.commands.initializeLocale(navigator.languages ?? [navigator.language]);
+      return selectAppearance(await storage.repositories.settings.get());
+    },
     async save(value) { return selectAppearance(await storage.commands.saveAppearance(value)); },
   };
 }

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectNoBleeding, openShowcase, setScale } from '../fixtures/ui';
+import { completeSetup } from '../fixtures/library';
 
 for (const width of [320, 390, 768]) {
   for (const scale of [4, 13, 30, 48]) {
@@ -76,6 +77,7 @@ test('focus tastiera contenuto e ripristinato per Dialog e Sheet, anche a 48pt',
 test('theme System segue OS, override e lingua/scala sopravvivono a reload e navigazione offline', async ({ page, context }) => {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ colorScheme: 'dark' });
+  await completeSetup(page);
   await page.goto('./#/settings');
   await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -144,7 +146,7 @@ test('contrasto light/dark per testi, stati, focus e pulsanti', async ({ page })
       const ratio = (a: string, b: string) => {
         const x = luminance(a); const y = luminance(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05);
       };
-      return { text: ['text', 'text-muted', 'primary', 'primary-strong', 'warning', 'danger', 'success', 'info'].flatMap((token) =>
+      return { text: ['text', 'text-muted', 'primary', 'primary-strong', 'warning', 'danger', 'success', 'info', 'ribbon-purple'].flatMap((token) =>
         ['surface', 'bg', 'surface-soft'].map((surface) => ({ pair: `${token}/${surface}`, ratio: ratio(token, surface) }))),
       button: ratio('on-primary', 'primary'), focus: ratio('focus', 'surface'), control: ratio('primary', 'surface') };
     });

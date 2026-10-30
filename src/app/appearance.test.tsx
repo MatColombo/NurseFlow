@@ -78,7 +78,7 @@ describe('Preferenze UI', () => {
   it('errore di apertura è recuperabile senza cancellare dati', async () => {
     const load = vi.fn<AppearanceService['load']>().mockRejectedValueOnce(new Error('Unavailable')).mockResolvedValue(defaults);
     render(<App appearanceService={service({ load })} />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Impostazioni non disponibili');
+    expect(await screen.findByRole('alert')).toHaveTextContent('IndexedDB deve essere accessibile');
     fireEvent.click(screen.getByRole('button', { name: 'Riprova' }));
     expect(await screen.findByRole('heading', { name: 'Impostazioni', level: 2 })).toBeInTheDocument();
   });

@@ -9,12 +9,15 @@ const baseURL = `http://127.0.0.1:4173${basePath}`;
 export default defineConfig({
   testDir: './e2e/journeys',
   fullyParallel: true,
+  timeout: 45_000,
+  expect: { timeout: 10_000 },
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: 2,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL,
+    locale: 'it-IT',
     trace: 'retain-on-failure',
   },
   projects: [

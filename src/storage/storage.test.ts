@@ -44,7 +44,7 @@ describe('schema, default e persistenza', () => {
     expect(await repositories.settings.get()).toEqual(settingsSchema.parse({}));
     expect((await repositories.uiPreferences.get()).recentProcedureIds).toEqual([]);
     expect(await repositories.procedures.list()).toEqual([]);
-    expect(db.verno).toBe(2);
+    expect(db.verno).toBe(3);
   });
   it('crea una Draft incompleta e la ritrova dopo close/open', async () => {
     const { procedure, draft } = await commands.createDraft({ metadata: { title: 'Bozza esempio' } });

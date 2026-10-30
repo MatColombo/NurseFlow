@@ -6,7 +6,7 @@ export const procedureFieldsSchema = z.strictObject({
   title: z.string().trim().min(1), description: z.string().optional(), groupId: idSchema.nullable().default(null),
   tags: z.array(z.string()).default([]), aliases: z.array(z.string()).default([]),
   priority: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
-  ribbon: z.strictObject({ colorKey: z.string(), iconKey: z.string() }).default({ colorKey: 'primary', iconKey: 'procedure' }),
+  ribbon: z.strictObject({ colorKey: z.string(), iconKey: z.string() }).default({ colorKey: 'neutral', iconKey: 'procedure' }),
   favorite: z.boolean().default(false), archived: z.boolean().optional(),
 });
 export const procedureSchema = procedureFieldsSchema.extend({
@@ -37,9 +37,12 @@ export const settingsSchema = z.strictObject({
   photoPreset: z.enum(['small', 'medium', 'high', 'original']).default('medium'),
 });
 export const uiPreferencesSchema = z.strictObject({
-  id: z.literal('main').default('main'), sortMode: z.enum(['groups', 'priority']).default('groups'),
+  id: z.literal('main').default('main'), sortMode: z.enum(['groups', 'priority', 'recent', 'az']).default('groups'),
   collapsedGroupIds: z.array(idSchema).default([]), searchText: z.string().optional(),
   filters: z.record(z.string(), z.unknown()).optional(), recentProcedureIds: z.array(idSchema).max(20).default([]),
+  firstLaunchComplete: z.boolean().default(false), initialLocaleSet: z.boolean().default(false),
+  recentCollapsed: z.boolean().default(false), scrollTop: z.number().nonnegative().default(0),
+  persistenceStatus: z.enum(['not-requested', 'granted', 'denied', 'unsupported', 'error']).default('not-requested'),
 });
 export const runSessionSchema = z.strictObject({
   id: idSchema, procedureId: idSchema, pinnedRevisionId: idSchema,

@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01** e design system **F02**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02** e First Launch/Library **F03**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -63,7 +63,7 @@ storage.close();
 - `saveRun` controlla appartenenza e riferimenti alla Ready, vieta di cambiare la revisione pinnata e usa `saveVersion`/`expectedSaveVersion` contro salvataggi obsoleti. Per la prima scrittura passare `null` come versione attesa. Il motore e i checkpoint Back sono F09.
 - `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
 
-Il DB ha sette tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti senza cambiare snapshot, asset o preferenze. Ready e Blob non sono sovrascrivibili; F01 non esegue garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la futura UI deve mostrare successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
+Il DB ha sette tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03 senza cambiare snapshot o asset. Ready e Blob non sono sovrascrivibili; F01 non esegue garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
 Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in produzione. Dettagli e limiti: [ADR-002](docs/adr/002-domain-storage-transactions.md), [report F01](docs/reports/F01.md).
 
@@ -104,7 +104,17 @@ Pubblicare il repository su GitHub con branch `main` e selezionare **Settings �
 
 I workflow sono predisposti; una verifica GitHub Actions/Pages reale richiede un remote e il primo push. L'esito locale non costituisce un deploy già effettuato.
 
-## Moduli e limiti F00–F02
+## First Launch e Library F03
+
+La root apre `#/setup` solo prima del completamento del primo avvio; lingua IT/EN, Start e collegamento alla futura 11B. Start salva il completamento e richiede persistenza senza attendere il permesso. Lo stato effettivo si consulta in Settings, con Retry e senza garanzia di conservazione.
+
+`#/library` legge procedure e gruppi da IndexedDB: gruppi collassabili, creazione/rinomina/ordine/eliminazione conservativa, ribbon allowlist, tag, alias ricercabili, preferiti, priorità 0/!/!! e viste Gruppi/Priorità/Recenti/A–Z. Ricerca locale normalizzata su titolo/gruppo/tag/alias/descrizione e opzionalmente passaggi; facet multiple con OR interno e AND fra facet. Filtri e ricerca producono risultati piatti e rimuovono Recent. Testo, filtri, ordinamento, collapse e posizione sono conservati al ritorno da Details.
+
+Recent mostra tre scorciatoie su una riga, solo identità e titolo; massimo 20% dell'area post-toolbar, Library almeno 80%. Overflow `···` fino a venti, cronologico, sheet mobile/popover desktop. La recenza cambia solo aprendo una procedura, mai con star, filtri o autosave. Le fixture non cliniche sono caricate esclusivamente dai test in IndexedDB reale. La libreria iniziale è vuota.
+
+Dettagli tecnici: [ADR-004](docs/adr/004-first-launch-library.md). Comandi, esiti, screenshot e limiti: [report F03](docs/reports/F03.md). Le prove offline di fase coprono la shell già caricata; cache PWA e riavvio completamente offline restano F15.
+
+## Moduli e limiti F00–F03
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -120,7 +130,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pagine 00–11B mostrano **Anteprima tecnica F02** e un avviso esplicito di funzionalità non implementata. Fanno eccezione le preferenze Interfaccia già operative in Settings. In sviluppo sono disponibili parametri hash, elenco diagnostico e catalogo componenti; questi strumenti sono esclusi dalla build production. La root apre `#/library` per lo smoke tecnico; il flusso di primo avvio verrà implementato in F03. Nessuna bottom navigation globale.
+Le Pages 00/01 sono implementate. Le pagine successive mostrano **Anteprima tecnica F02** e un avviso esplicito di funzionalità non implementata; Settings espone già Interfaccia, stato di persistenza e due collegamenti dati. L'apertura di Details/Builder/Run registra la recenza di record esistenti; il contenuto completo di queste pagine arriva nelle fasi assegnate. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 
