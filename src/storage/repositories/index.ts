@@ -3,6 +3,8 @@ import type { Table } from 'dexie';
 import { groupSchema, mediaAssetSchema, procedureSchema, revisionSchema, runSessionSchema,
   settingsSchema, uiPreferencesSchema } from '@domain/model';
 import type { NurseFlowDatabase } from '../db';
+import { assertRevisionOwner } from '@domain/procedures';
+import { assertRunReferences, invariant } from '@domain/model/integrity';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -17,6 +19,22 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    procedureDetails: {
+      async get(id: string) {
+        return db.transaction('r', [db.procedures, db.groups, db.revisions, db.runSessions], async () => {
+          const procedure = procedureSchema.parse(await db.procedures.get(id));
+          const ready = procedure.readyRevisionId ? assertRevisionOwner(procedure, await db.revisions.get(procedure.readyRevisionId), 'ready') : undefined;
+          const draft = procedure.workingDraftId ? assertRevisionOwner(procedure, await db.revisions.get(procedure.workingDraftId), 'working-draft') : undefined;
+          invariant(ready || draft, 'Procedure has no readable revision');
+          const groups = z.array(groupSchema).parse(await db.groups.toArray()).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+          const procedures = z.array(procedureSchema).parse(await db.procedures.toArray());
+          const runs = z.array(runSessionSchema).parse(await db.runSessions.where('procedureId').equals(id).toArray());
+          const resume = runs.filter((run) => run.pinnedRevisionId === ready?.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+          if (resume && ready) assertRunReferences(resume, ready);
+          return { procedure, ready, draft, groups, tags: procedures.flatMap((item) => item.tags), resume };
+        });
+      },
+    },
     library: {
       async getSnapshot(includeSteps?: boolean) {
         return db.transaction('r', [db.procedures, db.groups, db.uiPreferences, db.revisions], async () => {

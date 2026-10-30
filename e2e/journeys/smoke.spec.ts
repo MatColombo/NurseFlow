@@ -35,10 +35,11 @@ for (const path of deepLinks) {
   test(`apre e ricarica il deep link hash ${path}`, async ({ page, baseURL }) => {
     if (path !== '/setup') await completeSetup(page);
     await page.goto(`./#${path}`);
-    if (!['/setup', '/library'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
+    if (!['/setup', '/library', '/new', '/procedure/example'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('heading', { name: path === '/library' ? 'Procedure' : 'NurseFlow', level: 1 })).toBeVisible();
-    if (!['/setup', '/library'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
+    const heading = path === '/library' ? 'Procedure' : path === '/new' ? 'Nuova procedura' : path === '/procedure/example' ? 'Dettagli procedura' : 'NurseFlow';
+    await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible();
+    if (!['/setup', '/library', '/new', '/procedure/example'].includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await expect(page).toHaveURL(`${baseURL}#${path}`);
   });
 }

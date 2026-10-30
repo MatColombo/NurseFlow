@@ -2,12 +2,11 @@ import { useTranslation } from 'react-i18next';
 import type { Procedure } from '@domain/model';
 import { Button, Icon } from '@shared/components';
 import type { IconName } from '@shared/components/Icon';
+import { ribbonColors, ribbonIcons } from '@domain/procedures';
 
-const colors = ['neutral', 'primary', 'blue', 'purple', 'amber'] as const;
-const icons: IconName[] = ['procedure', 'ready', 'draft', 'info', 'image'];
 export function Identity({ procedure }: { procedure: Procedure }) {
-  const color = colors.find((key) => key === procedure.ribbon.colorKey) ?? 'neutral';
-  const icon = icons.find((key) => key === procedure.ribbon.iconKey) ?? 'procedure';
+  const color = ribbonColors.find((key) => key === procedure.ribbon.colorKey) ?? 'neutral';
+  const icon: IconName = ribbonIcons.find((key) => key === procedure.ribbon.iconKey) ?? 'procedure';
   return <span className={`nf-identity nf-identity--${color}`} aria-hidden="true"><Icon name={icon} /></span>;
 }
 export function ProcedureRow({ procedure, group, onOpen, onFavorite, recent = false }: {

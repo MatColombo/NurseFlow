@@ -10,7 +10,8 @@ export function FiltersSheet({ open, onClose, filters, onChange, groups, tags }:
   const { t } = useTranslation();
   const [tagQuery, setTagQuery] = useState('');
   function toggle(key: 'groupIds' | 'tags', value: string) {
-    const values = filters[key]; onChange({ ...filters, [key]: values.includes(value) ? values.filter((item) => item !== value) : [...values, value] });
+    const values = filters[key]; const matches = (item: string) => key === 'tags' ? normalize(item) === normalize(value) : item === value;
+    onChange({ ...filters, [key]: values.some(matches) ? values.filter((item) => !matches(item)) : [...values, value] });
   }
   return <Sheet open={open} title={t('library.filters')} onClose={onClose}>
     <fieldset><legend>{t('library.group')}</legend>{[{ id: 'ungrouped', name: t('library.ungrouped') }, ...groups].map((group) =>
@@ -18,7 +19,7 @@ export function FiltersSheet({ open, onClose, filters, onChange, groups, tags }:
         onChange={() => toggle('groupIds', group.id)} />{group.name}</label>)}</fieldset>
     <fieldset><legend>{t('library.tags')}</legend><Search label={t('library.searchTags')} value={tagQuery} onChange={setTagQuery} />
       {tags.filter((tag) => normalize(tag).includes(normalize(tagQuery))).map((tag) => <label className="nf-choice" key={normalize(tag)}>
-      <input type="checkbox" checked={filters.tags.includes(tag)} onChange={() => toggle('tags', tag)} />{tag}</label>)}</fieldset>
+      <input type="checkbox" checked={filters.tags.some((value) => normalize(value) === normalize(tag))} onChange={() => toggle('tags', tag)} />{tag}</label>)}</fieldset>
     <fieldset><legend>{t('library.priority')}</legend><div className="nf-row nf-segments" role="radiogroup" aria-label={t('library.priority')}>
       {(['any', '0', '1', '2', 'high'] as const).map((value) => <label className="nf-choice" key={value}>
         <input type="radio" name="library-priority" checked={filters.priority === value}

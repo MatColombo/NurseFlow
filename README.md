@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02** e First Launch/Library **F03**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03** e Details/New Procedure **F04**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -114,7 +114,17 @@ Recent mostra tre scorciatoie su una riga, solo identità e titolo; massimo 20% 
 
 Dettagli tecnici: [ADR-004](docs/adr/004-first-launch-library.md). Comandi, esiti, screenshot e limiti: [report F03](docs/reports/F03.md). Le prove offline di fase coprono la shell già caricata; cache PWA e riavvio completamente offline restano F15.
 
-## Moduli e limiti F00–F03
+## Details e nuova procedura F04
+
+`/#/procedure/:id` legge metadati e revisioni reali. Draft-only: Modifica grafo, Anteprima bozza, Mappa; Ready-only: Avvia, Mappa e copia di lavoro per Modifica; Ready+Draft: Avvia Ready, Mappa Ready e Continua modifica della Draft. Aprire l'editor di una Ready-only non crea una Draft prima del primo cambiamento del grafo. I destinatari ricevono e verificano l'ID della revisione. Avvia/Riprendi salva o riusa una sessione iniziale pinned; il motore di avanzamento e la schermata guidata completa restano F09/F10.
+
+Il menu More offre modifica metadati con autosave, duplicazione come Draft indipendente, collegamento export alla futura 11A, archiviazione e cancellazione confermata. Le sessioni salvate impediscono la cancellazione; Ready e Blob restano protetti dalle scritture ordinarie. L'elenco Archiviate nel menu Library permette di riaprire e ripristinare le procedure. Esporta non produce ancora file: formato e download sono F13.
+
+`/#/new` richiede soltanto il nome (massimo 120 caratteri), con gruppo singolo e tag; Altri dettagli apre ribbon, priorità, alias e descrizione. Il picker permette di creare un gruppo senza perdere il form. Crea bozza salva metadati, Draft e un solo Start editoriale in transazione, poi apre Builder. Nessun passaggio clinico o Ready precompilato. Back conferma lo scarto degli input; gli errori di salvataggio mantengono i valori e offrono Retry. La lingua UI non traduce il contenuto authored.
+
+Non cambia lo schema DB v3 e non si aggiungono dipendenze. [ADR-005](docs/adr/005-procedure-details-and-creation.md) e [report F04](docs/reports/F04.md) descrivono transazioni, prove e limiti. Per una verifica locale con browser seriali: `npm run test:e2e -- --workers=1`.
+
+## Moduli e limiti F00–F04
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -130,7 +140,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01 sono implementate. Le pagine successive mostrano **Anteprima tecnica F02** e un avviso esplicito di funzionalità non implementata; Settings espone già Interfaccia, stato di persistenza e due collegamenti dati. L'apertura di Details/Builder/Run registra la recenza di record esistenti; il contenuto completo di queste pagine arriva nelle fasi assegnate. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/06 sono implementate. Builder, Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 

@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 
 function AppFrame() {
   const { pathname } = useLocation();
-  const primary = ['/', '/setup', '/library'].includes(pathname);
+  const primary = ['/', '/setup', '/library', '/new'].includes(pathname) || /^\/procedure\/[^/]+$/.test(pathname);
   return <main className="nf-stack">{!primary && <h1>NurseFlow</h1>}<AppRoutes /></main>;
 }
 

@@ -1,0 +1,23 @@
+.nf-procedure { inline-size: 100%; }
+.nf-procedure header > h1 { flex: 1; }
+.nf-procedure input:not([type='radio']):not([type='checkbox']), .nf-dialog input:not([type]), .nf-procedure textarea, .nf-dialog textarea {
+  inline-size: 100%; min-block-size: var(--nf-control-min); padding: min(var(--nf-control-pad), 4vw);
+  border: 1px solid var(--nf-text-muted); border-radius: var(--nf-radius); background: var(--nf-surface);
+}
+.nf-procedure textarea, .nf-dialog textarea { min-block-size: calc(var(--nf-control-min) * 2); resize: vertical; }
+.nf-metadata-fields { border: 0; padding: 0; margin: 0; }
+.nf-procedure fieldset, .nf-dialog fieldset { min-inline-size: 0; }
+.nf-procedure .nf-choice { flex-wrap: wrap; }
+.nf-procedure-identity { display: flex; flex-wrap: wrap; gap: var(--nf-space-2); align-items: stretch; }
+.nf-procedure-identity h1 { flex: 1 1 min(8ch, 100%); }
+.nf-procedure-header { justify-content: space-between; }
+.nf-procedure-header > a { margin-inline-end: auto; justify-content: center; }
+.nf-procedure-header > a, .nf-procedure-header .nf-button { min-block-size: max(48px, var(--nf-control-min)); min-inline-size: min(100%, max(48px, var(--nf-control-min))); }
+.nf-procedure-actions > .nf-button { inline-size: 100%; }
+.nf-procedure-actions .nf-row > .nf-button { flex: 1 1 8ch; min-block-size: max(48px, var(--nf-control-min)); }
+.nf-description--collapsed { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.nf-procedure-menu hr { inline-size: 100%; border: 0; border-block-start: 1px solid var(--nf-border); }
+@media (min-width: 768px) {
+  .nf-procedure-menu { position: fixed; inset: clamp(16px, var(--nf-menu-top), 25dvh) 16px auto auto; margin: 0;
+    inline-size: min(30rem, calc(100% - 32px)); max-block-size: 70dvh; border-radius: var(--nf-radius); }
+}

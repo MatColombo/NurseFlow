@@ -1,17 +1,23 @@
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AppearanceSettings } from '@features/settings/AppearanceSettings';
 import { Card } from '@shared/components';
 import type { routeDefinitions } from './route-definitions';
 import { StartupPage } from '@features/first-launch/StartupPage';
 import { ProcedureEntry } from '@features/library/ProcedureEntry';
 import { StoragePersistence } from '@features/settings/StoragePersistence';
+import { ProcedureDetails } from '@features/procedures/ProcedureDetails';
+import { NewProcedure } from '@features/procedures/NewProcedure';
+import { RevisionDestination } from '@features/procedures/RevisionDestination';
 
 type Page = typeof routeDefinitions[number]['page'];
 export function RouteContent({ page }: { page: Page }) {
   const { t } = useTranslation();
   const parameters = useParams();
+  const [search] = useSearchParams();
   if (page === '00' || page === '01') return <StartupPage key={page} setup={page === '00'} />;
+  if (page === '02') return <ProcedureDetails key={parameters.id} />;
+  if (page === '06') return <NewProcedure />;
   const content = <section className="nf-stack" aria-labelledby="page-title">
     <h2 id="page-title" className="nf-title">{t(`pages.${page}`)}</h2>
     <Card><p>{t('shell.preview')}</p><p className="nf-note">{t('shell.pending', { page })}</p></Card>
@@ -20,7 +26,9 @@ export function RouteContent({ page }: { page: Page }) {
       <Link to="/data/procedures">{t('pages.11A')}</Link><Link to="/data/app">{t('pages.11B')}</Link></>}
     {page === '11B' && <Link to="/setup">{t('common.back')}</Link>}
   </section>;
-  return ['02', '03', '07', '08'].includes(page) ? <ProcedureEntry key={`${page}-${parameters.id}`} run={page === '03'}>{content}</ProcedureEntry> : content;
+  if (page === '07' || page === '05' || page === '03' && search.get('preview') === 'draft') return <RevisionDestination
+    key={`${page}-${parameters.id}-${search.get('revision')}`} kind={page === '07' ? 'build' : page === '05' ? 'map' : 'preview'}>{content}</RevisionDestination>;
+  return ['03', '08'].includes(page) ? <ProcedureEntry key={`${page}-${parameters.id}`} run={page === '03'}>{content}</ProcedureEntry> : content;
 }
 
 export function RouteNotFound() {

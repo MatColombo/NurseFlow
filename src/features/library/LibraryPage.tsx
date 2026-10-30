@@ -18,7 +18,7 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
   const browsePane = useRef<HTMLDivElement>(null); const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingFocus = useRef<string | null>(null);
   const failed = useRef<(() => Promise<void>) | null>(null); const [error, setError] = useState(false);
-  const [modal, setModal] = useState<'filters' | 'recent' | 'app' | null>(null); const [groupDialog, setGroupDialog] = useState<GroupDialog | null>(null);
+  const [modal, setModal] = useState<'filters' | 'recent' | 'app' | 'archived' | null>(null); const [groupDialog, setGroupDialog] = useState<GroupDialog | null>(null);
   const [recentTop, setRecentTop] = useState(0);
   const filters = libraryFiltersSchema.parse(view.filters ?? {});
   const filtered = Boolean(view.searchText?.trim()) || hasFilters(filters);
@@ -161,7 +161,12 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
     </Sheet>
     <Dialog open={modal === 'app'} title={t('library.more')} onClose={() => setModal(null)}>
       <Link to="/data/app">{t('pages.11B')}</Link><Link to="/settings">{t('pages.10')}</Link>
+      <Button onClick={() => setModal('archived')}>{t('procedure.archivedList')}</Button>
     </Dialog>
+    <Sheet open={modal === 'archived'} title={t('procedure.archivedList')} onClose={() => setModal(null)}>
+      <ul className="nf-list">{snapshot.procedures.filter((procedure) => procedure.archived).map((procedure) => <ProcedureRow key={procedure.id}
+        procedure={procedure} onOpen={() => open(procedure)} />)}</ul>
+    </Sheet>
     {groupDialog && <GroupDialogs key={`${groupDialog.kind}-${'group' in groupDialog ? groupDialog.group.id : ''}`}
       dialog={groupDialog} groups={snapshot.groups} procedures={snapshot.procedures} onClose={() => setGroupDialog(null)} onSaved={reload} />}
   </section>;

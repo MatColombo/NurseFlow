@@ -99,7 +99,7 @@ test('ritorno da Details mantiene ricerca, filtri, scroll e registra solo l’ap
   });
   expect(id).toBeTruthy();
   await pane.locator(`[data-procedure-id="${id}"] .nf-procedure-open`).click();
-  await expect(page.getByRole('heading', { name: 'Dettagli procedura', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Dettagli procedura', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Torna alla libreria', exact: true }).click();
   await expect(page.getByRole('searchbox')).toHaveValue('fittizia'); await expect(page.getByLabel('Vista', { exact: true })).toHaveValue('priority');
   await expect.poll(() => pane.evaluate((element) => element.scrollTop)).toBeCloseTo(scroll, 0);

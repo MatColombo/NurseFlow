@@ -3,6 +3,7 @@ import type { Group, LibraryViewState, MediaAsset, Procedure, Revision, RunSessi
 import { settingsSchema, uiPreferencesSchema } from '@domain/model';
 import { ImmutableRecordError } from '@domain/model/errors';
 import { configureMigrations } from './migrations/schema';
+import { canRemoveRevision } from './procedure-removal';
 
 /** Internal persistence implementation. Features import storage/index instead. */
 export class NurseFlowDatabase extends Dexie {
@@ -27,8 +28,8 @@ export class NurseFlowDatabase extends Dexie {
       this.revisions.hook('updating', (_changes, _id, revision) => {
         if (revision.state === 'ready') throw new ImmutableRecordError('Ready snapshots are write-once');
       });
-      this.revisions.hook('deleting', (_id, revision) => {
-        if (revision.state === 'ready') throw new ImmutableRecordError('Ready snapshots cannot be deleted');
+      this.revisions.hook('deleting', (_id, revision, transaction) => {
+        if (revision.state === 'ready' && !canRemoveRevision(transaction, revision.procedureId)) throw new ImmutableRecordError('Ready snapshots cannot be deleted');
       });
       this.mediaAssets.hook('updating', () => { throw new ImmutableRecordError('Media assets are write-once'); });
       this.mediaAssets.hook('deleting', () => { throw new ImmutableRecordError('Asset GC is not enabled in F01'); });

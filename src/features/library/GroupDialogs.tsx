@@ -27,7 +27,7 @@ export function GroupDialogs({ dialog, groups, procedures, onClose, onSaved }: {
   const members = dialog.kind === 'delete' ? procedures.filter((procedure) => procedure.groupId === dialog.group.id).length : 0;
   return <Dialog open title={t(dialog.kind === 'create' ? 'library.createGroup' : dialog.kind === 'rename' ? 'library.rename' : 'library.deleteGroup')} onClose={onClose}>
     {form ? <form className="nf-stack" onSubmit={(event) => {
-      event.preventDefault(); if (!name.trim() || duplicate || busy) return;
+      event.preventDefault(); event.stopPropagation(); if (!name.trim() || duplicate || busy) return;
       void perform(async () => { const group = await libraryService.saveGroup({ name, ...(dialog.kind === 'rename' ? { id: dialog.group.id } : {}) });
         return group.id; });
     }}><label className="nf-stack">{t('library.groupName')}<input ref={input} value={name} onChange={(event) => setName(event.target.value)} /></label>
