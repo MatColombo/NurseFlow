@@ -71,7 +71,7 @@ export function cloneProcedureGraph(source: Graph, newId: () => string): Graph {
     const next = newId(); invariant(next && !used.has(next), 'Copy IDs must be fresh'); used.add(next); return [id, next];
   }));
   const mapped = (id: string) => { const value = ids.get(id); invariant(value, 'Unknown copy reference'); return value; };
-  const destination = (value: Destination): Destination => value.kind === 'node' ? { kind: 'node', nodeId: mapped(value.nodeId) } : { ...value };
+  const destination = (value: Destination): Destination => value.kind === 'node' ? { ...value, nodeId: mapped(value.nodeId) } : { ...value };
   for (const phase of graph.phases) phase.id = mapped(phase.id);
   for (const node of graph.nodes) {
     node.id = mapped(node.id);

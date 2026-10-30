@@ -1,0 +1,25 @@
+.nf-builder { block-size: calc(100dvh - 2 * min(var(--nf-space-3), 4vw)); }
+.nf-builder-header { flex: 0 0 auto; }
+.nf-builder-heading { flex: 1 1 6ch; }
+.nf-builder-heading h1 { font-size: var(--nf-font-base); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nf-builder-header > [role='alert'] { flex-basis: 100%; }
+.nf-builder-pending { flex-basis: 100%; }
+.nf-builder-toolbar { flex: 0 0 auto; padding-block: var(--nf-space-1); background: var(--nf-bg); }
+.nf-builder-toolbar > .nf-button { flex: 1 1 14%; min-inline-size: max(48px, calc(var(--nf-icon) + 2 * min(var(--nf-control-pad), 4vw))); }
+.nf-builder-toolbar > .nf-button:nth-of-type(-n+2) { flex: 2 1 28%; }
+.nf-builder-scroll { flex: 1 1 0; overflow: auto; min-block-size: 0; padding: var(--nf-space-1); scrollbar-gutter: stable; }
+.nf-builder-footer { flex: 0 0 auto; }
+.nf-builder-footer > .nf-button { flex: 1 1 8ch; }
+.nf-builder .nf-button { min-block-size: max(48px, var(--nf-control-min)); }
+.nf-builder-toolbar .nf-note { font-size: var(--nf-font-meta); }
+.nf-builder-toolbar > .nf-note, .nf-builder-footer > .nf-note { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; }
+.nf-builder-flow { block-size: auto; min-block-size: calc(100dvh - 2 * min(var(--nf-space-3), 4vw)); }
+.nf-builder-flow .nf-builder-toolbar { position: sticky; inset-block-start: 0; z-index: 1; }
+.nf-builder-flow .nf-builder-scroll { flex: none; overflow: visible; }
+.nf-outline-node { padding: min(var(--nf-card-pad), 4vw); background: var(--nf-surface); border: 1px solid var(--nf-border); border-radius: var(--nf-radius); }
+.nf-outline-selected { outline: 2px solid var(--nf-focus); outline-offset: -2px; }
+.nf-outline-title { text-align: start; justify-content: start; font-weight: 600; }
+.nf-outline-edge { flex: 1 1 8ch; justify-content: start; text-align: start; }
+.nf-outline-edge[aria-pressed='true'] { background: var(--nf-primary-tint); outline: 2px solid var(--nf-focus); outline-offset: -2px; }
+.nf-outline-broken { color: var(--nf-warning); }
+.nf-impact-row { border-block-end: 1px solid var(--nf-border); padding-block: var(--nf-space-1); }

@@ -4,6 +4,7 @@ import { settingsSchema, uiPreferencesSchema } from '@domain/model';
 import { ImmutableRecordError } from '@domain/model/errors';
 import { configureMigrations } from './migrations/schema';
 import { canRemoveRevision } from './procedure-removal';
+import type { BuilderState } from '@domain/builder/model';
 
 /** Internal persistence implementation. Features import storage/index instead. */
 export class NurseFlowDatabase extends Dexie {
@@ -14,6 +15,7 @@ export class NurseFlowDatabase extends Dexie {
   declare runSessions: Table<RunSession, string>;
   declare settings: Table<Settings, string>;
   declare uiPreferences: Table<LibraryViewState, string>;
+  declare builderStates: Table<BuilderState, string>;
 
   constructor(name = 'NurseFlowDB') {
     super(name);

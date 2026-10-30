@@ -32,7 +32,13 @@ export function assertGraphReferences(graph: Graph): void {
   for (const node of graph.nodes) {
     if ('phaseId' in node && node.phaseId != null) invariant(phaseIds.has(node.phaseId), 'Unknown phase');
     for (const destination of destinations(node)) {
-      if (destination.kind === 'node') invariant(nodeIds.has(destination.nodeId), 'Unknown live destination; use explicit broken metadata');
+      if (destination.kind === 'node') {
+        invariant(nodeIds.has(destination.nodeId), 'Unknown live destination; use explicit broken metadata');
+        if (destination.terminateProcedure) {
+          const target = graph.nodes.find((target) => target.id === destination.nodeId);
+          invariant(target?.kind === 'end' && (target.endKind === 'stopped' || target.endKind === 'escalation'), 'Invalid whole-procedure exit');
+        }
+      }
     }
   }
   for (const id of Object.keys(graph.layout?.positions ?? {})) invariant(nodeIds.has(id), 'Unknown layout node');

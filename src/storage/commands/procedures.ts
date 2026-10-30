@@ -63,11 +63,12 @@ export function procedureCommands(db: NurseFlowDatabase, environment: CommandEnv
       });
     },
     async deleteProcedure(id: string) {
-      await db.transaction('rw', [db.procedures, db.revisions, db.runSessions, db.uiPreferences], async (transaction) => {
+      await db.transaction('rw', [db.procedures, db.revisions, db.runSessions, db.uiPreferences, db.builderStates], async (transaction) => {
         invariant(await db.procedures.get(id), 'Procedure unavailable');
         invariant(await db.runSessions.where('procedureId').equals(id).count() === 0, 'Procedure has saved sessions');
         authorizeProcedureRemoval(transaction, id);
         await db.revisions.where('procedureId').equals(id).delete(); await db.procedures.delete(id);
+        await db.builderStates.delete(id);
         const view = await db.uiPreferences.get('main');
         if (view) await db.uiPreferences.put({ ...view, recentProcedureIds: view.recentProcedureIds.filter((value) => value !== id) });
       });

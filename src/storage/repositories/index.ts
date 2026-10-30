@@ -5,6 +5,7 @@ import { groupSchema, mediaAssetSchema, procedureSchema, revisionSchema, runSess
 import type { NurseFlowDatabase } from '../db';
 import { assertRevisionOwner } from '@domain/procedures';
 import { assertRunReferences, invariant } from '@domain/model/integrity';
+import { builderRepository } from './builder';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -19,6 +20,7 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    builder: builderRepository(db),
     procedureDetails: {
       async get(id: string) {
         return db.transaction('r', [db.procedures, db.groups, db.revisions, db.runSessions], async () => {

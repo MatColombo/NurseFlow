@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03** e Details/New Procedure **F04**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04** e Builder Outline **F05**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -63,7 +63,7 @@ storage.close();
 - `saveRun` controlla appartenenza e riferimenti alla Ready, vieta di cambiare la revisione pinnata e usa `saveVersion`/`expectedSaveVersion` contro salvataggi obsoleti. Per la prima scrittura passare `null` come versione attesa. Il motore e i checkpoint Back sono F09.
 - `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
 
-Il DB ha sette tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03 senza cambiare snapshot o asset. Ready e Blob non sono sovrascrivibili; F01 non esegue garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
+Il DB ha otto tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03; v4 aggiunge la cronologia Builder senza cambiare snapshot, run, asset o preferenze esistenti. Ready e Blob non sono sovrascrivibili; non viene eseguita garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
 Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in produzione. Dettagli e limiti: [ADR-002](docs/adr/002-domain-storage-transactions.md), [report F01](docs/reports/F01.md).
 
@@ -122,13 +122,21 @@ Il menu More offre modifica metadati con autosave, duplicazione come Draft indip
 
 `/#/new` richiede soltanto il nome (massimo 120 caratteri), con gruppo singolo e tag; Altri dettagli apre ribbon, priorità, alias e descrizione. Il picker permette di creare un gruppo senza perdere il form. Crea bozza salva metadati, Draft e un solo Start editoriale in transazione, poi apre Builder. Nessun passaggio clinico o Ready precompilato. Back conferma lo scarto degli input; gli errori di salvataggio mantengono i valori e offrono Retry. La lingua UI non traduce il contenuto authored.
 
-Non cambia lo schema DB v3 e non si aggiungono dipendenze. [ADR-005](docs/adr/005-procedure-details-and-creation.md) e [report F04](docs/reports/F04.md) descrivono transazioni, prove e limiti. Per una verifica locale con browser seriali: `npm run test:e2e -- --workers=1`.
+La fase F04 conserva lo schema DB v3 e non aggiunge dipendenze. [ADR-005](docs/adr/005-procedure-details-and-creation.md) e [report F04](docs/reports/F04.md) descrivono transazioni, prove e limiti. Per una verifica locale con browser seriali: `npm run test:e2e -- --workers=1`.
 
-## Moduli e limiti F00–F04
+## Builder Outline F05
+
+`/#/build/:id` modifica il DAG reale della Draft. Le azioni contestuali creano/collegano passi vuoti, modificano un singolo edge e gestiscono esiti, attività e fasi. Decision e Multitask partono con due slot vuoti; il limite superiore è 32, mentre la Draft può restare incompleta. End espliciti in quattro tipi; nelle attività, Finish e Stop dell'intera procedura sono azioni distinte, con consenso per Stop Stopped/Escalation. Nessun Join visibile, ciclo o cross-arm accettato.
+
+Undo/Redo nella toolbar conserva 30 transazioni in IndexedDB, anche dopo reload. Copy usa nuove identità e mantiene i riferimenti ai media; Cut resta pending fino a Paste confermato, con move atomico e preview Prima/Dopo. Nodi condivisi canonici, W08 dopo cancellazione, orfani conservati e ripristinabili con Undo. Il primo cambiamento reale di una Ready-only crea Draft e storia nella stessa transazione, senza modificare Ready o run. Scroll e selezione persistono senza aggiornare la recenza.
+
+Graph/auto-layout arrivano in F06. La creazione apre la vera route Page 08 dopo il salvataggio; l'editor dei contenuti è F07. Preview/Check ricevono la revisione salvata, ma renderer e validazione completi restano nelle fasi successive. [ADR-006](docs/adr/006-builder-outline-and-history.md) e [report F05](docs/reports/F05.md) documentano implementazione, prove e limiti.
+
+## Moduli e limiti F00–F05
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
-src/domain/       model e remapping; graph, validation e runtime nelle fasi successive
+src/domain/       model, remapping e builder; validation e runtime nelle fasi successive
 src/storage/      DB, migrations, repositories, commands
 src/features/     first-launch, library, procedures, builder, step-editor,
                   validation, run, map, settings, portability
@@ -140,7 +148,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/06 sono implementate. Builder, Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/06 e l'Outline della 07 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 

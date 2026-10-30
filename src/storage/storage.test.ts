@@ -8,7 +8,7 @@ import { convergenceGraph, exampleRecords, exampleRun, fixtureDate, mediaGraph, 
 import { NurseFlowDatabase } from './db';
 import { createCommands, type ReadyValidator } from './commands';
 import { createRepositories } from './repositories';
-import { schemaV1 } from './migrations/schema';
+import { schemaV1, schemaV4 } from './migrations/schema';
 
 // Test double only: F01 tests the unit of work, never claims structural validation.
 const acceptFixture: ReadyValidator = () => ({ validatorSchemaVersion: 1, problems: [], warnings: [] });
@@ -39,12 +39,12 @@ function asset() {
 }
 
 describe('schema, default e persistenza', () => {
-  it('crea sette tabelle e default senza fixture di produzione', async () => {
-    expect(db.tables.map((table) => table.name).sort()).toEqual(Object.keys(schemaV1).sort());
+  it('crea otto tabelle e default senza fixture di produzione', async () => {
+    expect(db.tables.map((table) => table.name).sort()).toEqual(Object.keys(schemaV4).sort());
     expect(await repositories.settings.get()).toEqual(settingsSchema.parse({}));
     expect((await repositories.uiPreferences.get()).recentProcedureIds).toEqual([]);
     expect(await repositories.procedures.list()).toEqual([]);
-    expect(db.verno).toBe(3);
+    expect(db.verno).toBe(4);
   });
   it('crea una Draft incompleta e la ritrova dopo close/open', async () => {
     const { procedure, draft } = await commands.createDraft({ metadata: { title: 'Bozza esempio' } });

@@ -46,7 +46,7 @@ test('F01: tabelle, Ready immutabile, import atomico, quota e riapertura Indexed
   expect(await page.evaluate((state) => window.NurseFlowF01.inspectPersisted(state), state)).toBe(true);
 });
 
-test('F01: migrazione reale v1→v2 preserva lo snapshot Ready', async ({ page }) => {
+test('F01/F05: migrazione reale v1→v4 preserva lo snapshot Ready', async ({ page }) => {
   await page.goto('./');
   await page.addScriptTag({ content: harness });
   expect(await page.evaluate(() => window.NurseFlowF01.exerciseMigration())).toBe(true);

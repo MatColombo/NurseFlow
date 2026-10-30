@@ -3,7 +3,7 @@ import { endKindSchema, idSchema } from './common';
 import { galleryPrefsSchema, stepMediaSchema } from './media';
 
 export const destinationSchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('node'), nodeId: idSchema }),
+  z.strictObject({ kind: z.literal('node'), nodeId: idSchema, terminateProcedure: z.literal(true).optional() }),
   z.strictObject({ kind: z.literal('unassigned') }),
   z.strictObject({ kind: z.literal('broken'), formerNodeId: idSchema, formerTitle: z.string().optional() }),
   z.strictObject({ kind: z.literal('activity-complete') }),

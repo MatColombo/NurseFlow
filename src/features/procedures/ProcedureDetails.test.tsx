@@ -5,6 +5,8 @@ import { libraryFixture } from '@test/fixtures/library';
 import { procedureService, type ProcedureDetails } from './service';
 import { settingsSchema } from '@domain/model';
 import { libraryService } from '@features/library/service';
+import { builderService } from '@features/builder/service';
+import { builderViewSchema } from '@domain/builder/model';
 
 const fixture = libraryFixture();
 function details(kind: 'draft' | 'ready' | 'both'): ProcedureDetails {
@@ -45,6 +47,8 @@ describe('Details usa stati e revisioni reali', () => {
   });
   it('Edit Ready-only apre una copia di lavoro, senza invocare creazione Draft', async () => {
     vi.spyOn(procedureService, 'load').mockResolvedValue(details('ready')); vi.spyOn(procedureService, 'revision').mockResolvedValue(details('ready').ready!);
+    const source = details('ready'); vi.spyOn(builderService, 'load').mockResolvedValue({ procedure: source.procedure, revision: source.ready!,
+      history: { id: source.procedure.id, revisionId: source.ready!.id, editVersion: 1, past: [], future: [], view: builderViewSchema.parse({}) } });
     vi.spyOn(libraryService, 'openProcedure').mockResolvedValue({ ...details('ready').procedure, lastOpenedAt: '2026-10-30T10:00:00.000Z' }); const create = vi.spyOn(procedureService, 'create'); mount();
     fireEvent.click(await screen.findByRole('button', { name: 'Modifica grafo' }));
     await waitFor(() => expect(window.location.hash).toContain('copy=ready')); expect(create).not.toHaveBeenCalled();

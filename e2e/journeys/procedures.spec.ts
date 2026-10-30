@@ -7,6 +7,10 @@ async function setup(page: Page) {
 }
 async function records(page: Page) { await attachLibraryHarness(page); return page.evaluate(() => window.NurseFlowF03.inspectProcedureRecords()); }
 async function details(page: Page, id: string) { await page.goto(`./#/procedure/${id}`); await expect(page.getByRole('region', { name: 'Dettagli procedura', exact: true })).toBeVisible(); }
+async function builderToLibrary(page: Page) {
+  await page.getByRole('region', { name: 'Builder', exact: true }).getByRole('button', { name: 'Indietro', exact: true }).click();
+  await page.getByRole('link', { name: 'Torna alla libreria', exact: true }).click();
+}
 
 test('Ready-only: Mappa ed Edit puntano alla Ready, aprire e uscire non crea una Draft', async ({ page }) => {
   await setup(page); const before = await records(page); await details(page, 'fixture-3');
@@ -18,7 +22,7 @@ test('Ready-only: Mappa ed Edit puntano alla Ready, aprire e uscire non crea una
   await page.getByRole('button', { name: 'Modifica grafo', exact: true }).click();
   await expect(page).toHaveURL(/copy=ready/); await expect(page.getByText('Copia di lavoro · Ready · v1', { exact: true })).toBeVisible();
   await page.reload(); await expect(page.locator('[data-revision-id="fixture-3-ready"]')).toBeVisible();
-  await page.getByRole('link', { name: 'Torna alla libreria', exact: true }).click();
+  await builderToLibrary(page);
   const after = await records(page);
   expect(after.procedures.find((procedure) => procedure.id === 'fixture-3')?.workingDraftId).toBeUndefined();
   expect(after.revisions).toEqual(before.revisions); expect(after.runSessions).toEqual([]);
@@ -157,7 +161,7 @@ test('New salva una Draft con solo Start; creare un gruppo non crea prematuramen
   const draft = created.revisions.find((revision) => revision.id === procedure.workingDraftId)!;
   expect(draft.graph.nodes).toEqual([{ id: expect.any(String), kind: 'start', next: { kind: 'unassigned' } }]);
   await page.reload(); await expect(page.locator(`[data-revision-id="${draft.id}"]`)).toHaveText('Bozza');
-  await page.getByRole('link', { name: 'Torna alla libreria', exact: true }).click();
+  await builderToLibrary(page);
   await expect(page.getByTestId('library-scroll').getByRole('button', { name: procedure.title, exact: true })).toBeVisible();
 });
 
