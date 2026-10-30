@@ -37,6 +37,7 @@ export const settingsSchema = z.strictObject({
   photoPreset: z.enum(['small', 'medium', 'high', 'original']).default('medium'),
 });
 export const uiPreferencesSchema = z.strictObject({
+  builderMode: z.enum(['outline', 'graph']).default('outline'),
   id: z.literal('main').default('main'), sortMode: z.enum(['groups', 'priority', 'recent', 'az']).default('groups'),
   collapsedGroupIds: z.array(idSchema).default([]), searchText: z.string().optional(),
   filters: z.record(z.string(), z.unknown()).optional(), recentProcedureIds: z.array(idSchema).max(20).default([]),

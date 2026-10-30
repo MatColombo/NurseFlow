@@ -6,7 +6,7 @@ import { recentProcedures } from '@domain/library';
 import type { NurseFlowDatabase } from '../db';
 import type { CommandEnvironment } from './context';
 
-const viewPatchSchema = uiPreferencesSchema.omit({ id: true, recentProcedureIds: true, firstLaunchComplete: true, initialLocaleSet: true, persistenceStatus: true }).partial().strip();
+const viewPatchSchema = uiPreferencesSchema.omit({ id: true, recentProcedureIds: true, firstLaunchComplete: true, initialLocaleSet: true, persistenceStatus: true, builderMode: true }).partial().strip();
 export type LibraryViewPatch = z.input<typeof viewPatchSchema>;
 export function libraryCommands(db: NurseFlowDatabase, environment: CommandEnvironment) {
   async function saveView(patch: LibraryViewPatch) {

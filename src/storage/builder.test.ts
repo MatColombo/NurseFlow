@@ -29,6 +29,31 @@ async function travel(direction: 'undo' | 'redo') {
     sourceRevisionId: source.revision.id, expectedEditVersion: source.revision.editVersion, direction });
 }
 describe('unità atomiche Builder', () => {
+  it('F06: quota sul cambio mode conserva tutte le preferenze e non crea una Draft', async () => {
+    await commands.saveLibraryView({ searchText: 'autore', collapsedGroupIds: ['group'] }); const before = await snapshot();
+    db.uiPreferences.hook('updating', () => { throw new DOMException('quota-mode', 'QuotaExceededError'); });
+    await expect(commands.setBuilderMode('graph')).rejects.toThrow('quota-mode'); expect(await snapshot()).toEqual(before);
+    expect((await repo.builder.get('procedure')).editorMode).toBe('outline');
+  });
+  it('F06: mode e camera persistono senza Draft, storia o falsa recenza; default legacy Outline', async () => {
+    const before = await snapshot(); expect((await repo.builder.get('procedure')).editorMode).toBe('outline');
+    await commands.saveLibraryView({ searchText: 'autore', collapsedGroupIds: ['group'] });
+    await commands.setBuilderMode('graph');
+    await commands.saveBuilderView({ procedureId: 'procedure', sourceRevisionId: 'ready', expectedEditVersion: 1,
+      view: { scrollTop: 123, selection: null, canvas: { initialized: true, x: -100, y: 70, zoom: 1.25, focusItems: { tasks: 'activity-27' } } } });
+    db.close(); await db.open(); const restored = await repo.builder.get('procedure');
+    expect(restored.editorMode).toBe('graph'); expect(restored.procedure.workingDraftId).toBeUndefined(); expect(restored.history.past).toEqual([]);
+    expect(restored.history.view.canvas).toMatchObject({ x: -100, y: 70, zoom: 1.25 });
+    expect(await db.uiPreferences.get('main')).toMatchObject({ searchText: 'autore', collapsedGroupIds: ['group'], builderMode: 'graph' });
+    expect(await db.revisions.toArray()).toEqual(before.find(([name]) => name === 'revisions')?.[1]);
+  });
+  it('F06: Auto layout è una sola transazione Undo/Redo; Ready e run rimangono invariati', async () => {
+    const run = await commands.startOrResumeReady('procedure', 'ready'); const graph = (await repo.builder.get('procedure')).revision.graph;
+    const saved = await commit({ type: 'layout', positions: { shared: { x: 150, y: 400 } } });
+    expect((await repo.builder.get('procedure')).history.past).toHaveLength(1);
+    expect((await travel('undo')).graph).toEqual(graph); expect((await travel('redo')).graph).toEqual(saved.graph);
+    expect(await db.runSessions.get(run.id)).toEqual(run); expect((await db.revisions.get('ready'))?.graph).toEqual(graph);
+  });
   it('apertura Ready-only e salvataggio vista non creano una Draft; primo edit lo fa atomicamente', async () => {
     const run = await commands.startOrResumeReady('procedure', 'ready'); const ready = await db.revisions.get('ready');
     const opened = await repo.builder.get('procedure');

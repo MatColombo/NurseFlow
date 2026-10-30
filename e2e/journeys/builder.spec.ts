@@ -1,6 +1,7 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import { setupBuilder, readBuilder } from '../fixtures/builder';
 import { expectNoBleeding, setScale } from '../fixtures/ui';
+import { cancelGraphTarget, graphSurface, locateGraphNode, pickGraphNode } from '../fixtures/graph';
 
 const row = (page: Page, id: string) => page.locator('[data-outline-node="' + id + '"]');
 const dialog = (page: Page) => page.getByRole('dialog');
@@ -16,7 +17,7 @@ async function chooseNode(page: Page, id: string, title: string) { await row(pag
 async function changeA(page: Page) {
   await row(page, 'decision').getByRole('button', { name: 'A · Percorso A', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Cambia collegamento', exact: true }).click();
-  await dialog(page).getByRole('button', { name: 'Esempio terminato · Fine procedura', exact: true }).click();
+  await pickGraphNode(page, 'Esempio terminato');
 }
 
 test('Start vuoto: picker esatto, creazione+collegamento persistiti prima di Page08; outcome singolo', async ({ page }) => {
@@ -58,6 +59,7 @@ test('rewiring per singolo edge: preview orfani, Cancel, Undo/Redo persistenti, 
   await expect(preview).toContainText('Passo non raggiungibile: Percorso A');
   await preview.getByRole('button', { name: 'Annulla', exact: true }).click();
   expect((await readBuilder(page)).revision).toEqual(before.revision);
+  await cancelGraphTarget(page);
   await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click();
   await changeA(page); await apply(page); const changed = await readBuilder(page);
   expect(changed.revision.graph.nodes.find((node) => node.id === 'decision')).toMatchObject({ outcomes: [
@@ -113,8 +115,9 @@ test('AND: Finish attività, After all, Stop entire con tipo e consenso esplicit
   await setupBuilder(page, 'multi'); const before = await readBuilder(page, 'multi');
   await row(page, 'task-1').getByRole('button', { name: 'Passo successivo · Attività terminata', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Cambia collegamento', exact: true }).click();
-  await expect(dialog(page).getByRole('button', { name: 'Operazione 2 · Istruzione', exact: true })).toBeDisabled();
-  await expect(dialog(page).getByRole('button', { name: 'Fine esempio · Fine procedura', exact: true })).toBeDisabled();
+  await locateGraphNode(page, 'Operazione 2'); await expect(graphSurface(page).getByRole('button', { name: 'Scegli destinazione: Operazione 2', exact: true })).toBeDisabled();
+  await locateGraphNode(page, 'Fine esempio'); await expect(graphSurface(page).getByRole('button', { name: 'Scegli destinazione: Fine esempio', exact: true })).toBeDisabled();
+  await cancelGraphTarget(page);
   await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click();
   await row(page, 'task-1').getByRole('button', { name: 'Passo successivo · Attività terminata', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Scollega', exact: true }).click(); await apply(page);
@@ -180,7 +183,7 @@ test('outcome 19 di 32: selezione esatta, cap e collegamento canonico senza copi
   await dialog(page).getByRole('searchbox', { name: 'Cerca', exact: true }).fill('Esito 19');
   await dialog(page).getByRole('button', { name: 'Imposta percorso', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Vai a un passo esistente', exact: true }).click();
-  await dialog(page).getByRole('button', { name: 'Revisione comune · Istruzione', exact: true }).click(); await apply(page);
+  await pickGraphNode(page, 'Revisione comune'); await apply(page);
   const saved = await readBuilder(page, decisionsId); const decision = saved.revision.graph.nodes.find((node) => node.kind === 'decision');
   expect(saved.revision.graph.nodes).toHaveLength(before.revision.graph.nodes.length);
   if (decision?.kind !== 'decision') throw new Error('Decision missing');
@@ -296,6 +299,7 @@ for (const scale of [4, 13, 30, 48]) {
     await changeA(page); await expectNoBleeding(page);
     if (scale === 13) await capture(page, testInfo, 'impact-320px');
     await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click();
+    await cancelGraphTarget(page);
     await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click();
     await chooseNode(page, 'a-step', 'Percorso A'); await dialog(page).getByRole('button', { name: 'Taglia', exact: true }).click();
     await row(page, 'b-step').getByRole('button', { name: 'Passo successivo · Revisione comune', exact: true }).click();

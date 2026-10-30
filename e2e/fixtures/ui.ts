@@ -23,6 +23,12 @@ export async function expectNoBleeding(page: Page) {
     for (const element of document.querySelectorAll<HTMLElement>('main button, main input, main .nf-card, main .nf-validation, main .nf-gallery, dialog[open]')) {
       const box = element.getBoundingClientRect();
       if (!box.width || !box.height) continue;
+      const canvas = element.closest('.nf-graph-viewport');
+      if (canvas) {
+        const viewport = canvas.getBoundingClientRect();
+        if (viewport.left < -1 || viewport.right > innerWidth + 1) errors.push('Graph viewport outside app');
+        continue; // The graph deliberately pans/clips scene elements inside its bounded viewport.
+      }
       const carousel = element.closest('.nf-recent-tiles');
       const bounds = carousel?.getBoundingClientRect() ?? box;
       // Recent explicitly permits horizontal scrolling inside its single-row strip at large scales.

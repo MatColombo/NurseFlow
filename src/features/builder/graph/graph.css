@@ -1,0 +1,29 @@
+.nf-graph-shell { display: flex; flex-direction: column; flex: 1; min-block-size: 0; gap: var(--nf-space-1); }
+.nf-graph-controls { flex: 0 0 auto; }
+.nf-graph-controls > .nf-button { min-inline-size: max(48px, var(--nf-icon)); }
+.nf-graph-controls > .nf-note, .nf-graph-card .nf-note { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+.nf-graph-viewport { flex: 1; min-block-size: 200px; position: relative; overflow: hidden; isolation: isolate; touch-action: none; border: 1px solid var(--nf-border); border-radius: var(--nf-radius); background: var(--nf-surface-soft); }
+.nf-graph-svg { display: block; position: absolute; inset: 0; overflow: hidden; }
+.nf-graph-card { inline-size: 100%; block-size: 100%; overflow: hidden; background: var(--nf-surface); border: 1px solid var(--nf-border); border-radius: var(--nf-radius); }
+.nf-graph-card--selected { border: 2px solid var(--nf-focus); }
+.nf-graph-card-head { display: flex; flex-direction: column; padding: min(var(--nf-card-pad), 4vw); }
+.nf-graph-card .nf-graph-title { display: block; inline-size: 100%; flex: 1; min-block-size: 48px; border: 0; border-radius: 0; text-align: start; font-weight: 600; padding: 0; overflow: hidden; }
+.nf-graph-title > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.nf-graph-meta { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: 0 0 auto; }
+.nf-graph-port { display: flex; }
+.nf-graph-port > .nf-button { border-radius: 0; flex: 1; min-inline-size: 48px; min-block-size: 0; }
+.nf-graph-port > .nf-button:has(+ .nf-button) { flex: 0 0 max(48px, var(--nf-icon)); }
+.nf-graph-port .nf-button > span, .nf-graph-card > .nf-button > span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nf-graph-card > .nf-button { inline-size: 100%; border-radius: 0; min-block-size: 0; }
+.nf-graph-group-summary { display: flex; flex-direction: column; justify-content: center; padding-inline: min(var(--nf-card-pad), 4vw); }
+.nf-graph-group-summary > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nf-graph-port .nf-graph-broken { color: var(--nf-warning); border-style: dashed; }
+.nf-graph-line { fill: none; stroke: var(--nf-primary); stroke-width: 2; }
+.nf-graph-line--selected { stroke: var(--nf-focus); stroke-width: 4; }
+.nf-graph-edge-hit { fill: none; stroke: transparent; stroke-width: 32; pointer-events: stroke; cursor: pointer; }
+.nf-graph-edge-hit:focus-visible { stroke: var(--nf-primary-tint); stroke-opacity: .5; outline: none; }
+.nf-graph-group-region { fill: var(--nf-primary-tint); fill-opacity: .4; stroke: var(--nf-border); stroke-width: 2; }
+.nf-builder-scroll--graph { display: flex; overflow: hidden; }
+.nf-builder-flow .nf-builder-scroll--graph { overflow: visible; }
+.nf-builder-flow .nf-graph-shell { flex: none; inline-size: 100%; }
+.nf-builder-flow .nf-graph-viewport { flex: none; block-size: max(280px, 55dvh); }

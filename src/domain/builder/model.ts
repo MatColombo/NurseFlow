@@ -11,8 +11,16 @@ export const selectionSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('activity'), nodeId: idSchema, activityId: idSchema }),
 ]);
 export type Selection = z.infer<typeof selectionSchema>;
+export const canvasViewSchema = z.strictObject({
+  initialized: z.boolean().default(false),
+  x: z.number().finite().default(0), y: z.number().finite().default(0),
+  zoom: z.number().min(0.05).max(3).default(1),
+  focusItems: z.record(z.string(), z.string()).default({}),
+});
+export type CanvasView = z.infer<typeof canvasViewSchema>;
 export const builderViewSchema = z.strictObject({
   scrollTop: z.number().nonnegative().default(0), selection: selectionSchema.nullable().default(null),
+  canvas: canvasViewSchema.prefault({}),
 });
 const historyEntrySchema = z.strictObject({ graph: graphSchema, label: z.string() });
 export const builderStateSchema = z.strictObject({

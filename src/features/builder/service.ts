@@ -21,7 +21,7 @@ export function createBuilderService(storage = createNurseFlowStorage()) {
         const revision = await storage.commands.commitBuilderEdit({ procedureId: snapshot.procedure.id,
           sourceRevisionId: snapshot.revision.id, expectedEditVersion: snapshot.revision.editVersion,
           expectedGraph: snapshot.revision.graph, graph, label, view });
-        return { procedure: { ...snapshot.procedure, workingDraftId: revision.id, updatedAt: revision.updatedAt }, revision,
+        return { ...snapshot, procedure: { ...snapshot.procedure, workingDraftId: revision.id, updatedAt: revision.updatedAt }, revision,
           history: { id: snapshot.procedure.id, revisionId: revision.id, editVersion: revision.editVersion,
             past: [...snapshot.history.past, { graph: snapshot.revision.graph, label }].slice(-30), future: [], view } };
       });
@@ -40,6 +40,7 @@ export function createBuilderService(storage = createNurseFlowStorage()) {
       return write(() => storage.commands.saveBuilderView({ procedureId: snapshot.procedure.id,
         sourceRevisionId: snapshot.revision.id, expectedEditVersion: snapshot.revision.editVersion, view }));
     },
+    saveMode(mode: 'outline' | 'graph') { return write(() => storage.commands.setBuilderMode(mode)); },
   };
 }
 // The in-app graph clipboard never touches the OS clipboard or persistent Cut state.

@@ -16,8 +16,9 @@ function orderedOutline(graph: Graph) {
   for (const node of graph.nodes.filter((node) => node.kind === 'start')) visit(node.id, 0);
   for (const node of graph.nodes) visit(node.id, 0); return result;
 }
-export function Outline({ graph, select, focus, selection }: {
+export function Outline({ graph, select, focus, selection, pickNode, targetProblem }: {
   graph: Graph; select(value: Selection): void; focus(id: string): void; selection: Selection | null;
+  pickNode?: ((id: string) => void) | undefined; targetProblem?: ((id: string) => string | null) | undefined;
 }) {
   const { t } = useTranslation(); const linked = reachable(graph);
   const outletLabel = (node: Node, edge: EdgeRef) => edge.slot === 'outcome' && node.kind === 'decision'
@@ -29,15 +30,17 @@ export function Outline({ graph, select, focus, selection }: {
       className={'nf-outline-node nf-stack' + (selection?.kind === 'node' && selection.nodeId === node.id ? ' nf-outline-selected' : '')}
       style={{ marginInlineStart: 'min(' + Math.min(depth, 2) + ' * var(--nf-space-2), 4vw)' }}>
       <Button className="nf-outline-title" aria-pressed={selection?.kind === 'node' && selection.nodeId === node.id}
-        onClick={() => select({ kind: 'node', nodeId: node.id })}>{titleOf(node, t)}</Button>
+        disabled={Boolean(targetProblem?.(node.id))} disabledReason={targetProblem?.(node.id) ?? ''}
+        aria-label={pickNode ? t('canvas.choose', { title: titleOf(node, t) }) : titleOf(node, t)}
+        onClick={() => { if (pickNode) pickNode(node.id); else select({ kind: 'node', nodeId: node.id }); }}>{titleOf(node, t)}</Button>
       <div className="nf-row nf-meta"><span>{t('builder.kinds.' + node.kind)}</span>
         {!linked.has(node.id) && <span>{t('builder.unreachable')}</span>}
         {incoming(graph, node.id).length > 1 && <span>{t('builder.incoming', { count: incoming(graph, node.id).length })}</span>}
         {'phaseId' in node && node.phaseId && <span>{graph.phases.find((phase) => phase.id === node.phaseId)?.name}</span>}
         {'media' in node && node.media.length > 0 && <span>{t('builder.mediaCount', { count: node.media.length })}</span>}
       </div>
-      {node.kind === 'multitask' && <Button onClick={() => select({ kind: 'node', nodeId: node.id })}>{t('builder.browse', { count: node.activities.length })}</Button>}
-      <ul className="nf-list nf-stack">{outlets(node).map(({ edge, destination }) => <li className="nf-stack" key={edgeKey(edge)}>
+      {!pickNode && node.kind === 'multitask' && <Button onClick={() => select({ kind: 'node', nodeId: node.id })}>{t('builder.browse', { count: node.activities.length })}</Button>}
+      {!pickNode && <ul className="nf-list nf-stack">{outlets(node).map(({ edge, destination }) => <li className="nf-stack" key={edgeKey(edge)}>
         <div className="nf-row">
           {edge.slot === 'activity' && <Button aria-label={t('builder.activityActions', { title: outletLabel(node, edge) })}
             aria-pressed={selection?.kind === 'activity' && selection.nodeId === node.id && selection.activityId === edge.itemId}
@@ -49,7 +52,7 @@ export function Outline({ graph, select, focus, selection }: {
             onClick={() => focus(destination.nodeId)}>↗</Button>}
         </div>
         {destination.kind === 'broken' && <span className="nf-note nf-outline-broken">W08 · {destinationLabel(graph, destination, t)}</span>}
-      </li>)}</ul>
+      </li>)}</ul>}
     </li>)}
   </ol>;
 }

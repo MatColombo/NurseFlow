@@ -4,6 +4,7 @@ import { assertEditableGraph, destinationAt, incoming, nodeAt, nodeLabel, outlet
 
 export type NewKind = Exclude<Node['kind'], 'start'>;
 export type Edit =
+  | { type: 'layout'; positions: NonNullable<Graph['layout']>['positions'] }
   | { type: 'create'; edge: EdgeRef; kind: NewKind; endKind?: 'completed' | 'stopped' | 'escalation' | 'neutral'; stopEntire?: true }
   | { type: 'connect'; edge: EdgeRef; destination: Destination }
   | { type: 'disconnect'; edge: EdgeRef }
@@ -30,7 +31,8 @@ export function freshNode(kind: NewKind, newId: () => string, endKind: 'complete
 }
 export function applyEdit(source: Graph, edit: Edit, newId: () => string): { graph: Graph; createdId?: string } {
   const graph = structuredClone(source); let createdId: string | undefined;
-  if (edit.type === 'create') {
+  if (edit.type === 'layout') graph.layout = { positions: { ...graph.layout?.positions, ...edit.positions } };
+  else if (edit.type === 'create') {
     const old = destinationAt(graph, edit.edge); const scope = outletScope(graph, edit.edge);
     if (edit.stopEntire) requireEdit(edit.kind === 'end' && scope.length > 0 &&
       (edit.endKind === 'stopped' || edit.endKind === 'escalation'), 'scope');

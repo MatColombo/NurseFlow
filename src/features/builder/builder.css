@@ -7,6 +7,7 @@
 .nf-builder-toolbar { flex: 0 0 auto; padding-block: var(--nf-space-1); background: var(--nf-bg); }
 .nf-builder-toolbar > .nf-button { flex: 1 1 14%; min-inline-size: max(48px, calc(var(--nf-icon) + 2 * min(var(--nf-control-pad), 4vw))); }
 .nf-builder-toolbar > .nf-button:nth-of-type(-n+2) { flex: 2 1 28%; }
+.nf-builder-toolbar > .nf-button[aria-pressed='true'] { background: var(--nf-primary-tint); color: var(--nf-primary-strong); }
 .nf-builder-scroll { flex: 1 1 0; overflow: auto; min-block-size: 0; padding: var(--nf-space-1); scrollbar-gutter: stable; }
 .nf-builder-footer { flex: 0 0 auto; }
 .nf-builder-footer > .nf-button { flex: 1 1 8ch; }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { draftRevisionSchema, graphSchema, idSchema, positiveInteger, procedureSchema, revisionSchema } from '@domain/model';
+import { draftRevisionSchema, graphSchema, idSchema, positiveInteger, procedureSchema, revisionSchema, uiPreferencesSchema } from '@domain/model';
 import { builderStateSchema, builderViewSchema, requireEdit, type BuilderState } from '@domain/builder/model';
 import { assertEditableGraph } from '@domain/builder/structure';
 import { ConflictError } from '@domain/model/errors';
@@ -20,6 +20,13 @@ function historyFor(raw: unknown, id: string, revisionId: string, editVersion: n
 }
 export function builderCommands(db: NurseFlowDatabase, environment: CommandEnvironment) {
   return {
+    async setBuilderMode(mode: 'outline' | 'graph') {
+      const value = z.enum(['outline', 'graph']).parse(mode);
+      await db.transaction('rw', db.uiPreferences, async () => {
+        const current = uiPreferencesSchema.parse(await db.uiPreferences.get('main'));
+        await db.uiPreferences.put({ ...current, builderMode: value });
+      });
+    },
     async commitBuilderEdit(input: CommitBuilderInput) {
       const data = commitInput.parse(input); assertEditableGraph(data.graph);
       const now = environment.now(); const draftId = environment.newId();

@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04** e Builder Outline **F05**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05** e Graph **F06**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -130,9 +130,17 @@ La fase F04 conserva lo schema DB v3 e non aggiunge dipendenze. [ADR-005](docs/a
 
 Undo/Redo nella toolbar conserva 30 transazioni in IndexedDB, anche dopo reload. Copy usa nuove identità e mantiene i riferimenti ai media; Cut resta pending fino a Paste confermato, con move atomico e preview Prima/Dopo. Nodi condivisi canonici, W08 dopo cancellazione, orfani conservati e ripristinabili con Undo. Il primo cambiamento reale di una Ready-only crea Draft e storia nella stessa transazione, senza modificare Ready o run. Scroll e selezione persistono senza aggiornare la recenza.
 
-Graph/auto-layout arrivano in F06. La creazione apre la vera route Page 08 dopo il salvataggio; l'editor dei contenuti è F07. Preview/Check ricevono la revisione salvata, ma renderer e validazione completi restano nelle fasi successive. [ADR-006](docs/adr/006-builder-outline-and-history.md) e [report F05](docs/reports/F05.md) documentano implementazione, prove e limiti.
+La creazione apre la vera route Page 08 dopo il salvataggio; l'editor dei contenuti è F07. Preview/Check ricevono la revisione salvata, ma renderer e validazione completi restano nelle fasi successive. [ADR-006](docs/adr/006-builder-outline-and-history.md) e [report F05](docs/reports/F05.md) documentano implementazione, prove e limiti.
 
-## Moduli e limiti F00–F05
+## Builder Graph F06
+
+Il selettore Outline/Graph usa un unico DAG e ricorda l'ultima modalità sul dispositivo. Graph è caricato su richiesta: pan sullo sfondo, pinch, zoom con pulsanti, Fit, centro della selezione e ricerca per focalizzare. Camera, selezione, focus e scroll Outline persistono senza modificare Ready o cronologia. Undo/Redo, Cut/Copy/Paste e sheet contestuali sono condivisi fra le due viste.
+
+Cambiare un collegamento avvia un picker: la ricerca focalizza il passo; il tap propone soltanto l'edge scelto e apre la preview Prima/Dopo. Apply salva atomicamente. Si può selezionare il target anche in Outline; nessun collegamento richiede di trascinare linee. Cicli/cross-arm sono bloccati. Le convergenze mostrano un solo nodo con frecce distinte; cancellare il nodo produce W08, senza frecce sane o falsi `+`.
+
+Fino a tre attività AND sono in focus, con Browse ricercabile fino a 32; gli OR numerosi usano una lista equivalente senza ridurre i caratteri. I completamenti raggiungono direttamente la continuazione senza gate o merge visibili. Auto layout modifica solo le posizioni nel medesimo DAG ed è reversibile. [ADR-007](docs/adr/007-builder-graph-projection.md) e [report F06](docs/reports/F06.md) riportano scelte, test, screenshot e limiti.
+
+## Moduli e limiti F00–F06
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -148,7 +156,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/06 e l'Outline della 07 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/06 e le viste Outline/Graph della 07 sono implementate. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 
