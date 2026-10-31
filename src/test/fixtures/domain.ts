@@ -1,4 +1,4 @@
-import type { Graph, GalleryPrefs, RunSession } from '@domain/model';
+import type { Graph, GalleryPrefs, LegacyRunSession } from '@domain/model';
 import { procedureSchema, readyRevisionSchema } from '@domain/model';
 import type { ImportedRecords } from '@domain/portability/records';
 
@@ -80,7 +80,7 @@ export function exampleRecords(graph = convergenceGraph()): ImportedRecords {
   return { procedures: [procedure], groups: [{ id: 'group', name: 'Esempi', order: 0, createdAt: fixtureDate }],
     revisions: [ready], mediaAssets: [], runSessions: [] };
 }
-export function exampleRun(procedureId: string, pinnedRevisionId: string): RunSession {
+export function exampleRun(procedureId: string, pinnedRevisionId: string): LegacyRunSession {
   return { id: 'run', procedureId, pinnedRevisionId, saveVersion: 1, status: 'active', currentNodeId: 'shared',
     visited: [{ nodeId: 'start' }, { nodeId: 'decision', outcomeId: 'a' }], multitaskProgress: {},
     startedAt: fixtureDate, updatedAt: fixtureDate };

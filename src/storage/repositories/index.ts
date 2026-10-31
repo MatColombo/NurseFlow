@@ -7,6 +7,7 @@ import { assertRevisionOwner } from '@domain/procedures';
 import { assertRunReferences, invariant } from '@domain/model/integrity';
 import { builderRepository } from './builder';
 import { canonical } from '@domain/validation/validator';
+import { resumeRun, unwrap, viewRun } from '@domain/runtime';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -21,6 +22,14 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    runtime: {
+      async get(id: string) {
+        return db.transaction('r', [db.revisions, db.runSessions], async () => {
+          const stored = runSessionSchema.parse(await db.runSessions.get(id)); const revision = revisionSchema.parse(await db.revisions.get(stored.pinnedRevisionId));
+          const run = unwrap(resumeRun(stored, revision)); return { run, revision, view: viewRun(run, revision) };
+        });
+      },
+    },
     check: {
       subscribe(id: string, changed: () => void, failed: () => void) {
         let previous: string | undefined;

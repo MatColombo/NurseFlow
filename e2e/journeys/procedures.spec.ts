@@ -35,7 +35,7 @@ test('Ready+Draft: Start Ready crea una sessione pinned e Resume la conserva', a
   await expect(page.locator('[data-revision-id="fixture-0-draft"]')).toBeVisible();
   await details(page, 'fixture-0'); await page.getByRole('button', { name: 'Avvia Ready', exact: true }).click();
   await expect(page).toHaveURL(/#\/run\//); const started = await records(page); const run = started.runSessions[0]!;
-  expect(run).toMatchObject({ pinnedRevisionId: 'fixture-0-ready', currentNodeId: 'start', visited: [] });
+  expect(run).toMatchObject({ runtimeVersion: 1, pinnedRevisionId: 'fixture-0-ready', currentNodeId: 'decision' });
   expect(started.revisions).toEqual(before.revisions);
   await details(page, 'fixture-0'); await page.getByRole('button', { name: 'Riprendi', exact: true }).click();
   expect((await records(page)).runSessions).toEqual([run]);

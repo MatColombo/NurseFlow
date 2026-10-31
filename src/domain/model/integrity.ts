@@ -1,5 +1,6 @@
 import type { Destination, Graph, Node, Revision, RunSession } from './index';
 import { IntegrityError } from './errors';
+import { checkedRun } from '../runtime/validate';
 
 export function invariant(condition: unknown, message: string): asserts condition {
   if (!condition) throw new IntegrityError(message);
@@ -47,6 +48,7 @@ export function assertGraphReferences(graph: Graph): void {
 export function assertRunReferences(run: RunSession, revision: Revision): void {
   invariant(revision.state === 'ready' && revision.id === run.pinnedRevisionId &&
     revision.procedureId === run.procedureId, 'Run must pin its own Ready snapshot');
+  if ('runtimeVersion' in run) { checkedRun(run, revision); return; }
   const nodes = new Map(revision.graph.nodes.map((node) => [node.id, node]));
   const activityIds = new Set(revision.graph.nodes.flatMap((node) =>
     node.kind === 'multitask' ? node.activities.map((activity) => activity.id) : []));

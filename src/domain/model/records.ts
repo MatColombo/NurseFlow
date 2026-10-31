@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { idSchema, isoDateSchema, positiveInteger, warningSchema } from './common';
 import { graphSchema } from './graph';
+import { executionRunSchema } from '../runtime/model';
 
 export const procedureFieldsSchema = z.strictObject({
   title: z.string().trim().min(1), description: z.string().optional(), groupId: idSchema.nullable().default(null),
@@ -45,7 +46,7 @@ export const uiPreferencesSchema = z.strictObject({
   recentCollapsed: z.boolean().default(false), scrollTop: z.number().nonnegative().default(0),
   persistenceStatus: z.enum(['not-requested', 'granted', 'denied', 'unsupported', 'error']).default('not-requested'),
 });
-export const runSessionSchema = z.strictObject({
+export const legacyRunSessionSchema = z.strictObject({
   id: idSchema, procedureId: idSchema, pinnedRevisionId: idSchema,
   saveVersion: positiveInteger, status: z.enum(['active', 'ended', 'interrupted']), currentNodeId: idSchema,
   visited: z.array(z.strictObject({ nodeId: idSchema, outcomeId: idSchema.optional(), previousActivityId: idSchema.optional() })),
@@ -55,6 +56,8 @@ export const runSessionSchema = z.strictObject({
   })),
   terminalEndNodeId: idSchema.optional(), startedAt: isoDateSchema, updatedAt: isoDateSchema,
 });
+// Existing F01–F08 records remain readable; only explicit Resume may safely upgrade them.
+export const runSessionSchema = z.union([executionRunSchema, legacyRunSessionSchema]);
 
 export type Procedure = z.infer<typeof procedureSchema>;
 export type ProcedureMeta = Procedure;
@@ -66,7 +69,7 @@ export type RevisionRecord = Revision;
 export type Settings = z.infer<typeof settingsSchema>;
 export type AppSettings = Settings;
 export type LibraryViewState = z.infer<typeof uiPreferencesSchema>;
-// F09 will version this minimum persistence skeleton with canonical Back checkpoints.
+export type LegacyRunSession = z.infer<typeof legacyRunSessionSchema>;
 export type RunSession = z.infer<typeof runSessionSchema>;
 export type Priority = Procedure['priority'];
 export type UiLocale = Settings['locale'];

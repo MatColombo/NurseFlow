@@ -1,6 +1,7 @@
 import { draftRevisionSchema, procedureSchema, revisionSchema, runSessionSchema } from '@domain/model';
-import { assertRevisionOwner, cloneProcedureGraph, metadataOf, parseMetadata, readyStart, type ProcedureMetadata } from '@domain/procedures';
-import { assertRunReferences, invariant } from '@domain/model/integrity';
+import { assertRevisionOwner, cloneProcedureGraph, metadataOf, parseMetadata, type ProcedureMetadata } from '@domain/procedures';
+import { invariant } from '@domain/model/integrity';
+import { createRun, restoreRun, unwrap } from '@domain/runtime';
 import type { NurseFlowDatabase } from '../db';
 import { authorizeProcedureRemoval } from '../procedure-removal';
 import type { CommandEnvironment } from './context';
@@ -52,14 +53,14 @@ export function procedureCommands(db: NurseFlowDatabase, environment: CommandEnv
         const procedure = procedureSchema.parse(await db.procedures.get(id));
         invariant(!procedure.archived && procedure.readyRevisionId === expectedRevisionId, 'Ready changed; reopen Details');
         const revision = assertRevisionOwner(procedure, await db.revisions.get(expectedRevisionId), 'ready');
-        const start = readyStart(revision);
         const existing = (await db.runSessions.where('procedureId').equals(id).toArray())
           .filter((run) => run.pinnedRevisionId === revision.id)
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
-        if (existing) { assertRunReferences(runSessionSchema.parse(existing), revision); return existing; }
-        const run = runSessionSchema.parse({ id: runId, procedureId: id, pinnedRevisionId: revision.id, saveVersion: 1,
-          status: 'active', currentNodeId: start.id, visited: [], multitaskProgress: {}, startedAt: now, updatedAt: now });
-        assertRunReferences(run, revision); await db.runSessions.add(run); return run;
+        if (existing) {
+          const stored = runSessionSchema.parse(existing); const run = unwrap(restoreRun(stored, revision, now));
+          if (!('runtimeVersion' in stored)) await db.runSessions.put(run); return run;
+        }
+        const run = unwrap(createRun(revision, runId, now)); await db.runSessions.add(run); return run;
       });
     },
     async deleteProcedure(id: string) {

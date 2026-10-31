@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { groupSchema, mediaAssetSchema, procedureSchema, revisionSchema, runSessionSchema } from '@domain/model';
 import type { Destination, Graph, Procedure, Revision, RunSession } from '@domain/model';
 import { assertGraphReferences, assertRunReferences, invariant, uniqueIds } from '@domain/model/integrity';
+import { ROOT_TOKEN, activityTokenId } from '@domain/runtime/model';
 
 // Internal record staging only. Archive parsing/security and scope routing are F13/F14.
 // Settings intentionally cannot be passed to this additive command.
@@ -118,6 +119,20 @@ export function prepareImportedRecords(input: unknown, newId: () => string): Imp
     const remapRun = (run: RunSession): RunSession => {
       const ids = graphMap(run.procedureId);
       const id = (value: string) => mapped(ids, value);
+      const common = { id: freshId(), procedureId: mapped(procedureIds, run.procedureId),
+        pinnedRevisionId: mapped(revisionIds, run.pinnedRevisionId), currentNodeId: id(run.currentNodeId),
+        ...(run.terminalEndNodeId !== undefined ? { terminalEndNodeId: id(run.terminalEndNodeId) } : {}) };
+      if ('runtimeVersion' in run) {
+        const tokenIds = new Map(run.tokens.map((token) => [token.id, token.id === ROOT_TOKEN ? ROOT_TOKEN : activityTokenId(token.groupVisitId!, id(token.activityId!))]));
+        const tokenId = (value: string) => mapped(tokenIds, value);
+        return { ...run, ...common, focusTokenId: tokenId(run.focusTokenId),
+          tokens: run.tokens.map((token) => ({ ...token, id: tokenId(token.id), ...(token.activityId !== undefined ? { activityId: id(token.activityId) } : {}) })),
+          visits: run.visits.map((visit) => ({ ...visit, tokenId: tokenId(visit.tokenId), nodeId: id(visit.nodeId), ...(visit.outcomeId !== undefined ? { outcomeId: id(visit.outcomeId) } : {}) })),
+          groups: run.groups.map((group) => ({ ...group, focusedActivityId: id(group.focusedActivityId) })),
+          journal: run.journal.map((entry) => ({ ...entry, tokenId: tokenId(entry.tokenId) })),
+          ...(run.interruption ? { interruption: { ...run.interruption, edge: { ...run.interruption.edge, nodeId: id(run.interruption.edge.nodeId),
+            ...(run.interruption.edge.itemId !== undefined ? { itemId: id(run.interruption.edge.itemId) } : {}) } } } : {}) };
+      }
       return { ...run, id: freshId(), procedureId: mapped(procedureIds, run.procedureId),
         pinnedRevisionId: mapped(revisionIds, run.pinnedRevisionId), currentNodeId: id(run.currentNodeId),
         visited: run.visited.map((visit) => ({ ...visit, nodeId: id(visit.nodeId),

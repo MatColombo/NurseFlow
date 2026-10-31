@@ -48,7 +48,8 @@ export async function prepareProcedureEdgeCase(kind: 'terminal' | 'unassigned') 
   try {
     if (kind === 'terminal') {
       const commands = createCommands(db); const run = await commands.startOrResumeReady('fixture-3', 'fixture-3-ready');
-      await commands.saveRun({ ...run, status: 'ended', currentNodeId: 'end', terminalEndNodeId: 'end', saveVersion: run.saveVersion + 1 }, run.saveVersion);
+      const chosen = (await commands.transitionRun(run.id, run.saveVersion, { type: 'choose-outcome', outcomeId: 'a' }))!;
+      await commands.transitionRun(chosen.id, chosen.saveVersion, { type: 'continue' });
     } else {
       const revision = (await db.revisions.get('fixture-3-ready'))!;
       for (const node of revision.graph.nodes) if (node.kind === 'start') node.next = { kind: 'unassigned' };

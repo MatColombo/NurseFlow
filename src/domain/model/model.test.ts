@@ -40,6 +40,7 @@ describe('contratti dominio F01', () => {
     let next = 0;
     const batch = prepareImportedRecords([source], () => `mapped-${++next}`)[0];
     const run = batch?.runSessions[0];
+    if (!run || !('visited' in run)) throw new Error('Expected legacy fixture');
     expect(run?.currentNodeId).toBe(run?.terminalEndNodeId);
     expect(run?.visited[0]?.outcomeId).not.toBe('stop-all');
     expect(run?.visited[0]?.previousActivityId).not.toBe('activity-1');

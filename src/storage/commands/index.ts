@@ -13,6 +13,6 @@ export type { CheckedDraft } from './check';
 
 export type { ReadyValidator, ReadyValidation, CommandEnvironment } from './context';
 export function createCommands(db: NurseFlowDatabase, environment: CommandEnvironment = defaultEnvironment) {
-  return { ...draftCommands(db, environment), ...readyCommands(db, environment), ...runCommands(db),
+  return { ...draftCommands(db, environment), ...readyCommands(db, environment), ...runCommands(db, environment),
     ...importCommands(db, environment), ...appearanceCommands(db), ...libraryCommands(db, environment), ...procedureCommands(db, environment), ...builderCommands(db, environment), ...checkCommands(db, environment) };
 }

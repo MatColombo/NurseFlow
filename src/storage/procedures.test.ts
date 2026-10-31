@@ -41,7 +41,7 @@ describe('transazioni F04', () => {
     const before = await db.revisions.toArray(); const first = await commands.startOrResumeReady('procedure', 'ready');
     const resumed = await commands.startOrResumeReady('procedure', 'ready');
     expect(resumed).toEqual(first); expect(await db.runSessions.count()).toBe(1);
-    expect(first).toMatchObject({ pinnedRevisionId: 'ready', currentNodeId: 'start', visited: [] });
+    expect(first).toMatchObject({ runtimeVersion: 1, pinnedRevisionId: 'ready', currentNodeId: 'decision' });
     expect(await db.revisions.toArray()).toEqual(before);
     await expect(commands.startOrResumeReady('procedure', 'other')).rejects.toThrow('Ready changed');
   });
@@ -51,8 +51,8 @@ describe('transazioni F04', () => {
   });
   it('Resume conserva anche una sessione terminata sul suo End authored', async () => {
     const initial = await commands.startOrResumeReady('procedure', 'ready');
-    const terminal = { ...initial, status: 'ended' as const, currentNodeId: 'end', terminalEndNodeId: 'end', saveVersion: 2 };
-    await commands.saveRun(terminal, initial.saveVersion);
+    const chosen = (await commands.transitionRun(initial.id, initial.saveVersion, { type: 'choose-outcome', outcomeId: 'a' }))!;
+    const terminal = (await commands.transitionRun(chosen.id, chosen.saveVersion, { type: 'continue' }))!;
     const details = await createRepositories(db).procedureDetails.get('procedure');
     expect(details.resume).toEqual(terminal);
     expect(await commands.startOrResumeReady('procedure', 'ready')).toEqual(terminal);
