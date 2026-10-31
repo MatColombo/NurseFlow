@@ -55,3 +55,20 @@ export async function publishNewReady() {
     return await commands.markCheckedReady(await commands.checkDraft('procedure'), true);
   } finally { db.close(); }
 }
+export async function prepareMapDraft() {
+  const db = new NurseFlowDatabase(); await db.open();
+  try {
+    const draft = await db.revisions.get('draft'); if (!draft || draft.state !== 'working-draft') throw new Error('Draft fixture missing');
+    const choice = draft.graph.nodes.find((node) => node.kind === 'decision');
+    if (choice?.kind === 'decision') {
+      choice.outcomes[1]!.destination = { kind: 'broken', formerNodeId: 'removed', formerTitle: 'Carta rimossa' };
+      choice.outcomes.push({ id: 'dangling', order: 2, label: 'Riferimento storico', destination: { kind: 'node', nodeId: 'absent' } });
+    }
+    await db.revisions.put(draft);
+  } finally { db.close(); }
+}
+export async function prepareMapDetails() {
+  const db = new NurseFlowDatabase(); await db.open();
+  try { await db.procedures.update('procedure', { description: 'Descrizione authored completa. '.repeat(70), tags: ['Uno', 'Due', 'Tre', 'Quattro', 'Cinque'] }); }
+  finally { db.close(); }
+}

@@ -34,12 +34,12 @@ export function RunScreen({ initial, adapter, onData }: { initial: RunData; adap
   const phase = revision.graph.phases.find((item) => item.id === phaseId)?.name;
   const previous = view.previous; const previousLabel = previous ? previous.kind === 'multitask' ? t('run.forkContext') : titleOf(previous.node) : '';
   const answer = previous?.node.kind === 'decision' ? previous.node.outcomes.find((item) => item.id === previous.outcomeId)?.label : undefined;
-  useEffect(() => { void navigate(runPath, { replace: true }); }, [navigate, runPath]);
+  useEffect(() => { if (location.pathname + location.search !== runPath) void navigate(runPath, { replace: true, state: location.state }); }, [navigate, runPath, location.pathname, location.search, location.state]);
   useEffect(() => {
     const restoreMap = fromMap.current;
-    const frame = requestAnimationFrame(() => { fromMap.current = false; (restoreMap ? mapButton.current : content.current?.querySelector<HTMLElement>('h2'))?.focus({ preventScroll: true }); window.scrollTo(0, 0); });
+    const frame = requestAnimationFrame(() => { fromMap.current = false; (restoreMap ? mapButton.current : content.current?.querySelector<HTMLElement>('h2'))?.focus({ preventScroll: true }); window.scrollTo(0, restoreMap ? location.state?.runMapContext?.scrollTop ?? 0 : 0); });
     return () => cancelAnimationFrame(frame);
-  }, [run.currentNodeId, run.status, run.focusTokenId]);
+  }, [run.currentNodeId, run.status, run.focusTokenId, location.state]);
   useEffect(() => { if (modal !== 'exit') return; const frame = requestAnimationFrame(() => stay.current?.focus()); return () => cancelAnimationFrame(frame); }, [modal]);
   async function perform(operation: () => Promise<void>) {
     if (locking.current) return; locking.current = true; setBusy(true); setError(null);
@@ -62,7 +62,7 @@ export function RunScreen({ initial, adapter, onData }: { initial: RunData; adap
     <header className="nf-run-header">
       <Button icon="back" aria-label={t('common.back')} disabled={busy || ended && !previous} disabledReason={t(busy ? 'run.saving' : 'run.noPrevious')} onClick={back} />
       <h1 title={data.title}>{data.title}</h1>
-      <Button ref={mapButton} disabled={busy} disabledReason={t('run.saving')} onClick={() => { if (!locking.current) void navigate(mapPath); }}>{t('run.map')}</Button>
+      <Button ref={mapButton} disabled={busy} disabledReason={t('run.saving')} onClick={() => { if (!locking.current) void navigate(mapPath, { state: { runMapContext: { scrollTop: window.scrollY } } }); }}>{t('run.map')}</Button>
       {(!ended || invalidEnd) && <Button disabled={busy} disabledReason={t('run.saving')} onClick={() => setModal('exit')}>{t('run.exit')}</Button>}
     </header>
     {data.preview && <strong role="status">{t('procedure.draftPreview')}</strong>}

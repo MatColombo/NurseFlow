@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { procedureState } from '@domain/procedures';
 import { libraryFiltersSchema } from '@domain/library';
@@ -11,11 +11,12 @@ import { procedureService, type ProcedureDetails as Details } from './service';
 import './procedures.css';
 
 export function ProcedureDetails() {
+  const location = useLocation(); const fromMap = useRef(Boolean(location.state?.mapDetailsReturn));
   const { id = '' } = useParams(); const { t } = useTranslation(); const [details, setDetails] = useState<Details | null>(null);
   const [error, setError] = useState(false); const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
-    void procedureService.load(id, true).then((loaded) => { if (active) setDetails(loaded); }, () => { if (active) setError(true); });
+    void procedureService.load(id, !fromMap.current).then((loaded) => { if (active) setDetails(loaded); }, () => { if (active) setError(true); });
     return () => { active = false; };
   }, [id, attempt]);
   if (error) return <section className="nf-stack" aria-label={t('pages.02')}><h1>{t('pages.02')}</h1>
@@ -26,16 +27,24 @@ export function ProcedureDetails() {
 }
 
 function DetailsContent({ details, reload }: { details: Details; reload(): Promise<void> }) {
+  const location = useLocation(); const returned = location.state?.mapDetailsReturn as { scrollTop?: number; expandedTags?: boolean; expandedDescription?: boolean } | undefined;
+  const mapButton = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation(); const navigate = useNavigate(); const { procedure, ready, draft, resume } = details;
   const state = procedureState(procedure); const [modal, setModal] = useState<'more' | 'metadata' | 'archive' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null); const [busy, setBusy] = useState(false);
   const failed = useRef<(() => Promise<void>) | null>(null); const failureKey = useRef('procedure.saveError'); const [menuTop, setMenuTop] = useState(0);
-  const [expandedTags, setExpandedTags] = useState(false); const [expandedDescription, setExpandedDescription] = useState(false);
+  const [expandedTags, setExpandedTags] = useState(returned?.expandedTags === true); const [expandedDescription, setExpandedDescription] = useState(returned?.expandedDescription === true);
   const [descriptionOverflow, setDescriptionOverflow] = useState(false); const description = useRef<HTMLParagraphElement>(null);
   const selected = ready ?? draft;
   const exportPath = `/data/procedures?procedure=${encodeURIComponent(procedure.id)}`;
   const mapPath = `/procedure/${encodeURIComponent(procedure.id)}/map?revision=${encodeURIComponent(selected?.id ?? '')}`;
   const editPath = `/build/${encodeURIComponent(procedure.id)}?revision=${encodeURIComponent((draft ?? ready)?.id ?? '')}${draft ? '' : '&copy=ready'}`;
+  useLayoutEffect(() => {
+    if (!returned) return;
+    const frame = requestAnimationFrame(() => { mapButton.current?.focus({ preventScroll: true }); window.scrollTo(0, returned.scrollTop ?? 0); });
+    return () => cancelAnimationFrame(frame);
+  }, [returned]);
+  const openMap = () => { void navigate(mapPath, { state: { mapDetailsContext: { scrollTop: window.scrollY, expandedTags, expandedDescription } } }); };
   useLayoutEffect(() => {
     const element = description.current; if (!element) return;
     const measure = () => setDescriptionOverflow(element.scrollHeight > parseFloat(getComputedStyle(element).lineHeight) * 2 + 1);
@@ -76,11 +85,11 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
       {state === 'archived' ? <Button action variant="primary" onClick={() => { void perform(async () => { await procedureService.archive(procedure.id, false); await reload(); }); }}>{t('procedure.restore')}</Button>
         : ready ? <><Button action variant="primary" disabled={busy} disabledReason={t('common.loading')} onClick={start}>
           {resume ? t('procedure.resume') : t(state === 'ready-draft' ? 'procedure.startReady' : 'procedure.start')}</Button>
-          <div className="nf-row"><Button onClick={() => { void navigate(mapPath); }}>{t('procedure.map')}</Button>
+          <div className="nf-row"><Button ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button>
             <Button onClick={() => { void navigate(editPath); }}>{t(state === 'ready-draft' ? 'procedure.continueEditing' : 'procedure.edit')}</Button></div></>
         : <><Button action variant="primary" onClick={() => { void navigate(editPath); }}>{t('procedure.edit')}</Button>
           <div className="nf-row"><Button onClick={() => { void navigate(`/run/${encodeURIComponent(procedure.id)}?preview=draft&revision=${encodeURIComponent(draft?.id ?? '')}`); }}>{t('procedure.preview')}</Button>
-            <Button onClick={() => { void navigate(mapPath); }}>{t('procedure.map')}</Button></div></>}
+            <Button ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button></div></>}
     </div>
     <Sheet open={modal === 'more'} title={t('procedure.more')} className="nf-procedure-menu"
       style={{ '--nf-menu-top': `${menuTop}px` } as CSSProperties} onClose={() => setModal(null)}>

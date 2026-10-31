@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09** e Guided Run/End **F10**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10** e Map/List **F11**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -160,9 +160,15 @@ Ready richiede zero Problems e conferma personale con checkbox. Il commit rilegg
 
 `/#/run/:id` mostra un solo passo della Ready pinnata, con fase, posizione n/N o n/min–max, previous cue, note/alert e gallerie F07. Le scelte OR sono esplicite; ogni attività AND conserva cursore e completamento indipendenti. Cambia attività non completa il lavoro; Riapri una Done richiede conferma. Il motore distingue Finish activity, End globale e interruzione W08, senza Join visibili. Ogni transizione attende il commit prima di cambiare la scheda; quota e conflitti conservano il contesto e richiedono Retry o rilettura.
 
-Page 04 usa il testo completo dell'autore e i quattro tipi End, con Back, Map, Restart confermato e ritorno Library che elimina solo la sessione corrente. Exit è sempre confermato e Back di sistema segue il percorso reale. Draft Preview è esplicita e persistente in uno store separato, senza creare Ready; la sua snapshot non cambia quando si modifica la working Draft. I percorsi incompleti si bloccano con totale `?` e ritorno al Builder. Map mantiene il contesto pinned ma la mappa completa è F11. [ADR-010](docs/adr/010-pinned-runtime.md), [ADR-011](docs/adr/011-guided-run-end.md), [report F09](docs/reports/F09.md), [report F10](docs/reports/F10.md).
+Page 04 usa il testo completo dell'autore e i quattro tipi End, con Back, Map, Restart confermato e ritorno Library che elimina solo la sessione corrente. Exit è sempre confermato e Back di sistema segue il percorso reale. Draft Preview è esplicita e persistente in uno store separato, senza creare Ready; la sua snapshot non cambia quando si modifica la working Draft. I percorsi incompleti si bloccano con totale `?` e ritorno al Builder. Map F11 mantiene il contesto pinned senza eseguire transizioni. [ADR-010](docs/adr/010-pinned-runtime.md), [ADR-011](docs/adr/011-guided-run-end.md), [report F09](docs/reports/F09.md), [report F10](docs/reports/F10.md).
 
-## Moduli e limiti F00–F10
+## Map e List F11
+
+Page 05 legge la revisione scelta dai Details o la snapshot pinnata della Run/Preview, anche dopo una nuova pubblicazione Ready. Graph offre pan, pinch, zoom, Fit e Current; List usa ordine topologico, disclosure delle relazioni e riferimenti a nodi condivisi rappresentati una sola volta. Inspector con testo authored, fase, End type, gallerie e note indipendenti; nessun comando per avanzare, scegliere rami o modificare il grafo. AND mostra stati e conteggi dei token salvati, senza gate visibili.
+
+Il percorso evidenziato esclude il futuro oltre il cursore e i rami abbandonati. Draft incomplete restano consultabili con collegamenti mancanti espliciti. Back ripristina contesto, scroll e focus senza aggiornare recenti o sessioni. Geometria e camera restano transitorie; nessuna migrazione DB. List resta disponibile se fallisce il renderer grafico lazy. [ADR-012](docs/adr/012-read-only-map-list.md), [report F11](docs/reports/F11.md).
+
+## Moduli e limiti F00–F11
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -178,7 +184,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/03/04/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/03/04/05/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Le pagine successive restano incomplete; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 

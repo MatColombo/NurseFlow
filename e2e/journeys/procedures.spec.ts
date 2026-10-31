@@ -18,7 +18,7 @@ test('Ready-only: Mappa ed Edit puntano alla Ready, aprire e uscire non crea una
   await expect(page.getByRole('button', { name: 'Avvia Ready', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Vedi mappa', exact: true }).click();
   await expect(page.locator('[data-revision-id="fixture-3-ready"]')).toBeVisible();
-  await page.getByRole('link', { name: 'Indietro', exact: true }).click();
+  await page.getByRole('link', { name: 'Indietro ai dettagli', exact: true }).click();
   await page.getByRole('button', { name: 'Modifica grafo', exact: true }).click();
   await expect(page).toHaveURL(/copy=ready/); await expect(page.getByText('Copia di lavoro · Ready · v1', { exact: true })).toBeVisible();
   await page.reload(); await expect(page.locator('[data-revision-id="fixture-3-ready"]')).toBeVisible();

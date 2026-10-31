@@ -7,8 +7,9 @@ import { MediaImage } from '@features/step-editor/media/MediaImage';
 import './step-content.css';
 
 /** Shared content. Page08's local preview has inert actions; Guided Draft Preview uses RunScreen's explicit mode. */
-export function StepContent({ node, phase, preview, allowRemote = true, onContinue, onChoose, busy = false, continueLabel, showEndType = true, stopOutcomeIds = [], finishOutcomeIds = [] }: {
+export function StepContent({ node, phase, preview, inspection = false, allowRemote = true, onContinue, onChoose, busy = false, continueLabel, showEndType = true, stopOutcomeIds = [], finishOutcomeIds = [] }: {
   node: EditableStep; phase?: string | undefined; preview: boolean; allowRemote?: boolean;
+  inspection?: boolean;
   onContinue?: () => void; onChoose?: (id: string) => void;
   busy?: boolean; continueLabel?: string; showEndType?: boolean; stopOutcomeIds?: string[]; finishOutcomeIds?: string[];
 }) {
@@ -35,12 +36,12 @@ export function StepContent({ node, phase, preview, allowRemote = true, onContin
       {(note.visibility === 'always-visible' || noteOpen) && <p className="nf-authored nf-note">{note.text}</p>}
     </section>}
     {gallery('after-note')}
-    {node.kind === 'decision' && <div className="nf-stack">{[...node.outcomes].sort((a, b) => a.order - b.order).map((item) => <div className="nf-row" key={item.id} data-preview-outcome={item.id}>
+    {!inspection && node.kind === 'decision' && <div className="nf-stack">{[...node.outcomes].sort((a, b) => a.order - b.order).map((item) => <div className="nf-row" key={item.id} data-preview-outcome={item.id}>
       <Button action disabled={preview || busy} disabledReason={t(preview ? 'editor.previewOnly' : 'run.saving')} onClick={() => onChoose?.(item.id)}>{item.label || t('builder.unnamedOutcome')}{stopOutcomeIds.includes(item.id) && <small className="nf-meta"> · {t('run.stop')}</small>}{finishOutcomeIds.includes(item.id) && <small className="nf-meta"> · {t('run.finishActivity')}</small>}</Button>
       {item.note?.text.trim() && (item.note.visibility === 'always-visible' ? <p className="nf-authored nf-note">{item.note.text}</p> : <><Button aria-label={t('editor.outcomeInfo', { label: item.label })} aria-expanded={outcomeNote === item.id} onClick={() => setOutcomeNote(outcomeNote === item.id ? null : item.id)}>ⓘ</Button>
         {outcomeNote === item.id && <p className="nf-authored nf-note">{item.note.text}</p>}</>)}
     </div>)}</div>}
-    {node.kind !== 'decision' && node.kind !== 'end' && <Button action disabled={preview || busy} disabledReason={t(preview ? 'editor.previewOnly' : 'run.saving')} onClick={onContinue}>{continueLabel ?? t('editor.continue')}</Button>}
+    {!inspection && node.kind !== 'decision' && node.kind !== 'end' && <Button action disabled={preview || busy} disabledReason={t(preview ? 'editor.previewOnly' : 'run.saving')} onClick={onContinue}>{continueLabel ?? t('editor.continue')}</Button>}
     <Dialog open={Boolean(zoomed)} title={t('media.image')} onClose={() => setZoomed(null)}>
       <div className="nf-row"><Button aria-label={t('canvas.zoomOut')} disabled={zoom <= 1} disabledReason={t('canvas.zoomLimit')} onClick={() => setZoom(Math.max(1, zoom / 1.5))}>−</Button>
         <Button aria-label={t('canvas.zoomIn')} disabled={zoom >= 4} disabledReason={t('canvas.zoomLimit')} onClick={() => setZoom(Math.min(4, zoom * 1.5))}>+</Button></div>

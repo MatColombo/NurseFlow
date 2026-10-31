@@ -54,7 +54,7 @@ test('F10 browser Back follows real route; first-step Back and Exit always confi
 });
 test('F10 Map returns to pinned context and confirmed Restart uses the old Ready', async ({ page }) => {
   await setupRun(page); await reachEnd(page); const before = await runState(page); await attachRunHarness(page); await page.evaluate(() => window.NurseFlowF10.publishNewReady());
-  await page.getByRole('button', { name: 'Mappa', exact: true }).click(); await expect(page.locator('[data-current-node="end"]')).toBeVisible(); await page.getByRole('link', { name: 'Indietro', exact: true }).click(); await expect(page).toHaveURL(/\/end$/); expect((await runState(page)).runs).toEqual(before.runs);
+  await page.getByRole('button', { name: 'Mappa', exact: true }).click(); await expect(page.locator('[data-current-node="end"]')).toBeVisible(); await page.getByRole('link', { name: 'Indietro alla fine', exact: true }).click(); await expect(page).toHaveURL(/\/end$/); expect((await runState(page)).runs).toEqual(before.runs);
   await expect(page.getByRole('button', { name: 'Mappa', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Ricomincia', exact: true }).click(); await page.getByRole('dialog').getByRole('button', { name: 'Ricomincia', exact: true }).click();
   await expect(step(page)).toHaveAttribute('data-step-content', 'decision'); await expect(page.getByRole('heading', { name: 'Percorso A o B?', exact: true })).toBeVisible(); expect((await runState(page)).runs[0]?.pinnedRevisionId).toBe('ready');

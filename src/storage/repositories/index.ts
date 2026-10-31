@@ -23,6 +23,18 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    map: {
+      async get(procedureId: string, revisionId?: string) {
+        return db.transaction('r', [db.procedures, db.revisions], async () => {
+          const procedure = procedureSchema.parse(await db.procedures.get(procedureId));
+          const selected = revisionId ?? procedure.readyRevisionId ?? procedure.workingDraftId;
+          invariant(selected, 'Map revision unavailable');
+          const revision = revisionSchema.parse(await db.revisions.get(selected));
+          invariant(revision.procedureId === procedureId, 'Map revision mismatch');
+          return { title: procedure.title, revision };
+        });
+      },
+    },
     runtime: {
       async get(id: string) {
         return db.transaction('r', [db.procedures, db.revisions, db.runSessions], async () => {

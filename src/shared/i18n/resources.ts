@@ -5,6 +5,7 @@ import { canvasResources } from './canvas-resources';
 import { editorResources } from './editor-resources';
 import { checkResources } from './check-resources';
 import { runResources } from './run-resources';
+import { mapResources } from './map-resources';
 export const resources = {
   it: { translation: {
     ...libraryResources.it,
@@ -14,6 +15,7 @@ export const resources = {
     ...editorResources.it,
     ...checkResources.it,
     ...runResources.it,
+    ...mapResources.it,
     common: { close: 'Chiudi', cancel: 'Annulla', retry: 'Riprova', back: 'Indietro', loading: 'Caricamento…',
       library: 'Torna alla libreria', search: 'Cerca', clearSearch: 'Cancella ricerca' },
     shell: { preview: 'Anteprima tecnica F02', pending: 'Pagina {{page}}: funzionalità non ancora implementata.',
@@ -38,6 +40,7 @@ export const resources = {
     ...editorResources.en,
     ...checkResources.en,
     ...runResources.en,
+    ...mapResources.en,
     common: { close: 'Close', cancel: 'Cancel', retry: 'Retry', back: 'Back', loading: 'Loading…',
       library: 'Return to Library', search: 'Search', clearSearch: 'Clear search' },
     shell: { preview: 'F02 technical preview', pending: 'Page {{page}}: feature not implemented yet.',

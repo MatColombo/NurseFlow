@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type PointerEve
 import type { CanvasView } from '@domain/builder/model';
 import { zoomAt } from '@domain/builder/viewport';
 import type { Point } from '@domain/builder/scene';
-export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, view: CanvasView, change: (view: CanvasView) => void, fit: () => void, clear: () => void) {
+export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, view: CanvasView, change: (view: CanvasView) => void, fit: () => void, clear: () => void, minimumZoom = .05) {
   const current = useRef(view); const changed = useRef(change); const points = useRef(new Map<number, Point>());
   const suppressed = useRef(false); const panning = useRef(false);
   useLayoutEffect(() => { current.current = view; changed.current = change; });
@@ -19,16 +19,16 @@ export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, vie
       if (event.ctrlKey || event.metaKey) return; // Preserve the browser's own zoom shortcut.
       event.preventDefault();
       if (event.altKey) {
-        const rect = node.getBoundingClientRect(); emit(zoomAt(current.current, current.current.zoom * Math.exp(-event.deltaY / 500), { x: event.clientX - rect.left, y: event.clientY - rect.top }));
+        const rect = node.getBoundingClientRect(); emit(zoomAt(current.current, current.current.zoom * Math.exp(-event.deltaY / 500), { x: event.clientX - rect.left, y: event.clientY - rect.top }, minimumZoom));
       } else emit({ ...current.current, initialized: true, x: current.current.x - event.deltaX, y: current.current.y - event.deltaY });
     };
     node.addEventListener('wheel', wheel, { passive: false }); return () => node.removeEventListener('wheel', wheel);
-  }, [element]);
+  }, [element, minimumZoom]);
   function down(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
     points.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (points.current.size === 1) {
-      suppressed.current = false; panning.current = !(event.target instanceof Element && event.target.closest('button,[data-graph-edge]'));
+      suppressed.current = false; panning.current = !(event.target instanceof Element && event.target.closest('button,[data-graph-edge],[data-graph-inspect]'));
     }
     if (panning.current || points.current.size > 1) event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -40,7 +40,7 @@ export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, vie
       const distance = (values: Point[]) => Math.hypot(values[0]!.x - values[1]!.x, values[0]!.y - values[1]!.y);
       const middle = (values: Point[]) => ({ x: (values[0]!.x + values[1]!.x) / 2, y: (values[0]!.y + values[1]!.y) / 2 });
       const a = middle(old); const b = middle(next); const rect = event.currentTarget.getBoundingClientRect();
-      const zoomed = zoomAt(current.current, current.current.zoom * distance(next) / Math.max(1, distance(old)), { x: a.x - rect.left, y: a.y - rect.top });
+      const zoomed = zoomAt(current.current, current.current.zoom * distance(next) / Math.max(1, distance(old)), { x: a.x - rect.left, y: a.y - rect.top }, minimumZoom);
       emit({ ...zoomed, x: zoomed.x + b.x - a.x, y: zoomed.y + b.y - a.y }); suppressed.current = true;
     } else if (panning.current) {
       const dx = event.clientX - previous.x; const dy = event.clientY - previous.y;
@@ -61,10 +61,10 @@ export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, vie
     else if (event.key === 'Escape') clear();
     else if (event.key === '+' || event.key === '-') {
       event.preventDefault(); const node = element.current;
-      if (node) emit(zoomAt(current.current, current.current.zoom * (event.key === '+' ? 1.25 : .8), { x: node.clientWidth / 2, y: node.clientHeight / 2 }));
+      if (node) emit(zoomAt(current.current, current.current.zoom * (event.key === '+' ? 1.25 : .8), { x: node.clientWidth / 2, y: node.clientHeight / 2 }, minimumZoom));
     }
   }
   return { onPointerDown: down, onPointerMove: move, onPointerUp: up, onPointerCancel: up, onKeyDown: keyboard,
     onClickCapture(event: React.MouseEvent<HTMLDivElement>) { if (suppressed.current && event.detail > 0) { event.preventDefault(); event.stopPropagation(); } },
-    onClick(event: React.MouseEvent<HTMLDivElement>) { if (!(event.target instanceof Element && event.target.closest('button,[data-graph-edge]'))) clear(); } };
+    onClick(event: React.MouseEvent<HTMLDivElement>) { if (!(event.target instanceof Element && event.target.closest('button,[data-graph-edge],[data-graph-inspect]'))) clear(); } };
 }

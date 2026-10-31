@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { viewRun } from '@domain/runtime';
 import { Button } from '@shared/components';
@@ -8,14 +8,16 @@ import { libraryService } from '@features/library/service';
 import { RunScreen, type RunData, type RunAdapter } from './RunScreen';
 
 export default function RunPage() {
+  const location = useLocation(); const fromMap = useRef(Boolean(location.state?.runMapReturn));
   const { id = '' } = useParams(); const [search] = useSearchParams(); const revisionId = search.get('revision') ?? '';
   const preview = search.get('preview') === 'draft'; const { t } = useTranslation();
   const [data, setData] = useState<RunData | null>(null); const [error, setError] = useState(false); const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let active = true;
     void (async () => {
-      const loaded = preview ? await runtimeService.preview(id, revisionId) : await runtimeService.resume(id);
-      if (!loaded.archived) { if (preview) await libraryService.openProcedure(id); else await libraryService.openRun(id); }
+      const loaded = fromMap.current ? preview ? await runtimeService.readPreview(revisionId) : await runtimeService.read(id) :
+        preview ? await runtimeService.preview(id, revisionId) : await runtimeService.resume(id);
+      if (!loaded.archived && !fromMap.current) { if (preview) await libraryService.openProcedure(id); else await libraryService.openRun(id); }
       if (active) { setData(loaded); setError(false); }
     })().catch(() => { if (active) setError(true); });
     return () => { active = false; };

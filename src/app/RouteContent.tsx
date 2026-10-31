@@ -7,7 +7,7 @@ import { StartupPage } from '@features/first-launch/StartupPage';
 import { StoragePersistence } from '@features/settings/StoragePersistence';
 import { ProcedureDetails } from '@features/procedures/ProcedureDetails';
 import { NewProcedure } from '@features/procedures/NewProcedure';
-import { RevisionDestination } from '@features/procedures/RevisionDestination';
+import MapPage from '@features/map/MapPage';
 import { BuilderPage } from '@features/builder/BuilderPage';
 import { MediaSettings } from '@features/settings/MediaSettings';
 import StepEditorPage from '@features/step-editor/StepEditorPage';
@@ -21,6 +21,7 @@ export function RouteContent({ page }: { page: Page }) {
   const [search] = useSearchParams();
   if (page === '00' || page === '01') return <StartupPage key={page} setup={page === '00'} />;
   if (page === '02') return <ProcedureDetails key={parameters.id} />;
+  if (page === '05') return <MapPage key={`${parameters.id}-${search.get('revision')}-${search.get('run')}-${search.get('previewRun')}`} />;
   if (page === '06') return <NewProcedure />;
   if (page === '07') return <BuilderPage key={parameters.id} />;
   if (page === '08') return <StepEditorPage key={`${parameters.id}-${parameters.nodeId}`} />;
@@ -34,7 +35,6 @@ export function RouteContent({ page }: { page: Page }) {
       <Link to="/data/procedures">{t('pages.11A')}</Link><Link to="/data/app">{t('pages.11B')}</Link></>}
     {page === '11B' && <Link to="/setup">{t('common.back')}</Link>}
   </section>;
-  if (page === '05') return <RevisionDestination key={`${page}-${parameters.id}-${search.get('revision')}`} kind="map">{content}</RevisionDestination>;
   return content;
 }
 
