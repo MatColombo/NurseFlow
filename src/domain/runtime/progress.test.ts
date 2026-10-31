@@ -54,6 +54,17 @@ describe('route-aware counts and previous cue', () => {
     run = unwrap(reduceRun(run, revision, { type: 'continue' }, fixtureDate))!;
     expect(progressOf(run, revision)).toMatchObject({ n: 2, total: { kind: 'exact', value: 4 } });
   });
+  it('Back then switching preserves recorded ordinals and counts the other activity’s saved route until a choice changes', () => {
+    const revision = runtimeReady(activityChoiceGraph()); let run = unwrap(createRun(revision, 'run', fixtureDate));
+    const act = (event: RunEvent) => { run = unwrap(reduceRun(run, revision, event, fixtureDate))!; };
+    act({ type: 'continue' }); act({ type: 'choose-outcome', outcomeId: 'red' }); act({ type: 'back' });
+    act({ type: 'switch-activity', activityId: 'activity-2' });
+    expect(progressOf(run, revision)).toMatchObject({ n: 4, total: { kind: 'exact', value: 4 } });
+    act({ type: 'switch-activity', activityId: 'activity-1' });
+    expect(progressOf(run, revision)).toMatchObject({ n: 2, total: { kind: 'range', min: 3, max: 4 } });
+    act({ type: 'choose-outcome', outcomeId: 'blue' });
+    expect(progressOf(run, revision)).toMatchObject({ n: 3, total: { kind: 'exact', value: 3 } });
+  });
   it('W08 has unknown total even before choosing it; a safe alternative recomputes a real total', () => {
     const graph = unequalGraph(0, 0); const decision = graph.nodes.find((n) => n.kind === 'decision')!;
     if (decision.kind === 'decision') decision.outcomes[0]!.destination = { kind: 'broken', formerNodeId: 'missing' };

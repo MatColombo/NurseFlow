@@ -8,6 +8,7 @@ import { assertRunReferences, invariant } from '@domain/model/integrity';
 import { builderRepository } from './builder';
 import { canonical } from '@domain/validation/validator';
 import { resumeRun, unwrap, viewRun } from '@domain/runtime';
+import { previewSessionSchema } from '@domain/runtime/preview';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -24,9 +25,20 @@ export function createRepositories(db: NurseFlowDatabase) {
   return {
     runtime: {
       async get(id: string) {
-        return db.transaction('r', [db.revisions, db.runSessions], async () => {
+        return db.transaction('r', [db.procedures, db.revisions, db.runSessions], async () => {
           const stored = runSessionSchema.parse(await db.runSessions.get(id)); const revision = revisionSchema.parse(await db.revisions.get(stored.pinnedRevisionId));
-          const run = unwrap(resumeRun(stored, revision)); return { run, revision, view: viewRun(run, revision) };
+          const procedure = procedureSchema.parse(await db.procedures.get(stored.procedureId));
+          const run = unwrap(resumeRun(stored, revision)); return { run, revision, view: viewRun(run, revision), title: procedure.title, preview: false, archived: procedure.archived === true };
+        });
+      },
+    },
+    preview: {
+      async get(id: string) {
+        return db.transaction('r', [db.procedures, db.previewSessions], async () => {
+          const session = previewSessionSchema.parse(await db.previewSessions.get(id));
+          const procedure = procedureSchema.parse(await db.procedures.get(session.procedureId));
+          const run = unwrap(resumeRun(session.run, session.snapshot, 'draft-preview'));
+          return { run, revision: session.snapshot, view: viewRun(run, session.snapshot, 'draft-preview'), title: procedure.title, preview: true, archived: procedure.archived === true };
         });
       },
     },

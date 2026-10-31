@@ -10,8 +10,9 @@ export const schemaV1 = {
   settings: 'id',
   uiPreferences: 'id',
 };
-export const DATABASE_VERSION = 4;
+export const DATABASE_VERSION = 5;
 export const schemaV4 = { ...schemaV1, builderStates: 'id, revisionId' };
+export const schemaV5 = { ...schemaV4, previewSessions: 'id, procedureId' };
 
 export async function addVersionTokens(transaction: Transaction): Promise<void> {
   await transaction.table('revisions').toCollection().modify((record: { editVersion?: number }) => {
@@ -30,4 +31,5 @@ export function configureMigrations(db: Dexie): void {
     await transaction.table('uiPreferences').toCollection().modify({ initialLocaleSet: true });
   });
   db.version(4).stores(schemaV4);
+  db.version(5).stores(schemaV5);
 }

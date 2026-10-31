@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07** e Check/Ready **F08**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09** e Guided Run/End **F10**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -63,7 +63,7 @@ storage.close();
 - F09: `startOrResumeReady`, `resumeRunSession` e `transitionRun` usano il reducer puro OR/AND e la Ready pinnata. Ogni evento riceve la `saveVersion` visualizzata; conflitti e quota non avanzano la run. `finishRun` elimina soltanto la sessione sul suo End authored. `saveRun` resta l'API interna di staging con controllo identità/versione e invarianti del percorso.
 - `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
 
-Il DB ha otto tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03; v4 aggiunge la cronologia Builder senza cambiare snapshot, run, asset o preferenze esistenti. Ready e Blob non sono sovrascrivibili; non viene eseguita garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. Parsing, UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
+Il DB ha nove tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03; v4 aggiunge la cronologia Builder; v5 aggiunge le sessioni Draft Preview indipendenti, senza cambiare snapshot, run, asset o preferenze esistenti. Ready e Blob non sono sovrascrivibili; non viene eseguita garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
 Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in produzione. Dettagli e limiti: [ADR-002](docs/adr/002-domain-storage-transactions.md), [report F01](docs/reports/F01.md).
 
@@ -116,7 +116,7 @@ Dettagli tecnici: [ADR-004](docs/adr/004-first-launch-library.md). Comandi, esit
 
 ## Details e nuova procedura F04
 
-`/#/procedure/:id` legge metadati e revisioni reali. Draft-only: Modifica grafo, Anteprima bozza, Mappa; Ready-only: Avvia, Mappa e copia di lavoro per Modifica; Ready+Draft: Avvia Ready, Mappa Ready e Continua modifica della Draft. Aprire l'editor di una Ready-only non crea una Draft prima del primo cambiamento del grafo. I destinatari ricevono e verificano l'ID della revisione. Avvia/Riprendi salva o riusa una sessione iniziale pinned; il motore di avanzamento e la schermata guidata completa restano F09/F10.
+`/#/procedure/:id` legge metadati e revisioni reali. Draft-only: Modifica grafo, Anteprima bozza, Mappa; Ready-only: Avvia, Mappa e copia di lavoro per Modifica; Ready+Draft: Avvia Ready, Mappa Ready e Continua modifica della Draft. Aprire l'editor di una Ready-only non crea una Draft prima del primo cambiamento del grafo. I destinatari ricevono e verificano l'ID della revisione. Avvia/Riprendi salva o riusa una sessione pinned e apre Guided Run F10, anche quando la sessione è già sul suo End.
 
 Il menu More offre modifica metadati con autosave, duplicazione come Draft indipendente, collegamento export alla futura 11A, archiviazione e cancellazione confermata. Le sessioni salvate impediscono la cancellazione; Ready e Blob restano protetti dalle scritture ordinarie. L'elenco Archiviate nel menu Library permette di riaprire e ripristinare le procedure. Esporta non produce ancora file: formato e download sono F13.
 
@@ -152,15 +152,21 @@ URL HTTPS/GIF sono facoltativi, con controllo URL/MIME/firma raster e placeholde
 
 ## Check e Ready F08
 
-`/#/build/:id/check` controlla l'ultima Draft durabile offline con P01–P12 e W01–W08: Problems sopra Warnings, ID issue stabili, Fix/Inspect mirati a Page 07/08, ricontrollo, contesto di ritorno e Preview Draft senza run. I collegamenti storici interrotti sono W08; quelli mai assegnati restano P02/P04. Blob mancanti/illeggibili sono W07, mentre media fuori schema sono P12. I remoti sono segnalati come dipendenti dalla rete e non verificati ora, senza fetch nel controllo.
+`/#/build/:id/check` controlla l'ultima Draft durabile offline con P01–P12 e W01–W08: Problems sopra Warnings, ID issue stabili, Fix/Inspect mirati a Page 07/08, ricontrollo, contesto di ritorno e Preview Draft indipendente dalle run Ready. I collegamenti storici interrotti sono W08; quelli mai assegnati restano P02/P04. Blob mancanti/illeggibili sono W07, mentre media fuori schema sono P12. I remoti sono segnalati come dipendenti dalla rete e non verificati ora, senza fetch nel controllo.
 
 Ready richiede zero Problems e conferma personale con checkbox. Il commit rilegge e rivalida la Draft esatta, rifiuta risultati stale e inserisce nuova Ready/puntatore nella stessa transazione IndexedDB. Vecchie Ready, Draft e sessioni pinnate restano indipendenti. Warning consentiti; W08 comunica che un percorso può interrompersi, anche nella conferma. Quota/abort mantengono i dati e offrono Retry senza falso successo. Il controllo riguarda solo la struttura, non la correttezza clinica. [ADR-009](docs/adr/009-offline-validation-and-ready.md) e [report F08](docs/reports/F08.md).
 
-## Moduli e limiti F00–F08
+## Runtime F09 e Guided Run/End F10
+
+`/#/run/:id` mostra un solo passo della Ready pinnata, con fase, posizione n/N o n/min–max, previous cue, note/alert e gallerie F07. Le scelte OR sono esplicite; ogni attività AND conserva cursore e completamento indipendenti. Cambia attività non completa il lavoro; Riapri una Done richiede conferma. Il motore distingue Finish activity, End globale e interruzione W08, senza Join visibili. Ogni transizione attende il commit prima di cambiare la scheda; quota e conflitti conservano il contesto e richiedono Retry o rilettura.
+
+Page 04 usa il testo completo dell'autore e i quattro tipi End, con Back, Map, Restart confermato e ritorno Library che elimina solo la sessione corrente. Exit è sempre confermato e Back di sistema segue il percorso reale. Draft Preview è esplicita e persistente in uno store separato, senza creare Ready; la sua snapshot non cambia quando si modifica la working Draft. I percorsi incompleti si bloccano con totale `?` e ritorno al Builder. Map mantiene il contesto pinned ma la mappa completa è F11. [ADR-010](docs/adr/010-pinned-runtime.md), [ADR-011](docs/adr/011-guided-run-end.md), [report F09](docs/reports/F09.md), [report F10](docs/reports/F10.md).
+
+## Moduli e limiti F00–F10
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
-src/domain/       model, remapping, builder e validation; runtime nella fase F09
+src/domain/       model, remapping, builder, validation e runtime puro
 src/storage/      DB, migrations, repositories, commands
 src/features/     first-launch, library, procedures, builder, step-editor,
                   check, run, map, settings, portability
@@ -172,8 +178,8 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/03/04/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. Il motore run arriva in F09. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).

@@ -1,11 +1,11 @@
 import { activityTokenId } from './model';
 import { progressOf } from './progress';
-import { currentVisit, destinationAt, groupChain, groupNode, nodeAt, tokenAt, visitAt } from './topology';
+import { currentVisit, destinationAt, groupChain, groupNode, nodeAt, tokenAt, visitAt, type RuntimeMode } from './topology';
 import { checkedRun } from './validate';
 
 /** Read-only projection for F10. Authored text is read directly from the pinned Ready. */
-export function viewRun(input: unknown, revision: unknown) {
-  const { run, graph } = checkedRun(input, revision); const visit = currentVisit(run); const node = nodeAt(graph, visit.nodeId);
+export function viewRun(input: unknown, revision: unknown, mode: RuntimeMode = 'ready') {
+  const { run, graph } = checkedRun(input, revision, mode); const visit = currentVisit(run); const node = nodeAt(graph, visit.nodeId);
   const previous = visit.fromVisitId === undefined ? undefined : visitAt(run, visit.fromVisitId);
   const groups = groupChain(run).map((id) => {
     const fork = groupNode(graph, run, id);
@@ -19,7 +19,7 @@ export function viewRun(input: unknown, revision: unknown) {
   });
   const finishActivity = (node.kind === 'instruction' || node.kind === 'alert') && node.next.kind === 'activity-complete';
   const authorizedStop = node.kind === 'decision' ? node.outcomes.filter((o) => o.destination.kind === 'node' && o.destination.terminateProcedure).map((o) => o.id) : [];
-  return { runId: run.id, saveVersion: run.saveVersion, status: run.status, node, groups, progress: progressOf(run, revision),
+  return { runId: run.id, saveVersion: run.saveVersion, status: run.status, node, groups, progress: progressOf(run, revision, mode),
     ...(previous ? { previous: { nodeId: previous.nodeId, kind: nodeAt(graph, previous.nodeId).kind, visitId: previous.id,
       node: nodeAt(graph, previous.nodeId),
       ...(previous.outcomeId !== undefined ? { outcomeId: previous.outcomeId } : {}) } } : {}),

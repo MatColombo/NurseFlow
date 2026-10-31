@@ -1,5 +1,5 @@
 import { executionRunSchema, ROOT_TOKEN, activityTokenId, requireRun, type ExecutionRun } from './model';
-import { children, compileRevision, currentVisit, destinationAt, exitEdge, groupAt, nodeAt, tokenAt, visitAt, type RuntimeGraph } from './topology';
+import { children, compileRevision, currentVisit, destinationAt, exitEdge, groupAt, nodeAt, tokenAt, visitAt, type RuntimeGraph, type RuntimeMode } from './topology';
 
 /** Validate persisted references, route provenance and gates before any command can mutate a run. */
 export function validateRun(input: unknown, graph: RuntimeGraph): ExecutionRun {
@@ -81,4 +81,4 @@ export function validateRun(input: unknown, graph: RuntimeGraph): ExecutionRun {
   }
   return run;
 }
-export function checkedRun(input: unknown, revision: unknown) { const graph = compileRevision(revision); return { run: validateRun(input, graph), graph }; }
+export function checkedRun(input: unknown, revision: unknown, mode: RuntimeMode = 'ready') { const graph = compileRevision(revision, mode); return { run: validateRun(input, graph), graph }; }

@@ -17,7 +17,7 @@ export async function exerciseStorage() {
   const commands = createCommands(db); const repositories = createRepositories(db);
   await db.open();
   try {
-    check(db.tables.length === 8, 'Tables not created');
+    check(db.tables.length === 9, 'Tables not created');
     check((await repositories.settings.get()).uiScalePt === 13, 'Wrong settings defaults');
     const { procedure, draft } = await commands.createDraft({ metadata: { title: 'Esempio browser non clinico' }, graph: convergenceGraph() });
     const ready = await commands.markReadyUnitOfWork({ procedureId: procedure.id, draftId: draft.id,
@@ -91,7 +91,7 @@ export async function exerciseMigration() {
   const db = new NurseFlowDatabase(name);
   try {
     await db.open();
-    check(db.verno === 4 && (await db.revisions.get(revision.id))?.editVersion === 1, 'Migration failed');
+    check(db.verno === 5 && (await db.revisions.get(revision.id))?.editVersion === 1, 'Migration failed');
     check(JSON.stringify((await db.revisions.get(revision.id))?.graph) === JSON.stringify(revision.graph), 'Migration changed graph');
     return true;
   } finally { await db.delete(); }

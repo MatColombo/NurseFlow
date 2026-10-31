@@ -47,7 +47,9 @@ test('Draft-only non offre Start: Preview e Mappa usano la Draft e non salvano r
   await page.getByRole('button', { name: 'Anteprima bozza', exact: true }).click();
   await expect(page.getByText('ANTEPRIMA BOZZA', { exact: true })).toBeVisible();
   await expect(page.locator('[data-revision-id="fixture-1-draft"]')).toBeVisible();
-  await page.getByRole('link', { name: 'Indietro', exact: true }).click();
+  await page.getByRole('button', { name: 'Esci', exact: true }).click();
+  await page.getByRole('button', { name: 'Esci dall’esecuzione', exact: true }).click();
+  await details(page, 'fixture-1');
   await page.getByRole('button', { name: 'Vedi mappa', exact: true }).click();
   await expect(page.locator('[data-revision-id="fixture-1-draft"]')).toBeVisible();
   const snapshot = await records(page); expect(snapshot.runSessions).toEqual([]);
@@ -58,7 +60,7 @@ test('Resume riapre anche una sessione su End senza sostituirla con una nuova ru
   await setup(page); await page.evaluate(() => window.NurseFlowF03.prepareProcedureEdgeCase('terminal'));
   const before = await records(page); const run = before.runSessions[0]!;
   await details(page, 'fixture-3'); await page.getByRole('button', { name: 'Riprendi', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/#/run/${run.id}$`));
+  await expect(page).toHaveURL(new RegExp(`/#/run/${run.id}/end$`));
   expect((await records(page)).runSessions).toEqual(before.runSessions);
 });
 

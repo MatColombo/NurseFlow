@@ -1,4 +1,5 @@
 const paths = {
+  fork: 'M12 21v-8M5 3v5l7 5 7-5V3',
   check: 'm5 12 4 4L19 6', close: 'm6 6 12 12M6 18 18 6',
   search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
   warning: 'm12 3 10 18H2L12 3Zm0 6v5m0 3v1', problem: 'M12 8v5m0 3v1M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',

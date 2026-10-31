@@ -1,15 +1,18 @@
-import { readyRevisionSchema } from '../model/records';
-import type { Destination, Node, ReadyRevision } from '../model';
+import { revisionSchema } from '../model/records';
+import type { Destination, Node, Revision } from '../model';
 import { validateGraph } from '../validation/validator';
 import { requireRun, type ExecutionRun, type RunEdge, type RunVisit } from './model';
 
-export type RuntimeGraph = { revision: ReadyRevision; nodes: ReadonlyMap<string, Node>; start: Extract<Node, { kind: 'start' }> };
-export function compileRevision(input: unknown): RuntimeGraph {
-  const parsed = readyRevisionSchema.safeParse(input); requireRun(parsed.success, 'invalid-revision');
+export type RuntimeMode = 'ready' | 'draft-preview';
+export type RuntimeGraph = { revision: Revision; nodes: ReadonlyMap<string, Node>; start: Extract<Node, { kind: 'start' }> };
+export function compileRevision(input: unknown, mode: RuntimeMode = 'ready'): RuntimeGraph {
+  const parsed = revisionSchema.safeParse(input); requireRun(parsed.success, 'invalid-revision');
   const revision = parsed.data;
+  requireRun(revision.state === (mode === 'ready' ? 'ready' : 'working-draft'), 'invalid-revision');
   // Content validation belongs to Check. Loading an older Ready never invents or translates its text.
   const validation = validateGraph(revision.graph);
-  requireRun(validation.problems.every((issue) => issue.code === 'P10'), 'invalid-revision');
+  const allowed = mode === 'ready' ? ['P10'] : ['P02', 'P03', 'P04', 'P05', 'P06', 'P09', 'P10'];
+  requireRun(validation.problems.every((issue) => allowed.includes(issue.code)), 'invalid-revision');
   const nodes = new Map(revision.graph.nodes.map((node) => [node.id, node]));
   const start = revision.graph.nodes.find((node) => node.kind === 'start'); requireRun(start?.kind === 'start', 'invalid-revision');
   return { revision, nodes, start };

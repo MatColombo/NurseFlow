@@ -1,7 +1,7 @@
 import { isoDateSchema, idSchema } from '../model/common';
 import { ROOT_TOKEN, activityTokenId, requireRun, result, runEventSchema, type ExecutionRun, type RunEvent } from './model';
 import { activate, focus, follow, invalidateParents, journal, release, summarize, truncate } from './state';
-import { children, compileRevision, currentVisit, destinationAt, exitEdge, groupAt, groupChain, nodeAt, tokenAt, visitAt, type RuntimeGraph } from './topology';
+import { children, compileRevision, currentVisit, destinationAt, exitEdge, groupAt, groupChain, nodeAt, tokenAt, visitAt, type RuntimeGraph, type RuntimeMode } from './topology';
 import { checkedRun, validateRun } from './validate';
 
 function begin(graph: RuntimeGraph, id: string, now: string): ExecutionRun {
@@ -13,8 +13,8 @@ function begin(graph: RuntimeGraph, id: string, now: string): ExecutionRun {
   journal(run, 'start', ROOT_TOKEN); follow(run, graph, tokenAt(run, ROOT_TOKEN), { nodeId: graph.start.id, slot: 'next' });
   summarize(run, graph); return validateRun(run, graph);
 }
-export function createRun(revision: unknown, id: string, now: string) { return result(() => begin(compileRevision(revision), id, now), 'invalid-revision'); }
-export function resumeRun(input: unknown, revision: unknown) { return result(() => checkedRun(input, revision).run); }
+export function createRun(revision: unknown, id: string, now: string, mode: RuntimeMode = 'ready') { return result(() => begin(compileRevision(revision, mode), id, now), 'invalid-revision'); }
+export function resumeRun(input: unknown, revision: unknown, mode: RuntimeMode = 'ready') { return result(() => checkedRun(input, revision, mode).run); }
 
 function apply(run: ExecutionRun, graph: RuntimeGraph, event: RunEvent): boolean {
   const token = tokenAt(run, run.focusTokenId); const visit = currentVisit(run); const node = nodeAt(graph, visit.nodeId);
@@ -68,9 +68,9 @@ function apply(run: ExecutionRun, graph: RuntimeGraph, event: RunEvent): boolean
 }
 
 /** No clock, randomness, database or UI. A rejected event leaves the input byte-for-byte unchanged. */
-export function reduceRun(input: unknown, revision: unknown, inputEvent: unknown, now: string) {
+export function reduceRun(input: unknown, revision: unknown, inputEvent: unknown, now: string, mode: RuntimeMode = 'ready') {
   return result<ExecutionRun | null>(() => {
-    const { run, graph } = checkedRun(input, revision); const parsed = runEventSchema.safeParse(inputEvent); requireRun(parsed.success); const event = parsed.data;
+    const { run, graph } = checkedRun(input, revision, mode); const parsed = runEventSchema.safeParse(inputEvent); requireRun(parsed.success); const event = parsed.data;
     isoDateSchema.parse(now);
     if (event.type === 'exit') { requireRun(event.confirmed, 'confirmation-required'); return null; }
     if (event.type === 'restart') {

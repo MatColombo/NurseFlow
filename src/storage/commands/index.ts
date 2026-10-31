@@ -9,10 +9,11 @@ import { libraryCommands } from './library';
 import { procedureCommands } from './procedures';
 import { builderCommands } from './builder';
 import { checkCommands } from './check';
+import { previewCommands } from './preview';
 export type { CheckedDraft } from './check';
 
 export type { ReadyValidator, ReadyValidation, CommandEnvironment } from './context';
 export function createCommands(db: NurseFlowDatabase, environment: CommandEnvironment = defaultEnvironment) {
-  return { ...draftCommands(db, environment), ...readyCommands(db, environment), ...runCommands(db, environment),
+  return { ...draftCommands(db, environment), ...readyCommands(db, environment), ...runCommands(db, environment), ...previewCommands(db, environment),
     ...importCommands(db, environment), ...appearanceCommands(db), ...libraryCommands(db, environment), ...procedureCommands(db, environment), ...builderCommands(db, environment), ...checkCommands(db, environment) };
 }

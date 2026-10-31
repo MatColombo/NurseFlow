@@ -1,8 +1,9 @@
-import { useId, type ButtonHTMLAttributes } from 'react';
+import { useId, type ButtonHTMLAttributes, type Ref } from 'react';
 import { Icon, type IconName } from './Icon';
 
 type Props = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> & {
   variant?: 'primary' | 'secondary' | 'danger'; action?: boolean; icon?: IconName;
+  ref?: Ref<HTMLButtonElement>;
 } & ({ disabled?: false; disabledReason?: never } | { disabled: boolean; disabledReason: string });
 
 export function Button({ variant = 'secondary', action = false, icon, disabledReason, children,

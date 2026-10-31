@@ -36,7 +36,7 @@ export const nodeSchema = z.discriminatedUnion('kind', [
     activities: z.array(activitySchema), afterAll: destinationSchema,
   }),
   z.strictObject({
-    id: idSchema, kind: z.literal('end'), endKind: endKindSchema, heading: z.string(), message: z.string(),
+    id: idSchema, kind: z.literal('end'), endKind: endKindSchema.default('neutral'), heading: z.string(), message: z.string(),
     note: stepNoteSchema.optional(), phaseId: idSchema.nullable().optional(),
   }),
 ]);

@@ -1,6 +1,6 @@
 import type { Destination } from '../model/graph';
 import { ROOT_TOKEN, activityTokenId, type ExecutionRun, type RunToken } from './model';
-import { actionable, currentVisit, nodeAt, tokenAt, visitAt, type RuntimeGraph } from './topology';
+import { actionable, currentVisit, nodeAt, tokenAt, visitAt, type RuntimeGraph, type RuntimeMode } from './topology';
 import { checkedRun } from './validate';
 
 type Range = { min: number; max: number };
@@ -75,6 +75,9 @@ function calculator(run: ExecutionRun, graph: RuntimeGraph) {
   while (focused.groupVisitId !== undefined) { focused = tokenAt(run, visitAt(run, focused.groupVisitId).tokenId); focusedAncestors.add(focused.id); }
   const dynamic = (token: RunToken): Cost => {
     if (token.completed && !focusedAncestors.has(token.id)) return plus(zero(), actual(token));
+    // Back does not erase a recorded route. While another activity is focused, its saved
+    // future still contributes to the global ordinal; alternatives reopen when it is focused again.
+    if (!focusedAncestors.has(token.id) && token.cursor < token.path.length - 1) token = { ...token, cursor: token.path.length - 1 };
     if (token.path.length === 0) {
       const fork = nodeAt(graph, visitAt(run, token.groupVisitId!).nodeId);
       return fork.kind === 'multitask' ? destination(fork.activities.find((a) => a.id === token.activityId)!.first, true) : { unknown: true, committed: 0 };
@@ -92,8 +95,8 @@ function calculator(run: ExecutionRun, graph: RuntimeGraph) {
   return dynamic(tokenAt(run, ROOT_TOKEN));
 }
 
-export function progressOf(input: unknown, revision: unknown): RunProgress {
-  const { run, graph } = checkedRun(input, revision);
+export function progressOf(input: unknown, revision: unknown, mode: RuntimeMode = 'ready'): RunProgress {
+  const { run, graph } = checkedRun(input, revision, mode);
   const visible = run.visits.filter((v) => actionable(nodeAt(graph, v.nodeId))); const current = currentVisit(run);
   const n = actionable(nodeAt(graph, current.nodeId)) ? visible.findIndex((v) => v.id === current.id) + 1 : undefined;
   if (run.status === 'ended') return { actualVisibleCount: visible.length, total: { kind: 'exact', value: visible.length } };

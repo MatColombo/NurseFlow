@@ -25,7 +25,7 @@ describe('Shell F02 con HashRouter', () => {
     expect(screen.getByRole('searchbox', { name: 'Cerca procedure' })).toBeInTheDocument();
   });
 
-  it.each(routeDefinitions.filter(({ page }) => !['00', '02', '06', '07', '08', '09'].includes(page)))('risolve il deep link $path', async ({ example, title, page }) => {
+  it.each(routeDefinitions.filter(({ page }) => !['00', '02', '03', '04', '06', '07', '08', '09'].includes(page)))('risolve il deep link $path', async ({ example, title, page }) => {
     window.history.replaceState(null, '', `/repository/#${example}`);
     render(<App appearanceService={appearanceService} />);
 

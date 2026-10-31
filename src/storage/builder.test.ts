@@ -142,7 +142,7 @@ it('migrazione reale v3→v4 aggiunge solo lo store editor e preserva Ready, Dra
   const before = await legacy.table('revisions').toArray(); legacy.close();
   const migrated = new NurseFlowDatabase(name);
   try {
-    await migrated.open(); expect(migrated.verno).toBe(4); expect(await migrated.revisions.toArray()).toEqual(before);
+    await migrated.open(); expect(migrated.verno).toBe(5); expect(await migrated.revisions.toArray()).toEqual(before);
     expect(await migrated.uiPreferences.get('main')).toEqual(view); expect(await migrated.settings.get('main')).toEqual({ id: 'main', locale: 'en', uiScalePt: 30 });
     expect(await migrated.runSessions.get(run.id)).toEqual(run); expect((await migrated.procedures.get('procedure'))?.workingDraftId).toBe('legacy-draft');
     expect(await migrated.builderStates.count()).toBe(0); expect((await migrated.procedures.get('procedure'))?.createdAt).toBe(fixtureDate);
