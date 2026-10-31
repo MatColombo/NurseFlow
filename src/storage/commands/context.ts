@@ -14,7 +14,7 @@ const validationSchema = z.strictObject({
   validatorSchemaVersion: positiveInteger, problems: z.array(z.string()), warnings: z.array(warningSchema),
 });
 export type ReadyValidation = z.infer<typeof validationSchema>;
-/** Must be pure and synchronous. The concrete P/W validator is implemented in F08. */
+/** Explicit pure/synchronous adapter for archive staging. Page09 uses checkDraft/markCheckedReady. */
 export type ReadyValidator = (revision: Revision, availableAssetIds: ReadonlySet<string>) => ReadyValidation;
 
 export async function validateForReady(db: NurseFlowDatabase, revision: Revision, validate?: ReadyValidator) {

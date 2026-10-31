@@ -1,0 +1,8 @@
+.nf-check-header > div { flex: 1 1 12em; min-width: 0; }
+.nf-check-counts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--nf-space-2); }
+.nf-check-counts > strong { padding: var(--nf-space-2); border: 1px solid var(--nf-border); border-radius: var(--nf-radius); overflow-wrap: anywhere; }
+.nf-check h1, .nf-check h2, .nf-check p { overflow-wrap: anywhere; }
+.nf-check-scope { border-inline-start: .3em solid var(--nf-border); padding-inline-start: var(--nf-space-2); }
+.nf-check-review { min-height: max(48px, 3em); }
+.nf-check-review input { flex: 0 0 auto; inline-size: max(24px, var(--nf-icon)); block-size: max(24px, var(--nf-icon)); accent-color: var(--nf-primary); }
+.nf-check-broken { font-weight: 700; border: 2px solid currentColor; padding: var(--nf-space-2); }

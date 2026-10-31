@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06** e Step Editor/media **F07**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07** e Check/Ready **F08**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -59,7 +59,7 @@ storage.close();
 ```
 
 - `createDraft` aggiunge procedura, Draft e asset preparati atomicamente. Con `{ procedureId }` riapre la Draft esistente o ne crea una indipendente dalla Ready; `updateDraft` salva grafo/asset con controllo `expectedEditVersion`.
-- `markReadyUnitOfWork` richiede conferma personale, token aggiornato e un validatore sincrono fornito dal chiamante. Aggiunge sempre una nuova snapshot Ready e aggiorna il puntatore nella stessa transazione; mantiene la Draft indipendente. Non esiste un validatore permissivo predefinito: le regole P/W arrivano in F08.
+- Page 09 usa `checkDraft`/`markCheckedReady`: validatore P/W concreto, lettura durabile, token anti-stale, nuova snapshot e puntatore Ready nella stessa transazione. `markReadyUnitOfWork` resta l'API interna con validatore sincrono esplicito del nucleo F01; nessun validatore permissivo predefinito.
 - `saveRun` controlla appartenenza e riferimenti alla Ready, vieta di cambiare la revisione pinnata e usa `saveVersion`/`expectedSaveVersion` contro salvataggi obsoleti. Per la prima scrittura passare `null` come versione attesa. Il motore e i checkpoint Back sono F09.
 - `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
 
@@ -134,7 +134,7 @@ La creazione di un passo di contenuto apre Page 08 dopo il salvataggio; Start/Mu
 
 ## Builder Graph F06
 
-Il selettore Outline/Graph usa un unico DAG e ricorda l'ultima modalità sul dispositivo. Graph è caricato su richiesta: pan sullo sfondo, pinch, zoom con pulsanti, Fit, centro della selezione e ricerca per focalizzare. Camera, selezione, focus e scroll Outline persistono senza modificare Ready o cronologia. Undo/Redo, Cut/Copy/Paste e sheet contestuali sono condivisi fra le due viste.
+Il selettore Outline/Graph usa un unico DAG e ricorda l'ultima modalità sul dispositivo. Graph offre pan sullo sfondo, pinch, zoom con pulsanti, Fit, centro della selezione e ricerca per focalizzare. Camera, selezione, focus e scroll Outline persistono senza modificare Ready o cronologia. Undo/Redo, Cut/Copy/Paste e sheet contestuali sono condivisi fra le due viste. Da F08 il codice di Graph/Step Editor/Check viene caricato insieme alla shell per permettere Fix/Inspect senza rete dopo il caricamento dell'app.
 
 Cambiare un collegamento avvia un picker: la ricerca focalizza il passo; il tap propone soltanto l'edge scelto e apre la preview Prima/Dopo. Apply salva atomicamente. Si può selezionare il target anche in Outline; nessun collegamento richiede di trascinare linee. Cicli/cross-arm sono bloccati. Le convergenze mostrano un solo nodo con frecce distinte; cancellare il nodo produce W08, senza frecce sane o falsi `+`.
 
@@ -150,14 +150,20 @@ Le gallerie prima/dopo nota hanno ordine, layout e spazio immagine indipendenti,
 
 URL HTTPS/GIF sono facoltativi, con controllo URL/MIME/firma raster e placeholder quando indisponibili. I collegamenti possono contattare il sito esterno e non sono garantiti offline. Un asset locale mancante mostra W07 e non blocca il salvataggio della Draft. Gli object URL vengono revocati; testi e didascalie non vengono interpretati come HTML. Il round-trip media di F07 verifica metadati/byte attraverso il repository reale di import additivo; file/archivi e interfacce 11A/11B restano F13/F14. [ADR-008](docs/adr/008-step-editor-and-local-media.md) e [report F07](docs/reports/F07.md).
 
-## Moduli e limiti F00–F07
+## Check e Ready F08
+
+`/#/build/:id/check` controlla l'ultima Draft durabile offline con P01–P12 e W01–W08: Problems sopra Warnings, ID issue stabili, Fix/Inspect mirati a Page 07/08, ricontrollo, contesto di ritorno e Preview Draft senza run. I collegamenti storici interrotti sono W08; quelli mai assegnati restano P02/P04. Blob mancanti/illeggibili sono W07, mentre media fuori schema sono P12. I remoti sono segnalati come dipendenti dalla rete e non verificati ora, senza fetch nel controllo.
+
+Ready richiede zero Problems e conferma personale con checkbox. Il commit rilegge e rivalida la Draft esatta, rifiuta risultati stale e inserisce nuova Ready/puntatore nella stessa transazione IndexedDB. Vecchie Ready, Draft e sessioni pinnate restano indipendenti. Warning consentiti; W08 comunica che un percorso può interrompersi, anche nella conferma. Quota/abort mantengono i dati e offrono Retry senza falso successo. Il controllo riguarda solo la struttura, non la correttezza clinica. [ADR-009](docs/adr/009-offline-validation-and-ready.md) e [report F08](docs/reports/F08.md).
+
+## Moduli e limiti F00–F08
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
-src/domain/       model, remapping e builder; validation e runtime nelle fasi successive
+src/domain/       model, remapping, builder e validation; runtime nella fase F09
 src/storage/      DB, migrations, repositories, commands
 src/features/     first-launch, library, procedures, builder, step-editor,
-                  validation, run, map, settings, portability
+                  check, run, map, settings, portability
 src/shared/       components, design-tokens, styles, i18n, icons, utils
 src/test/         setup, fixtures, helpers
 e2e/              journeys, fixtures
@@ -166,8 +172,8 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/06, le viste Outline/Graph della 07 e l'editor contenuti/media della 08 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. Il motore run arriva in F09. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).

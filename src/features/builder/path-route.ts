@@ -2,7 +2,7 @@ import type { Graph } from '@domain/model';
 import type { EdgeRef } from '@domain/builder/model';
 import { destinationAt, nodeAt } from '@domain/builder/structure';
 import { requireEdit } from '@domain/builder/model';
-export type PathReturn = { edge: EdgeRef; stepId: string; outcomeId?: string; top: number };
+export type PathReturn = { edge: EdgeRef; stepId: string; outcomeId?: string; top: number; checkReturn?: string };
 export function readPathReturn(params: URLSearchParams, graph: Graph): PathReturn | undefined {
   if (!params.has('pathNode')) return;
   const slot = params.get('pathSlot'); requireEdit(slot === 'next' || slot === 'outcome');
@@ -11,10 +11,11 @@ export function readPathReturn(params: URLSearchParams, graph: Graph): PathRetur
   requireEdit(node.id === edge.nodeId && node.kind !== 'start' && node.kind !== 'multitask');
   const outcomeId = params.get('returnOutcome') ?? undefined; requireEdit(!outcomeId || edge.itemId === outcomeId);
   const top = Number(params.get('editorTop') ?? 0); requireEdit(Number.isFinite(top) && top >= 0 && top <= 10_000_000);
-  return { edge, stepId, ...(outcomeId ? { outcomeId } : {}), top };
+  return { edge, stepId, ...(outcomeId ? { outcomeId } : {}), top, ...(params.has('checkReturn') ? { checkReturn: params.get('checkReturn')! } : {}) };
 }
 export function editorPath(procedureId: string, revisionId: string, context: PathReturn) {
   const query = new URLSearchParams({ revision: revisionId, editorTop: String(context.top) });
   if (context.outcomeId) query.set('outcome', context.outcomeId);
+  if (context.checkReturn) query.set('checkReturn', context.checkReturn);
   return '/build/' + encodeURIComponent(procedureId) + '/step/' + encodeURIComponent(context.stepId) + '?' + query.toString();
 }

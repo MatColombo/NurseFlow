@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AppearanceSettings } from '@features/settings/AppearanceSettings';
@@ -12,7 +11,8 @@ import { NewProcedure } from '@features/procedures/NewProcedure';
 import { RevisionDestination } from '@features/procedures/RevisionDestination';
 import { BuilderPage } from '@features/builder/BuilderPage';
 import { MediaSettings } from '@features/settings/MediaSettings';
-const StepEditorPage = lazy(() => import('@features/step-editor/StepEditorPage'));
+import StepEditorPage from '@features/step-editor/StepEditorPage';
+import CheckPage from '@features/check/CheckPage';
 
 type Page = typeof routeDefinitions[number]['page'];
 export function RouteContent({ page }: { page: Page }) {
@@ -23,7 +23,8 @@ export function RouteContent({ page }: { page: Page }) {
   if (page === '02') return <ProcedureDetails key={parameters.id} />;
   if (page === '06') return <NewProcedure />;
   if (page === '07') return <BuilderPage key={parameters.id} />;
-  if (page === '08') return <Suspense fallback={<p role="status">{t('common.loading')}</p>}><StepEditorPage key={`${parameters.id}-${parameters.nodeId}`} /></Suspense>;
+  if (page === '08') return <StepEditorPage key={`${parameters.id}-${parameters.nodeId}`} />;
+  if (page === '09') return <CheckPage key={parameters.id} />;
   const content = <section className="nf-stack" aria-labelledby="page-title">
     <h2 id="page-title" className="nf-title">{t(`pages.${page}`)}</h2>
     <Card><p>{t('shell.preview')}</p><p className="nf-note">{t('shell.pending', { page })}</p></Card>

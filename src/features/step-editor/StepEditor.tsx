@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { MediaAsset, Settings, StepMedia } from '@domain/model';
@@ -16,6 +16,7 @@ import { ContentFields } from './ContentFields';
 import { OutcomeSection } from './OutcomeSection';
 import { MediaEditor } from './media/MediaEditor';
 import { SourceDialog } from './media/SourceDialog';
+import { carryCheck, checkPath, readCheckReturn } from '@features/check/navigation';
 
 type Modal = 'preview' | 'more' | 'type' | 'phase' | 'arrange' | 'outcome' | null;
 export function StepEditor({ initial, settings, nodeId, markRevision }: { initial: BuilderSnapshot; settings: Settings; nodeId: string; markRevision(id: string): void }) {
@@ -25,13 +26,27 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
   const [source, setSource] = useState<{ mode: 'photo' | 'url' | 'recompress'; slot: StepMedia['slot']; existing?: StepMedia } | null>(null);
   const [issue, setIssue] = useState<string | null>(null);
   const [restoreTop] = useState(() => Number(params.get('editorTop') ?? 0));
+  const focusField = useRef(params.get('focusField')); const focusItem = useRef(params.get('focusItem'));
   const draft = useStepDraft(initial, nodeId, settings, (revisionId) => { markRevision(revisionId); const query = new URLSearchParams(params); query.set('revision', revisionId); void navigate('?' + query.toString(), { replace: true }); });
   const node = editableStep(draft.graph.nodes.find((node) => node.id === nodeId) ?? draft.snapshot.revision.graph.nodes.find((node) => node.id === nodeId) ?? nodeAt(initial.revision.graph, nodeId));
   const outcome = node.kind === 'decision' ? node.outcomes.find((item) => item.id === outcomeId) : undefined;
   const busy = draft.writing; const failed = draft.failed; const error = draft.error ?? issue;
   const base = '/build/' + encodeURIComponent(initial.procedure.id);
   useLayoutEffect(() => { if (Number.isFinite(restoreTop) && restoreTop >= 0) window.scrollTo({ top: restoreTop }); }, [restoreTop]);
-  async function leave() { try { if (await draft.saveSelection()) void navigate(base + '?revision=' + encodeURIComponent(draft.current().revision.id), { replace: true, state: { fromStep: true } }); } catch { setIssue(t('editor.saveError')); } }
+  useLayoutEffect(() => {
+    if (!focusField.current) return;
+    const field = focusField.current; const itemId = focusItem.current;
+    const target = [...document.querySelectorAll<HTMLElement>('[data-editor-field]')].find((element) => element.dataset.editorField === field);
+    const item = itemId ? [...document.querySelectorAll<HTMLElement>('[data-media-row]')].find((element) => element.dataset.mediaRow === itemId) : undefined;
+    const element = item ?? target; element?.closest('details')?.setAttribute('open', '');
+    const control = element?.matches('input,textarea,select,button') ? element : element?.querySelector<HTMLElement>('input,textarea,select,button');
+    control?.focus(); element?.scrollIntoView({ block: 'center' });
+    if (field === 'outcomes' && itemId) {
+      const frame = requestAnimationFrame(() => document.querySelector<HTMLElement>('dialog[open] [data-editor-field="answer"]')?.focus());
+      return () => cancelAnimationFrame(frame);
+    }
+  }, []);
+  async function leave(toCheck = false) { try { if (await draft.saveSelection()) { const query = new URLSearchParams({ revision: draft.current().revision.id }); carryCheck(params, query); void navigate(toCheck ? checkPath(initial.procedure.id, readCheckReturn(params)) : base + '?' + query.toString(), { replace: true, state: { fromStep: true } }); } } catch { setIssue(t('editor.saveError')); } }
   function closeSource() { if (busy) return; if (failed) draft.discardProposal(); setSource(null); }
   useUnsavedNavigation(draft.dirty || busy || failed || Boolean(modal || source || plan), { onBack: () => {
     if (plan) { if (!busy) { if (failed) draft.discardProposal(); setPlan(null); } } else if (source) closeSource(); else if (modal) setModal(null); else void leave();
@@ -41,6 +56,7 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
     try {
       if (!await draft.saveSelection()) return;
       const query = new URLSearchParams({ revision: draft.current().revision.id, pathNode: nodeId, pathSlot: itemId ? 'outcome' : 'next', returnStep: nodeId, editorTop: String(window.scrollY) });
+      carryCheck(params, query);
       if (itemId) { query.set('pathItem', itemId); query.set('returnOutcome', itemId); }
       void navigate(base + '?' + query.toString());
     } catch { setIssue(t('editor.saveError')); }
@@ -77,6 +93,7 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
     <header className="nf-row nf-editor-header"><div><h1>{t('editor.title')}</h1><p className="nf-meta">{titleOf(node, t)}</p></div>
       <Button onClick={() => setModal('preview')}>{t('editor.preview')}</Button><Button variant="primary" onClick={() => { void leave(); }}>{t('editor.done')}</Button>
       <Button aria-label={t('editor.more')} onClick={() => { void open('more'); }}>···</Button></header>
+    {readCheckReturn(params) && <Button onClick={() => { void leave(true); }}>{t('check.back')}</Button>}
     <p role="status" className="nf-meta">{t(error ? 'editor.saveError' : draft.dirty || busy ? 'editor.saving' : 'editor.saved')}</p>
     {!modal && !source && !plan && errorPanel}
     <ContentFields node={node} graph={draft.graph} change={draft.change} newPhase={() => { void open('phase'); }} />
@@ -90,7 +107,7 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
     {'media' in node && <MediaEditor node={node} settings={settings} busy={busy} change={draft.change} edit={(value) => { void edit(value); }} source={(...args) => { void mediaSource(...args); }} />}
     <Sheet open={modal === 'outcome' && Boolean(outcome) && !plan} title={t('editor.editOutcome', { label: outcome?.label || t('builder.unnamedOutcome') })} onClose={() => setModal(null)}>
       {errorPanel}{outcome && <>
-        <label className="nf-stack">{t('editor.answer')}<input value={outcome.label} onChange={(event) => draft.change({ type: 'outcome', id: outcome.id, label: event.target.value })} /></label>
+        <label className="nf-stack">{t('editor.answer')}<input data-editor-field="answer" value={outcome.label} onChange={(event) => draft.change({ type: 'outcome', id: outcome.id, label: event.target.value })} /></label>
         <label className="nf-stack">{t('editor.outcomeNote')}<textarea rows={4} value={outcome.note?.text ?? ''} onChange={(event) => draft.change({ type: 'outcome', id: outcome.id, label: outcome.label, note: { text: event.target.value, visibility: outcome.note?.visibility ?? 'expandable' } })} /></label>
         <p>{t('editor.path')}: {destinationLabel(draft.graph, outcome.destination, t)}</p><Button aria-label={t('editor.changePath') + ': ' + outcome.label} onClick={() => { void changePath(outcome.id); }}>{t('editor.changePath')}</Button>
       </>}

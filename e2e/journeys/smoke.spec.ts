@@ -35,10 +35,10 @@ for (const path of deepLinks) {
   test(`apre e ricarica il deep link hash ${path}`, async ({ page, baseURL }) => {
     if (path !== '/setup') await completeSetup(page);
     await page.goto(`./#${path}`);
-    const implemented = ['/setup', '/library', '/new', '/procedure/example', '/build/example', '/build/example/step/node-example'];
+    const implemented = ['/setup', '/library', '/new', '/procedure/example', '/build/example', '/build/example/step/node-example', '/build/example/check'];
     if (!implemented.includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await page.reload();
-    const heading = path === '/library' ? 'Procedure' : path === '/new' ? 'Nuova procedura' : path === '/procedure/example' ? 'Dettagli procedura' : path === '/build/example' ? 'Builder' : path.includes('/step/') ? 'Editor passaggio' : 'NurseFlow';
+    const heading = path === '/library' ? 'Procedure' : path === '/new' ? 'Nuova procedura' : path === '/procedure/example' ? 'Dettagli procedura' : path === '/build/example' ? 'Builder' : path.includes('/step/') ? 'Editor passaggio' : path.endsWith('/check') ? 'Controlla procedura' : 'NurseFlow';
     await expect(page.getByRole('heading', { name: heading, level: 1 })).toBeVisible();
     if (!implemented.includes(path)) await expect(page.getByText('Anteprima tecnica F02', { exact: true })).toBeVisible();
     await expect(page).toHaveURL(`${baseURL}#${path}`);

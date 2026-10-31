@@ -15,7 +15,7 @@ export function MediaEditor({ node, settings, busy, change, edit, source }: {
   source(mode: 'photo' | 'url' | 'recompress', slot: StepMedia['slot'], existing?: StepMedia): void;
 }) {
   const { t } = useTranslation(); const limit = effectiveMediaLimit(settings); const blocked = node.media.length >= Math.min(32, limit);
-  return <details className="nf-card nf-stack nf-editor-section" open={node.media.length > 0}><summary>{t('media.title', { count: node.media.length })}</summary>
+  return <details data-editor-field="media" className="nf-card nf-stack nf-editor-section" open={node.media.length > 0}><summary>{t('media.title', { count: node.media.length })}</summary>
     {(['before-note', 'after-note'] as const).map((slot) => {
       const items = node.media.filter((item) => item.slot === slot).sort((a, b) => a.order - b.order);
       const style = node.galleries[slot === 'before-note' ? 'beforeNote' : 'afterNote'];

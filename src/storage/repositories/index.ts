@@ -1,11 +1,12 @@
 import { z } from 'zod';
-import type { Table } from 'dexie';
+import { liveQuery, type Table } from 'dexie';
 import { groupSchema, mediaAssetSchema, procedureSchema, revisionSchema, runSessionSchema,
   settingsSchema, uiPreferencesSchema } from '@domain/model';
 import type { NurseFlowDatabase } from '../db';
 import { assertRevisionOwner } from '@domain/procedures';
 import { assertRunReferences, invariant } from '@domain/model/integrity';
 import { builderRepository } from './builder';
+import { canonical } from '@domain/validation/validator';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -20,6 +21,17 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    check: {
+      subscribe(id: string, changed: () => void, failed: () => void) {
+        let previous: string | undefined;
+        return liveQuery(() => db.transaction('r', [db.procedures, db.revisions, db.mediaAssets], async () => {
+          const procedure = await db.procedures.get(id);
+          const revision = procedure?.workingDraftId ? await db.revisions.get(procedure.workingDraftId) : undefined;
+          const assets = (await db.mediaAssets.toArray()).map(({ blob, ...asset }) => ({ ...asset, size: blob?.size, type: blob?.type }));
+          return canonical({ revision, ready: procedure?.readyRevisionId, assets });
+        })).subscribe({ next(value) { if (previous !== undefined && previous !== value) changed(); previous = value; }, error: failed });
+      },
+    },
     builder: builderRepository(db),
     procedureDetails: {
       async get(id: string) {

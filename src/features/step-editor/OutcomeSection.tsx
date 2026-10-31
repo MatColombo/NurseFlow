@@ -8,7 +8,7 @@ export function OutcomeSection({ node, graph, busy, open, arrange, add }: {
   node: Extract<Node, { kind: 'decision' }>; graph: Graph; busy: boolean; open(id: string): void; arrange(): void; add(): void;
 }) {
   const { t } = useTranslation(); const [query, setQuery] = useState('');
-  return <details className="nf-card nf-stack nf-editor-section" open><summary>{t('editor.outcomes')} ({node.outcomes.length})</summary>
+  return <details data-editor-field="outcomes" className="nf-card nf-stack nf-editor-section" open><summary>{t('editor.outcomes')} ({node.outcomes.length})</summary>
     <div className="nf-row"><Button disabled={busy} disabledReason={t('common.loading')} onClick={arrange}>{t('editor.arrange')}</Button>
       <Button disabled={busy || node.outcomes.length >= 32} disabledReason={t('builder.limit')} onClick={add}>{t('editor.addOutcome')}</Button></div>
     {node.outcomes.length >= 8 && <label className="nf-stack">{t('common.search')}<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>}
