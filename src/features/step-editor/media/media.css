@@ -1,0 +1,7 @@
+.nf-media-figure { min-inline-size: 0; }
+.nf-media-zoom { border: 0; background: transparent; padding: 0; inline-size: 100%; display: block; cursor: zoom-in; }
+.nf-media-zoom:disabled { cursor: default; }
+.nf-media-zoom img { display: block; object-fit: contain; max-inline-size: 100%; max-block-size: var(--nf-gallery-compact); margin-inline: auto; }
+.nf-gallery--natural .nf-media-zoom img { max-block-size: none; }
+.nf-gallery--medium .nf-media-zoom img { max-block-size: var(--nf-gallery-medium); }
+.nf-gallery--large .nf-media-zoom img { max-block-size: var(--nf-gallery-large); }

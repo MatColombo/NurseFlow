@@ -33,7 +33,7 @@ test('Start vuoto: picker esatto, creazione+collegamento persistiti prima di Pag
   expect(saved.revision.graph.nodes[0]).toMatchObject({ next: { kind: 'node', nodeId: decision.id } });
   expect(saved.history.past).toHaveLength(1); expect(saved.ready).toBeUndefined();
   await page.reload(); await expect(page.locator('[data-node-id]')).toHaveAttribute('data-node-id', decision.id);
-  await page.getByRole('link', { name: 'Torna al Builder', exact: true }).click();
+  await page.getByRole('button', { name: 'Fine', exact: true }).click();
   await row(page, decision.id).getByRole('button', { name: 'Esito senza nome · +', exact: true }).first().click();
   await dialog(page).getByRole('button', { name: 'Crea il prossimo passo', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Istruzione', exact: true }).click(); await expect(page).toHaveURL(/\/step\//);

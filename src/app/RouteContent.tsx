@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AppearanceSettings } from '@features/settings/AppearanceSettings';
@@ -10,7 +11,8 @@ import { ProcedureDetails } from '@features/procedures/ProcedureDetails';
 import { NewProcedure } from '@features/procedures/NewProcedure';
 import { RevisionDestination } from '@features/procedures/RevisionDestination';
 import { BuilderPage } from '@features/builder/BuilderPage';
-import { StepEntry } from '@features/builder/StepEntry';
+import { MediaSettings } from '@features/settings/MediaSettings';
+const StepEditorPage = lazy(() => import('@features/step-editor/StepEditorPage'));
 
 type Page = typeof routeDefinitions[number]['page'];
 export function RouteContent({ page }: { page: Page }) {
@@ -21,17 +23,17 @@ export function RouteContent({ page }: { page: Page }) {
   if (page === '02') return <ProcedureDetails key={parameters.id} />;
   if (page === '06') return <NewProcedure />;
   if (page === '07') return <BuilderPage key={parameters.id} />;
+  if (page === '08') return <Suspense fallback={<p role="status">{t('common.loading')}</p>}><StepEditorPage key={`${parameters.id}-${parameters.nodeId}`} /></Suspense>;
   const content = <section className="nf-stack" aria-labelledby="page-title">
     <h2 id="page-title" className="nf-title">{t(`pages.${page}`)}</h2>
     <Card><p>{t('shell.preview')}</p><p className="nf-note">{t('shell.pending', { page })}</p></Card>
     {import.meta.env.DEV && Object.entries(parameters).map(([name, value]) => <p key={name}>{name}: <code>{value}</code></p>)}
-    {page === '10' && <><Link to="/library">{t('common.back')}</Link><AppearanceSettings /><StoragePersistence />
+    {page === '10' && <><Link to="/library">{t('common.back')}</Link><AppearanceSettings /><MediaSettings /><StoragePersistence />
       <Link to="/data/procedures">{t('pages.11A')}</Link><Link to="/data/app">{t('pages.11B')}</Link></>}
     {page === '11B' && <Link to="/setup">{t('common.back')}</Link>}
   </section>;
   if (page === '05' || page === '03' && search.get('preview') === 'draft') return <RevisionDestination
     key={`${page}-${parameters.id}-${search.get('revision')}`} kind={page === '05' ? 'map' : 'preview'}>{content}</RevisionDestination>;
-  if (page === '08') return <StepEntry key={`${parameters.id}-${parameters.nodeId}`}>{content}</StepEntry>;
   return page === '03' ? <ProcedureEntry key={`${page}-${parameters.id}`} run>{content}</ProcedureEntry> : content;
 }
 

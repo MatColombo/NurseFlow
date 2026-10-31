@@ -6,6 +6,13 @@ export type AppearancePreferences = ReturnType<typeof appearanceSchema.parse>;
 
 export function appearanceCommands(db: NurseFlowDatabase) {
   return {
+    async saveMediaPreferences(input: Pick<ReturnType<typeof settingsSchema.parse>, 'photoPreset' | 'mediaAddSoftLimit'>) {
+      const patch = settingsSchema.pick({ photoPreset: true, mediaAddSoftLimit: true }).parse(input);
+      return db.transaction('rw', db.settings, async () => {
+        const current = settingsSchema.parse(await db.settings.get('main')); const next = { ...current, ...patch };
+        await db.settings.put(next); return next;
+      });
+    },
     async saveAppearance(input: AppearancePreferences) {
       const appearance = appearanceSchema.parse(input);
       return db.transaction('rw', db.settings, async () => {

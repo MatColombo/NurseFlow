@@ -2,6 +2,8 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import type { Appearance, AppearanceService } from './appearance-service';
+import { settingsSchema } from '@domain/model';
+vi.mock('@features/step-editor/media/service', () => ({ mediaService: { settings: async () => settingsSchema.parse({}), saveSettings: async (value: unknown) => settingsSchema.parse(value) } }));
 
 const defaults: Appearance = { locale: 'it', theme: 'system', uiScalePt: 13 };
 let osDark = false;

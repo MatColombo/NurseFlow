@@ -21,18 +21,19 @@ import { useBuilderLayout } from './useBuilderLayout';
 import type { FocusRequest } from './graph/GraphCanvas';
 import { edgeTitle } from './labels';
 import { connectionProblem } from '@domain/builder/targets';
+import { editorPath, type PathReturn } from './path-route';
 
 const GraphCanvas = lazy(() => import('./graph/GraphCanvas'));
 
-export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
+export function BuilderEditor({ initial, pathReturn }: { initial: BuilderSnapshot; pathReturn?: PathReturn | undefined }) {
   const { t } = useTranslation(); const navigate = useNavigate();
   const { preferences } = useAppearance();
   const [mode, setMode] = useState(initial.editorMode);
   const [canvas, setCanvas] = useState(initial.history.view.canvas); const camera = useRef(canvas);
   const outlineTop = useRef(initial.history.view.scrollTop);
-  const [picking, setPicking] = useState<{ edge: EdgeRef; revisionId: string; version: number } | null>(null);
+  const [picking, setPicking] = useState<{ edge: EdgeRef; revisionId: string; version: number } | null>(pathReturn ? { edge: pathReturn.edge, revisionId: initial.revision.id, version: initial.revision.editVersion } : null);
   const [targetMode, setTargetMode] = useState<'outline' | 'graph'>('graph');
-  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null); const focusSequence = useRef(0);
+  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(pathReturn ? { id: pathReturn.edge.nodeId, sequence: 1 } : null); const focusSequence = useRef(pathReturn ? 1 : 0);
   const displayMode = picking ? targetMode : mode;
   const [snapshot, setSnapshot] = useState(initial); const current = useRef(initial);
   const [selection, setSelection] = useState<Selection | null>(null); const selected = useRef<Selection | null>(initial.history.view.selection);
@@ -46,7 +47,8 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
   const clip = useSyncExternalStore(graphClipboard.subscribe, graphClipboard.get);
   const { procedure, revision, history } = snapshot; const graph = revision.graph;
   const basePath = '/build/' + encodeURIComponent(procedure.id);
-  const view = (): BuilderView => ({ scrollTop: Math.max(0, displayMode === 'outline' && !picking ? flow ? window.scrollY : scroll.current?.scrollTop ?? 0 : outlineTop.current), selection: selected.current, canvas: camera.current });
+  const view = (): BuilderView => pathReturn ? { ...initial.history.view, selection: { kind: 'node', nodeId: pathReturn.stepId } } :
+    ({ scrollTop: Math.max(0, displayMode === 'outline' && !picking ? flow ? window.scrollY : scroll.current?.scrollTop ?? 0 : outlineTop.current), selection: selected.current, canvas: camera.current });
   function update(value: BuilderSnapshot) { current.current = value; setSnapshot(value); }
   function explain(reason: unknown) {
     return t(reason instanceof BuilderError ? 'builder.errors.' + reason.code :
@@ -59,6 +61,7 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
     finally { locked.current = false; setBusy(false); }
   }
   function persistView() {
+    if (pathReturn) return;
     if (locked.current || failed.current) return;
     const source = current.current; const layout = view();
     const operation = async () => { await builderService.saveView(source, layout); };
@@ -75,7 +78,7 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
     setFocusRequest(null);
     if (displayMode === 'outline') outlineTop.current = view().scrollTop;
     persistView();
-    if (picking) { setTargetMode(value); return; }
+    if (picking || pathReturn) { setTargetMode(value); return; }
     setMode(value);
     const operation = async () => { await builderService.saveMode(value); };
     void operation().catch((reason: unknown) => { failed.current = operation; setHasFailure(true); setError(explain(reason)); });
@@ -85,7 +88,10 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
     setPicking({ edge, revisionId: current.current.revision.id, version: current.current.revision.editVersion }); setTargetMode('graph'); setSelection(null);
     setFocusRequest({ id: edge.nodeId, sequence: ++focusSequence.current });
   }
-  function cancelDestination() { const edge = picking?.edge; setPicking(null); setFocusRequest(null); if (edge) select({ kind: 'edge', edge }); }
+  function cancelDestination() {
+    if (pathReturn) { void navigate(editorPath(initial.procedure.id, current.current.revision.id, pathReturn), { replace: true }); return; }
+    const edge = picking?.edge; setPicking(null); setFocusRequest(null); if (edge) select({ kind: 'edge', edge });
+  }
   function pickTarget(id: string) {
     if (!picking) return;
     if (picking.revisionId !== current.current.revision.id || picking.version !== current.current.revision.editVersion) { setError(t('builder.errors.stale')); return; }
@@ -123,7 +129,8 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
       const saved = await builderService.commit(before, value.graph, value.label, nextView); update(saved);
       if (graphClipboard.get()?.mode === 'cut') graphClipboard.set(null);
       selected.current = nextView.selection; setHighlight(nextView.selection); setPlan(null); setSelection(null); setModal(null); setPicking(null); setFocusRequest(null);
-      if (value.openEditor && value.createdId) editor(value.createdId, saved);
+      if (value.openEditor && value.createdId && nodeAt(saved.revision.graph, value.createdId).kind !== 'multitask') editor(value.createdId, saved);
+      else if (pathReturn) void navigate(editorPath(procedure.id, saved.revision.id, pathReturn), { replace: true });
       else if (before.revision.id !== saved.revision.id) void navigate(basePath + '?revision=' + encodeURIComponent(saved.revision.id), { replace: true });
     });
   }
@@ -160,6 +167,7 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
       selected.current = null; setHighlight(null); setSelection(null); setPlan(null); });
   }
   async function leave() {
+    if (pathReturn) { cancelDestination(); return; }
     if (locked.current) { try { await builderService.flush(); } catch { return; } }
     if (failed.current) return;
     await run(async () => { await builderService.flush(); await builderService.saveView(current.current, view());
@@ -203,6 +211,7 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
       <Button aria-label={t('builder.redo')} disabled={busy || history.future.length === 0 || Boolean(plan || picking)} disabledReason={t('builder.noRedo')} onClick={() => travel('redo')}>↷</Button>
     </div>
     {picking && <div ref={chromeRef} className="nf-target-context nf-stack"><strong>{t('canvas.pathFor', { title: edgeTitle(graph, picking.edge, t) })}</strong>
+      {pathReturn && <Button onClick={() => { setPicking(null); select({ kind: 'edge', edge: pathReturn.edge }); }}>{t('builder.createNext')}</Button>}
       <Button onClick={cancelDestination}>{t('common.cancel')}</Button>{error && <div role="alert">{error}<Button onClick={() => setDiscard(true)}>{t('builder.reload')}</Button></div>}</div>}
     <div ref={scroll} className={'nf-builder-scroll' + (displayMode === 'graph' ? ' nf-builder-scroll--graph' : '')} data-testid="builder-scroll" onScroll={() => {
       if (displayMode === 'outline' && !picking) { outlineTop.current = Math.max(0, scroll.current?.scrollTop ?? 0); scheduleView(); }
@@ -220,7 +229,7 @@ export function BuilderEditor({ initial }: { initial: BuilderSnapshot }) {
           void navigate(basePath + '/check?revision=' + encodeURIComponent(revision.id)); }); }}>{t('builder.check')}</Button>
     </footer>
     {!plan && !picking && selection?.kind === 'edge' && <EdgeActions key={JSON.stringify(selection.edge)} graph={graph} edge={selection.edge} chooseTarget={() => chooseDestination(selection.edge)}
-      close={() => select(null)} edit={(value, preview, openEditor) => { void edit(value, preview, openEditor); }}
+      close={() => { if (pathReturn) cancelDestination(); else select(null); }} edit={(value, preview, openEditor) => { void edit(value, preview, openEditor); }}
       paste={() => paste({ kind: 'edge', edge: selection.edge })} hasClipboard={Boolean(clip)} focus={focus} busy={busy} error={error} retry={retry} retryable={hasFailure} />}
     {!plan && selection && selection.kind !== 'edge' && <NodeActions key={JSON.stringify(selection)} graph={graph} selection={selection}
       close={() => select(null)} edit={edit} copy={copy} pasteActivity={(nodeId) => paste({ kind: 'activity-list', nodeId })}

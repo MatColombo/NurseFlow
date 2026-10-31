@@ -35,7 +35,7 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
           <option value="">{t('builder.noPhase')}</option>{graph.phases.map((phase) => <option key={phase.id} value={phase.id}>{phase.name}</option>)}</select></label>}
         <div className="nf-row"><Button onClick={() => setForm(null)}>{t('common.cancel')}</Button><Button type="submit" variant="primary">{t('library.done')}</Button></div>
       </form> : <>
-        {!activity && <><Button onClick={() => openEditor(node.id)}>{t('builder.editStep')}</Button>
+        {!activity && <>{node.kind !== 'multitask' && <Button onClick={() => openEditor(node.id)}>{t('builder.editStep')}</Button>}
           <Button onClick={() => startForm('$node', 'title' in node ? node.title ?? '' : node.kind === 'end' ? node.heading : '')}>{t('builder.rename')}</Button></>}
         {activity && <><Button onClick={() => startForm(activity.id, activity.name)}>{t('builder.rename')}</Button>
           <Button onClick={() => select({ kind: 'edge', edge: { nodeId: node.id, slot: 'activity', itemId: activity.id } })}>{t('builder.setPath')}</Button></>}

@@ -29,8 +29,8 @@ const stepFields = {
 export const nodeSchema = z.discriminatedUnion('kind', [
   z.strictObject({ id: idSchema, kind: z.literal('start'), next: destinationSchema }),
   z.strictObject({ ...stepFields, kind: z.literal('instruction'), text: z.string(), next: destinationSchema }),
-  z.strictObject({ ...stepFields, kind: z.literal('alert'), text: z.string(), next: destinationSchema }),
-  z.strictObject({ ...stepFields, kind: z.literal('decision'), question: z.string(), outcomes: z.array(outcomeSchema) }),
+  z.strictObject({ ...stepFields, kind: z.literal('alert'), text: z.string(), additionalText: z.string().optional(), next: destinationSchema }),
+  z.strictObject({ ...stepFields, kind: z.literal('decision'), question: z.string(), context: z.string().optional(), outcomes: z.array(outcomeSchema) }),
   z.strictObject({
     id: idSchema, kind: z.literal('multitask'), title: z.string(), phaseId: idSchema.nullable().optional(),
     activities: z.array(activitySchema), afterAll: destinationSchema,

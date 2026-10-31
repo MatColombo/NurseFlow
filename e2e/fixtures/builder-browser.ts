@@ -29,3 +29,33 @@ export async function readBuilder(id: string) {
       runs: await db.runSessions.where('procedureId').equals(id).toArray(), version: db.verno };
   } finally { db.close(); }
 }
+export async function readEditor(id = 'procedure') {
+  const db = new NurseFlowDatabase(); await db.open();
+  try {
+    const loaded = await createRepositories(db).builder.get(id); const assets = await db.mediaAssets.toArray();
+    return { ...loaded, settings: await db.settings.get('main'), assets: await Promise.all(assets.map(async ({ blob, ...asset }) => ({ ...asset,
+      data: [...new Uint8Array(await blob.arrayBuffer())], actualSha: [...new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))].map((value) => value.toString(16).padStart(2, '0')).join('') }))) };
+  } finally { db.close(); }
+}
+/** Test-only wire round-trip. Archive formats/UI and full E13 release gate remain F13/F14. */
+export async function roundTripEditor(id = 'procedure') {
+  const db = new NurseFlowDatabase(); await db.open();
+  try {
+    const procedure = (await db.procedures.get(id))!; const revisions = await db.revisions.where('procedureId').equals(id).toArray();
+    const groups = procedure.groupId ? [(await db.groups.get(procedure.groupId))!] : [];
+    const assets = await db.mediaAssets.toArray(); const wire = JSON.parse(JSON.stringify({ procedures: [procedure], revisions, groups, runSessions: [],
+      mediaAssets: await Promise.all(assets.map(async ({ blob, ...asset }) => ({ ...asset, data: [...new Uint8Array(await blob.arrayBuffer())] }))) }));
+    wire.mediaAssets = wire.mediaAssets.map(({ data, ...asset }: { data: number[]; mime: string }) => ({ ...asset, blob: new Blob([new Uint8Array(data)], { type: asset.mime }) }));
+    // The artificial Ready fixture is already known by this test; no production validator is installed.
+    return await createCommands(db).addImportedRecords([wire], () => ({ validatorSchemaVersion: 1, problems: [], warnings: [] }));
+  } finally { db.close(); }
+}
+export async function addMissingPhoto() {
+  const db = new NurseFlowDatabase(); await db.open();
+  try {
+    const source = await createRepositories(db).builder.get('procedure'); const graph = structuredClone(source.revision.graph); const node = graph.nodes.find((node) => node.id === 'shared');
+    if (!node || !('media' in node)) throw new Error('fixture');
+    node.media.push({ id: 'missing-photo', slot: 'after-note', order: 0, source: { kind: 'local', assetId: 'missing-blob', mime: 'image/png' } });
+    await createCommands(db).updateDraft({ procedureId: 'procedure', draftId: source.revision.id, expectedEditVersion: source.revision.editVersion, graph });
+  } finally { db.close(); }
+}

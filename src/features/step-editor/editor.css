@@ -1,0 +1,14 @@
+.nf-editor-header > div { flex: 1 1 14ch; }
+.nf-editor-header h1 { font-size: var(--nf-font-base); }
+.nf-editor-header .nf-meta { overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nf-step-editor .nf-button { min-block-size: max(48px, var(--nf-control-min)); }
+.nf-editor-section > summary { cursor: pointer; min-block-size: max(48px, var(--nf-control-min)); font-weight: 600; padding-block: var(--nf-space-1); }
+.nf-editor-section[open] > summary { margin-block-end: var(--nf-space-2); }
+.nf-editor-section[open] > :not(summary) + :not(summary) { margin-block-start: var(--nf-space-2); }
+.nf-outcome-row { inline-size: 100%; justify-content: start; text-align: start; }
+.nf-step-editor input:not([type='checkbox']):not([type='radio']), .nf-step-editor select, .nf-step-editor textarea {
+  min-block-size: max(48px, var(--nf-control-min)); inline-size: 100%; padding: min(var(--nf-control-pad), 4vw);
+  border: 1px solid var(--nf-text-muted); border-radius: var(--nf-radius); background: var(--nf-surface);
+}
+.nf-step-editor textarea { resize: vertical; min-block-size: max(80px, calc(var(--nf-font-base) * 4)); }
+.nf-photo-result { display: block; max-inline-size: 100%; max-block-size: 45dvh; object-fit: contain; }

@@ -1,14 +1,17 @@
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import type { Graph } from '@domain/model';
 import { destinationAt, impact, incoming, outlets } from '@domain/builder/structure';
 import { Button, Sheet } from '@shared/components';
 import { destinationLabel, edgeTitle, titleOf } from './labels';
 export type EditPlan = { graph: Graph; label: string; createdId?: string; openEditor?: boolean };
-export function ImpactSheet({ before, plan, busy, error, cancel, confirm }: {
+export function ImpactSheet({ before, plan, busy, error, cancel, confirm, details }: {
   before: Graph; plan: EditPlan; busy: boolean; error: string | null; cancel(): void; confirm(): void;
+  details?: ReactNode;
 }) {
   const { t } = useTranslation(); const changes = impact(before, plan.graph);
   return <Sheet open title={t('builder.impact')} onClose={cancel}>
+    {details}
     <ul className="nf-list nf-stack">{changes.changed.map((change, index) => <li key={index} className="nf-stack nf-impact-row">
       <strong>{edgeTitle(change.before ? before : plan.graph, change.edge, t)}</strong>
       <span>{t('builder.before')}: {destinationLabel(before, change.before, t)}</span>

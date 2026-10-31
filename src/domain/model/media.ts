@@ -4,13 +4,14 @@ import { idSchema } from './common';
 export const localImageMimeSchema = z.enum(['image/jpeg', 'image/png', 'image/webp']);
 // URL parsing is pure: no request or DNS lookup is performed here.
 export const remoteImageUrlSchema = z.url().refine((value) => {
-  const url = new URL(value);
+  let url: URL; let pathname: string;
+  try { url = new URL(value); pathname = decodeURIComponent(url.pathname); } catch { return false; }
   const host = url.hostname.toLowerCase();
   return url.protocol === 'https:' && !url.username && !url.password &&
     !host.includes(':') && !/^\d+(\.\d+){3}$/.test(host) &&
     host.includes('.') && !host.endsWith('.') &&
     !/\.(localhost|local|internal|test|invalid)$/.test(host) &&
-    !/\.svg(?:$|[?#])/i.test(url.pathname);
+    !/\.svgz?(?:$|[/?#])/i.test(pathname);
 }, 'Only public HTTPS image URLs are supported');
 
 export const stepMediaSchema = z.strictObject({

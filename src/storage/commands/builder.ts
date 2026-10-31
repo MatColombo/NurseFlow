@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { draftRevisionSchema, graphSchema, idSchema, positiveInteger, procedureSchema, revisionSchema, uiPreferencesSchema } from '@domain/model';
+import { draftRevisionSchema, graphSchema, idSchema, mediaAssetSchema, positiveInteger, procedureSchema, revisionSchema, settingsSchema, uiPreferencesSchema } from '@domain/model';
 import { builderStateSchema, builderViewSchema, requireEdit, type BuilderState } from '@domain/builder/model';
 import { assertEditableGraph } from '@domain/builder/structure';
 import { ConflictError } from '@domain/model/errors';
@@ -11,6 +11,7 @@ const baseInput = z.strictObject({
 });
 const commitInput = baseInput.extend({
   expectedGraph: graphSchema, graph: graphSchema, label: z.string(), view: builderViewSchema,
+  mediaAssets: z.array(mediaAssetSchema).default([]), mediaAdditionFor: idSchema.optional(),
 });
 export type CommitBuilderInput = z.input<typeof commitInput>;
 function historyFor(raw: unknown, id: string, revisionId: string, editVersion: number): BuilderState {
@@ -30,7 +31,7 @@ export function builderCommands(db: NurseFlowDatabase, environment: CommandEnvir
     async commitBuilderEdit(input: CommitBuilderInput) {
       const data = commitInput.parse(input); assertEditableGraph(data.graph);
       const now = environment.now(); const draftId = environment.newId();
-      return db.transaction('rw', [db.procedures, db.revisions, db.builderStates], async () => {
+      return db.transaction('rw', [db.procedures, db.revisions, db.builderStates, db.mediaAssets, db.settings], async () => {
         const procedure = procedureSchema.parse(await db.procedures.get(data.procedureId));
         const source = revisionSchema.parse(await db.revisions.get(data.sourceRevisionId));
         requireEdit(!procedure.archived && source.procedureId === procedure.id);
@@ -38,6 +39,11 @@ export function builderCommands(db: NurseFlowDatabase, environment: CommandEnvir
           (source.state === 'working-draft' ? procedure.workingDraftId !== source.id :
             procedure.readyRevisionId !== source.id || procedure.workingDraftId !== undefined)) throw new ConflictError('Draft changed; reload before saving');
         requireEdit(JSON.stringify(source.graph) !== JSON.stringify(data.graph));
+        if (data.mediaAdditionFor) {
+          const node = data.graph.nodes.find((node) => node.id === data.mediaAdditionFor); const settings = settingsSchema.parse(await db.settings.get('main'));
+          requireEdit(node && 'media' in node && node.media.length <= (settings.mediaAddSoftLimit.enabled ? settings.mediaAddSoftLimit.max : 32), 'limit');
+        }
+        for (const asset of data.mediaAssets) requireEdit(data.graph.nodes.some((node) => 'media' in node && node.media.some((item) => item.source.kind === 'local' && item.source.assetId === asset.id && item.source.mime === asset.mime)));
         const history = historyFor(await db.builderStates.get(procedure.id), procedure.id, source.id, source.editVersion);
         const draft = draftRevisionSchema.parse({ id: source.state === 'ready' ? draftId : source.id, procedureId: source.procedureId,
           state: 'working-draft', revisionNumber: source.revisionNumber + (source.state === 'ready' ? 1 : 0),
@@ -45,6 +51,7 @@ export function builderCommands(db: NurseFlowDatabase, environment: CommandEnvir
           createdAt: source.state === 'ready' ? now : source.createdAt, updatedAt: now, validatorSchemaVersion: 0,
         });
         const saved = draft;
+        await db.mediaAssets.bulkAdd(data.mediaAssets);
         if (source.state === 'ready') await db.revisions.add(saved); else await db.revisions.put(saved);
         await db.builderStates.put(builderStateSchema.parse({ id: procedure.id, revisionId: saved.id, editVersion: saved.editVersion,
           past: [...history.past, { graph: source.graph, label: data.label }].slice(-30), future: [], view: data.view }));

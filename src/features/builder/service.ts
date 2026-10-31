@@ -1,7 +1,7 @@
 import { createNurseFlowStorage } from '@storage/index';
 import type { BuilderView } from '@domain/builder/model';
 import type { GraphClip } from '@domain/builder/clipboard';
-import type { Graph } from '@domain/model';
+import type { Graph, MediaAsset } from '@domain/model';
 type Storage = ReturnType<typeof createNurseFlowStorage>;
 export type BuilderSnapshot = Awaited<ReturnType<Storage['repositories']['builder']['get']>>;
 
@@ -16,11 +16,11 @@ export function createBuilderService(storage = createNurseFlowStorage()) {
       if (opened) loaded.procedure = await storage.commands.recordProcedureOpen(id); return loaded;
     },
     async flush() { await queue; },
-    commit(snapshot: BuilderSnapshot, graph: Graph, label: string, view: BuilderView): Promise<BuilderSnapshot> {
+    commit(snapshot: BuilderSnapshot, graph: Graph, label: string, view: BuilderView, mediaAssets: MediaAsset[] = [], mediaAdditionFor?: string): Promise<BuilderSnapshot> {
       return write(async () => {
         const revision = await storage.commands.commitBuilderEdit({ procedureId: snapshot.procedure.id,
           sourceRevisionId: snapshot.revision.id, expectedEditVersion: snapshot.revision.editVersion,
-          expectedGraph: snapshot.revision.graph, graph, label, view });
+          expectedGraph: snapshot.revision.graph, graph, label, view, mediaAssets, ...(mediaAdditionFor ? { mediaAdditionFor } : {}) });
         return { ...snapshot, procedure: { ...snapshot.procedure, workingDraftId: revision.id, updatedAt: revision.updatedAt }, revision,
           history: { id: snapshot.procedure.id, revisionId: revision.id, editVersion: revision.editVersion,
             past: [...snapshot.history.past, { graph: snapshot.revision.graph, label }].slice(-30), future: [], view } };

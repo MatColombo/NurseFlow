@@ -108,7 +108,7 @@ test('32 outcome: Browse 19, + vero, creazione automaticamente collegata e rilet
   await expect(page).toHaveURL(/\/step\//); const saved = await readBuilder(page, decisionsId); const decision = saved.revision.graph.nodes.find((node) => node.kind === 'decision');
   if (decision?.kind !== 'decision') throw new Error('Decision missing');
   expect(decision.outcomes.filter((item) => item.destination.kind === 'node')).toEqual([expect.objectContaining({ id: 'outcome-19' })]);
-  await page.getByRole('link', { name: 'Torna al Builder', exact: true }).click(); await outline(page).click();
+  await page.getByRole('button', { name: 'Fine', exact: true }).click(); await outline(page).click();
   await expect(page.locator('[data-outline-node="decision"]').getByRole('button', { name: 'Esito 19 · Istruzione', exact: true })).toBeVisible();
 });
 

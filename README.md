@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05** e Graph **F06**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06** e Step Editor/media **F07**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Questa è un'anteprima tecnica: le pagine applicative successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -71,7 +71,7 @@ Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in pr
 
 `src/shared/components` esporta Button, Card, Badge, Search, Sheet, Dialog, Icon, List/ListItem, GalleryFrame e ValidationRow. Token colore in `shared/styles/tokens.css`, geometria/tipografia in `shared/design-tokens/scale.ts`. Usare i token anche nelle prossime feature; nessun `transform: scale()` sulla pagina. Button disabilitato richiede `disabledReason`; le icone decorative sono escluse dal nome accessibile. GalleryFrame non carica autonomamente risorse.
 
-`/#/settings` espone solo la sezione Interfaccia di F02: lingua IT/EN, tema System/Light/Dark, scala unica 4–48pt e ripristino 13pt. I selettori usano Sheet con focus trap, Escape e ritorno focus. Cambi immediati, persistenza locale mediante `saveAppearance`; su errore rollback e Retry. Le altre sezioni Page 10 arrivano in F12. I cataloghi i18next sono nel bundle, senza richieste HTTP o traduzione automatica dei contenuti authored.
+`/#/settings` espone Interfaccia di F02: lingua IT/EN, tema System/Light/Dark, scala unica 4–48pt e ripristino 13pt. I selettori usano Sheet con focus trap, Escape e ritorno focus. Cambi immediati, persistenza locale mediante `saveAppearance`; su errore rollback e Retry. F07 aggiunge le preferenze Immagini necessarie all'editor; le altre sezioni Page 10 arrivano in F12. I cataloghi i18next sono nel bundle, senza richieste HTTP o traduzione automatica dei contenuti authored.
 
 Solo con `npm run dev`, `/#/dev/components` mostra i componenti con fixture neutre per ispezione e test; non modifica la libreria. Gli snapshot sono in `e2e/journeys/components.visual.spec.ts-snapshots/`. I test coprono 320/390/768px × 4/13/30/48pt, offset, icone, target, overflow, contrasti, etichette, focus e preferenze dopo reload. [ADR-003](docs/adr/003-ui-theme-scale-i18n.md) e [report F02](docs/reports/F02.md) documentano scelte, prove e limiti.
 
@@ -130,7 +130,7 @@ La fase F04 conserva lo schema DB v3 e non aggiunge dipendenze. [ADR-005](docs/a
 
 Undo/Redo nella toolbar conserva 30 transazioni in IndexedDB, anche dopo reload. Copy usa nuove identità e mantiene i riferimenti ai media; Cut resta pending fino a Paste confermato, con move atomico e preview Prima/Dopo. Nodi condivisi canonici, W08 dopo cancellazione, orfani conservati e ripristinabili con Undo. Il primo cambiamento reale di una Ready-only crea Draft e storia nella stessa transazione, senza modificare Ready o run. Scroll e selezione persistono senza aggiornare la recenza.
 
-La creazione apre la vera route Page 08 dopo il salvataggio; l'editor dei contenuti è F07. Preview/Check ricevono la revisione salvata, ma renderer e validazione completi restano nelle fasi successive. [ADR-006](docs/adr/006-builder-outline-and-history.md) e [report F05](docs/reports/F05.md) documentano implementazione, prove e limiti.
+La creazione di un passo di contenuto apre Page 08 dopo il salvataggio; Start/Multitask restano strutturali nel Builder. Preview/Check del Builder ricevono la revisione salvata; consultazione e validazione complete restano nelle fasi successive. [ADR-006](docs/adr/006-builder-outline-and-history.md) e [report F05](docs/reports/F05.md) documentano implementazione, prove e limiti.
 
 ## Builder Graph F06
 
@@ -140,7 +140,17 @@ Cambiare un collegamento avvia un picker: la ricerca focalizza il passo; il tap 
 
 Fino a tre attività AND sono in focus, con Browse ricercabile fino a 32; gli OR numerosi usano una lista equivalente senza ridurre i caratteri. I completamenti raggiungono direttamente la continuazione senza gate o merge visibili. Auto layout modifica solo le posizioni nel medesimo DAG ed è reversibile. [ADR-007](docs/adr/007-builder-graph-projection.md) e [report F06](docs/reports/F06.md) riportano scelte, test, screenshot e limiti.
 
-## Moduli e limiti F00–F06
+## Step Editor e media F07
+
+`/#/build/:id/step/:nodeId` è la Page 08 full-page reale per Instruction, Alert, Decision ed End: contenuti authored, fase o nessuna fase, nota facoltativa, preview live e Fine che attende le scritture e torna al Builder. Nessun Save duplicato. Autosave con debounce, transazioni e Undo/Redo condivisi con il Builder; Ready e run pinnate rimangono indipendenti. Errori e quota mantengono gli input e offrono Retry senza falsa conferma.
+
+Outcome Editor contiene soltanto risposta, nota, percorso di sola lettura e Cambia percorso. Il picker Graph F06 cambia un singolo edge con preview d'impatto e torna allo stesso outcome; la modalità temporanea conserva camera, scroll e preferenze del Builder. Riordina risposte è separato e modifica solo l'ordine UI. Preview usa il renderer `StepContent` destinato anche alla futura Page 03, con disclosure/zoom disponibili e azioni Run inerti.
+
+Le gallerie prima/dopo nota hanno ordine, layout e spazio immagine indipendenti, caption/alt e spostamento fra slot. JPEG/PNG/WebP locali vengono verificati, preparati e mostrati con byte/dimensioni effettivi prima dell'inserimento. I Blob sono separati e immutabili in IndexedDB; ricomprimere o sostituire crea un nuovo asset conservando il precedente per Undo/Ready. Compressione predefinita e soft limit globale 2 riguardano le aggiunte future; gli elementi esistenti restano modificabili oltre il limite ridotto, fino al massimo di schema di 32 complessivi. End non contiene media.
+
+URL HTTPS/GIF sono facoltativi, con controllo URL/MIME/firma raster e placeholder quando indisponibili. I collegamenti possono contattare il sito esterno e non sono garantiti offline. Un asset locale mancante mostra W07 e non blocca il salvataggio della Draft. Gli object URL vengono revocati; testi e didascalie non vengono interpretati come HTML. Il round-trip media di F07 verifica metadati/byte attraverso il repository reale di import additivo; file/archivi e interfacce 11A/11B restano F13/F14. [ADR-008](docs/adr/008-step-editor-and-local-media.md) e [report F07](docs/reports/F07.md).
+
+## Moduli e limiti F00–F07
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -156,7 +166,7 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/06 e le viste Outline/Graph della 07 sono implementate. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00/01/02/06, le viste Outline/Graph della 07 e l'editor contenuti/media della 08 sono implementati. Run, Map e le pagine successive mostrano ancora un avviso esplicito di funzionalità non implementata, con contesto reale di procedura/revisione agli ingressi già collegati; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
 
 Non sono presenti account, backend, sync, CDN, font remoti o tracker. Validator P/W e motore run arrivano nelle rispettive fasi. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
 

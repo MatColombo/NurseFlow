@@ -25,7 +25,7 @@ describe('Shell F02 con HashRouter', () => {
     expect(screen.getByRole('searchbox', { name: 'Cerca procedure' })).toBeInTheDocument();
   });
 
-  it.each(routeDefinitions.filter(({ page }) => !['00', '02', '06', '07'].includes(page)))('risolve il deep link $path', async ({ example, title, page }) => {
+  it.each(routeDefinitions.filter(({ page }) => !['00', '02', '06', '07', '08'].includes(page)))('risolve il deep link $path', async ({ example, title, page }) => {
     window.history.replaceState(null, '', `/repository/#${example}`);
     render(<App appearanceService={appearanceService} />);
 
@@ -41,12 +41,13 @@ describe('Shell F02 con HashRouter', () => {
     expect(window.location.hash).toBe('#/library');
   });
 
-  it('espone i parametri del deep link senza risolvere dati inesistenti', async () => {
+  it('Page08 non mostra un editor fittizio per dati inesistenti', async () => {
     window.history.replaceState(null, '', '/#/build/draft-example/step/node-example');
     render(<App appearanceService={appearanceService} />);
 
-    expect(await screen.findByText('draft-example')).toBeInTheDocument();
-    expect(screen.getByText('node-example')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Editor passaggio', level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('Passaggio non disponibile');
+    expect(screen.getByRole('link', { name: 'Torna al Builder' })).toHaveAttribute('href', '#/build/draft-example');
   });
 
   it('offre recupero per una route inesistente', async () => {
