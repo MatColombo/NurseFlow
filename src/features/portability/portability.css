@@ -1,8 +1,8 @@
 .nf-portable .nf-button, .nf-portable input, .nf-portable-preview .nf-button { min-block-size: max(48px, var(--nf-control-min)); }
 .nf-portable [hidden] { display: none; }
 .nf-portable input[type='file'], .nf-portable select, .nf-portable-preview select { inline-size: 100%; max-inline-size: 100%; padding: min(var(--nf-control-pad), 4vw); background: var(--nf-surface); color: var(--nf-text); }
-.nf-portable .nf-choice { align-items: start; min-block-size: max(48px, var(--nf-control-min)); }
-.nf-portable .nf-choice > span { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--nf-space-1); }
+.nf-portable .nf-choice { align-items: start; flex-wrap: wrap; min-block-size: max(48px, var(--nf-control-min)); }
+.nf-portable .nf-choice > span { flex: 1 1 8ch; display: flex; flex-wrap: wrap; align-items: center; gap: var(--nf-space-1); }
 .nf-portable .nf-choice .nf-identity { flex: 0 0 auto; }
 .nf-portable-row { border-block-start: 1px solid var(--nf-border); padding-block: var(--nf-space-2); }
 .nf-portable-preview .nf-map-list { max-block-size: 50dvh; }

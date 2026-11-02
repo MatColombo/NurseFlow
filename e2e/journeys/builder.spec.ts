@@ -291,7 +291,8 @@ for (const scale of [4, 13, 30, 48]) {
     if (scale >= 30) {
       const top = await page.evaluate(() => window.scrollY); expect(top).toBeGreaterThan(0);
       await expect.poll(async () => (await readBuilder(page)).history.view.scrollTop).toBe(top);
-      await page.reload(); await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(top);
+      // Firefox/Linux rounds fractional restored offsets to device pixels.
+      await page.reload(); await expect.poll(async () => Math.abs(await page.evaluate(() => window.scrollY) - top)).toBeLessThan(1);
       if (scale === 48) await capture(page, testInfo, 'outline-320px-48pt');
     }
     await chooseNode(page, 'b-step', 'Percorso B'); await expectNoBleeding(page); await dialog(page).getByRole('button', { name: 'Rinomina / fase', exact: true }).click();
