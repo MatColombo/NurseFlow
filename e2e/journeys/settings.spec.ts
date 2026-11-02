@@ -59,7 +59,11 @@ for (const granted of [false, true]) test(`F12 storage actual grant=${granted}, 
 });
 
 test('F12 unsupported storage/update and offline checks remain truthful; About is on demand and Install hidden without support', async ({ page, context }) => {
-  await page.addInitScript(() => { Object.defineProperty(navigator, 'storage', { configurable: true, value: {} }); });
+  // F15 registers a real worker in production: emulate the missing browser APIs explicitly.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'storage', { configurable: true, value: {} });
+    Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: undefined });
+  });
   await page.goto('./#/settings'); await page.getByRole('button', { name: /^Protezione archivio/ }).click(); await expect(sheet(page).getByRole('status')).toHaveText('Non supportata'); await expect(sheet(page).getByRole('button', { name: 'Richiedi protezione' })).toHaveCount(0); await close(page);
   await page.getByRole('button', { name: /^Spazio utilizzato/ }).click(); await expect(sheet(page)).toContainText('Non disponibile'); await close(page);
   await page.getByRole('button', { name: /^Verifica aggiornamenti/ }).click(); await expect(sheet(page).getByRole('status')).toHaveText('Aggiornamenti non disponibili in questa versione'); await close(page);
