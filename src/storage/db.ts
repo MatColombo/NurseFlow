@@ -7,6 +7,7 @@ import { canRemoveRevision } from './procedure-removal';
 import type { BuilderState } from '@domain/builder/model';
 import type { PreviewSession } from '@domain/runtime/preview';
 import { canonical } from '@domain/validation/validator';
+import { canClearLocalData } from './local-data-removal';
 
 /** Internal persistence implementation. Features import storage/index instead. */
 export class NurseFlowDatabase extends Dexie {
@@ -34,10 +35,10 @@ export class NurseFlowDatabase extends Dexie {
         if (revision.state === 'ready') throw new ImmutableRecordError('Ready snapshots are write-once');
       });
       this.revisions.hook('deleting', (_id, revision, transaction) => {
-        if (revision.state === 'ready' && !canRemoveRevision(transaction, revision.procedureId)) throw new ImmutableRecordError('Ready snapshots cannot be deleted');
+        if (revision.state === 'ready' && !canRemoveRevision(transaction, revision.procedureId) && !canClearLocalData(transaction)) throw new ImmutableRecordError('Ready snapshots cannot be deleted');
       });
       this.mediaAssets.hook('updating', () => { throw new ImmutableRecordError('Media assets are write-once'); });
-      this.mediaAssets.hook('deleting', () => { throw new ImmutableRecordError('Asset GC is not enabled in F01'); });
+      this.mediaAssets.hook('deleting', (_id, _asset, transaction) => { if (!canClearLocalData(transaction)) throw new ImmutableRecordError('Asset GC is not enabled in F01'); });
       this.previewSessions.hook('updating', (changes, _id, session) => {
         const at = (value: unknown, path: string) => path.split('.').reduce<unknown>((current, part) => current && typeof current === 'object' ? (current as Record<string, unknown>)[part] : undefined, value);
         const frozen = ['procedureId', 'mode', 'run.id', 'run.procedureId', 'run.pinnedRevisionId', 'run.startedAt'];

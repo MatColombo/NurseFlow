@@ -21,8 +21,9 @@ async function records(page: Page, id = 'procedure') { await attachBuilderHarnes
 async function done(page: Page) { await page.getByRole('button', { name: 'Fine', exact: true }).click(); await expect(page.getByRole('toolbar', { name: 'Strumenti Builder', exact: true })).toBeVisible(); }
 async function expand(page: Page, label: RegExp) { const summary = page.locator('summary').filter({ hasText: label }); if (!(await summary.locator('..').evaluate((element) => (element as HTMLDetailsElement).open))) await summary.click(); }
 async function softLimit(page: Page, enabled: boolean) {
-  await page.goto('./#/settings'); const checkbox = page.getByRole('checkbox', { name: 'Limita nuovi media per passaggio', exact: true });
-  await expect(checkbox).toBeVisible(); await checkbox.setChecked(enabled); await expect.poll(async () => (await records(page)).settings?.mediaAddSoftLimit.enabled).toBe(enabled);
+  await page.goto('./#/settings'); await page.getByRole('button', { name: /^Limite nuove aggiunte/ }).click(); const checkbox = page.getByRole('checkbox', { name: 'Limita nuovi media per passaggio', exact: true });
+  await expect(checkbox).toBeVisible(); if (await checkbox.isChecked() !== enabled) await checkbox.click(); await expect.poll(async () => (await records(page)).settings?.mediaAddSoftLimit.enabled).toBe(enabled);
+  await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click();
 }
 async function addPhoto(page: Page, slot: 'before-note' | 'after-note', caption: string) {
   await expand(page, /^Media/); await page.locator(`[data-editor-gallery="${slot}"]`).getByRole('button', { name: 'Aggiungi foto', exact: true }).click();
@@ -69,6 +70,7 @@ test('Arrange cambia solo ordine, Undo/Redo Builder conserva ID/note/destinazion
 });
 
 test('media: upload reale, due gallerie, move/reorder/replace oltre soft cap; Blob e objectURL senza perdite', async ({ page }) => {
+  test.setTimeout(180_000); // Four real image imports plus Blob/hash checks in Windows WebKit.
   await setupBuilder(page); await softLimit(page, false); await openEditor(page);
   await page.evaluate(() => { const active: string[] = []; Object.assign(window, { F07Urls: active }); const create = URL.createObjectURL; const revoke = URL.revokeObjectURL;
     URL.createObjectURL = (blob) => { const url = create.call(URL, blob); active.push(url); return url; }; URL.revokeObjectURL = (url) => { const index = active.indexOf(url); if (index >= 0) active.splice(index, 1); revoke.call(URL, url); }; });

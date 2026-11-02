@@ -24,6 +24,6 @@ export function FirstLaunch({ onComplete }: { onComplete(): void }) {
     {error && <p role="alert">{t('library.saveError')}</p>}
     <Button variant="primary" disabled={busy || saveFailed} disabledReason={t('common.loading')}
       onClick={() => { void start(); }}>{error ? t('common.retry') : t('setup.start')}</Button>
-    <Link to="/data/app">{t('setup.import')}</Link>
+    <Link to="/data/app" state={{ dataReturn: '/setup' }}>{t('setup.import')}</Link>
   </section>;
 }

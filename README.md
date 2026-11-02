@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10** e Map/List **F11**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11** e Settings **F12**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -71,9 +71,19 @@ Le fixture non cliniche risiedono soltanto nei test e non vengono inserite in pr
 
 `src/shared/components` esporta Button, Card, Badge, Search, Sheet, Dialog, Icon, List/ListItem, GalleryFrame e ValidationRow. Token colore in `shared/styles/tokens.css`, geometria/tipografia in `shared/design-tokens/scale.ts`. Usare i token anche nelle prossime feature; nessun `transform: scale()` sulla pagina. Button disabilitato richiede `disabledReason`; le icone decorative sono escluse dal nome accessibile. GalleryFrame non carica autonomamente risorse.
 
-`/#/settings` espone Interfaccia di F02: lingua IT/EN, tema System/Light/Dark, scala unica 4–48pt e ripristino 13pt. I selettori usano Sheet con focus trap, Escape e ritorno focus. Cambi immediati, persistenza locale mediante `saveAppearance`; su errore rollback e Retry. F07 aggiunge le preferenze Immagini necessarie all'editor; le altre sezioni Page 10 arrivano in F12. I cataloghi i18next sono nel bundle, senza richieste HTTP o traduzione automatica dei contenuti authored.
+`/#/settings` riusa Interfaccia di F02: lingua IT/EN, tema System/Light/Dark, scala unica 4–48pt e ripristino 13pt. I selettori usano Sheet con focus trap, Escape e ritorno focus. Cambi immediati, persistenza locale mediante `saveAppearance`; su errore rollback e Retry. F12 completa Page 10 con media, dati locali e controlli applicativi descritti sotto. I cataloghi i18next sono nel bundle, senza richieste HTTP o traduzione automatica dei contenuti authored.
 
 Solo con `npm run dev`, `/#/dev/components` mostra i componenti con fixture neutre per ispezione e test; non modifica la libreria. Gli snapshot sono in `e2e/journeys/components.visual.spec.ts-snapshots/`. I test coprono 320/390/768px × 4/13/30/48pt, offset, icone, target, overflow, contrasti, etichette, focus e preferenze dopo reload. [ADR-003](docs/adr/003-ui-theme-scale-i18n.md) e [report F02](docs/reports/F02.md) documentano scelte, prove e limiti.
+
+## Settings F12
+
+Page 10 completa preferenze Interfaccia e Immagini con soft limit On 1..32/default 2 e Off che conserva il massimo; compressione Small/Medium/High/Original per importazioni locali successive. Le modifiche non cambiano contenuti authored, Blob già presenti, Ready o sessioni pinnate. Ogni preferenza autosalva indipendentemente e offre Retry su errore.
+
+I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route 11A e 11B, con ritorno a Settings. I relativi formati e download rimangono F13/F14. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
+
+Verifica aggiornamenti usa un eventuale worker registrato per lo scope dell'app, solo online e su richiesta. `Aggiorna quando inattiva` attende run/sessioni salvate, editor e salvataggi; un evento controllerchange da solo non forza reload. Install compare solo quando il browser espone il prompt; About è su richiesta. Registrazione del worker, manifest e cache offline restano F15.
+
+Advanced è inizialmente collassata. Reset vista preserva contenuto e record recenti. Clear offre export prima, due cautele e checkbox finale; verifica che il riepilogo sia ancora attuale e cancella/reinizializza in una transazione con rollback. Torna a First Launch solo dopo commit. [ADR-013](docs/adr/013-settings-and-local-data-controls.md) e [report F12](docs/reports/F12.md) documentano verifiche, matrice e limiti.
 
 ## GitHub Pages e `base`
 

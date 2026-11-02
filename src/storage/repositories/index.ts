@@ -9,6 +9,7 @@ import { builderRepository } from './builder';
 import { canonical } from '@domain/validation/validator';
 import { resumeRun, unwrap, viewRun } from '@domain/runtime';
 import { previewSessionSchema } from '@domain/runtime/preview';
+import { localInventory } from './settings';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -23,6 +24,11 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    localData: {
+      async inventory() { return db.transaction('r', db.tables, () => localInventory(db)); },
+      async hasSessions() { return db.transaction('r', [db.runSessions, db.previewSessions], async () => (await db.runSessions.count()) + (await db.previewSessions.count()) > 0); },
+      watchSessions(changed: () => void) { const subscription = liveQuery(() => db.transaction('r', [db.runSessions, db.previewSessions], async () => (await db.runSessions.count()) + (await db.previewSessions.count()))).subscribe({ next: changed, error: changed }); return () => subscription.unsubscribe(); },
+    },
     map: {
       async get(procedureId: string, revisionId?: string) {
         return db.transaction('r', [db.procedures, db.revisions], async () => {

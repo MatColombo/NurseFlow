@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@shared/components';
-import { libraryService } from '@features/library/service';
-import type { LibraryViewState } from '@domain/model';
-
+import { Button, Sheet } from '@shared/components';
+import { readStorageInfo, requestStorageProtection, type StorageInfo } from './browser-storage';
 export function StoragePersistence() {
-  const { t } = useTranslation(); const [status, setStatus] = useState<LibraryViewState['persistenceStatus']>('not-requested');
-  useEffect(() => { void libraryService.persistenceStatus().then(setStatus, () => setStatus('error')); }, []);
-  return <section className="nf-card nf-stack" aria-label={t('persistence.title')}>
-    <h3>{t('persistence.title')}</h3><p role="status">{t(`persistence.${status}`)}</p><p className="nf-note">{t('persistence.backup')}</p>
-    {status !== 'granted' && status !== 'unsupported' && <Button onClick={() => {
-      void libraryService.requestPersistence().then(setStatus, () => setStatus('error'));
-    }}>{t('common.retry')}</Button>}
+  const { t, i18n } = useTranslation(); const [info, setInfo] = useState<StorageInfo | null>(null); const [sheet, setSheet] = useState<'protection' | 'usage' | null>(null); const [busy, setBusy] = useState(false);
+  useEffect(() => { let active = true; void readStorageInfo().then((value) => { if (active) setInfo(value); }); return () => { active = false; }; }, []);
+  const bytes = (value: number) => {
+    const exponent = value >= 1024 ** 3 ? 3 : value >= 1024 ** 2 ? 2 : value >= 1024 ? 1 : 0;
+    return new Intl.NumberFormat(i18n.resolvedLanguage, { style: 'unit', unit: ['byte', 'kilobyte', 'megabyte', 'gigabyte'][exponent]!, maximumFractionDigits: 1 }).format(value / 1024 ** exponent);
+  };
+  return <section className="nf-settings-section nf-stack" aria-label={t('settings.local')}>
+    <h3>{t('settings.local')}</h3>
+    <Link className="nf-button nf-preference" to="/data/procedures"><span>{t('pages.11A')}</span><span aria-hidden="true">›</span></Link>
+    <Link className="nf-button nf-preference" to="/data/app"><span>{t('pages.11B')}</span><span aria-hidden="true">›</span></Link>
+    <Button className="nf-preference" onClick={() => setSheet('protection')}><span>{t('settings.protection')}</span><span>{t('settings.storage.' + (info?.protection ?? 'loading'))} ›</span></Button>
+    <Button className="nf-preference" onClick={() => setSheet('usage')}><span>{t('settings.usage')}</span><span>{info?.estimate ? '≈ ' + bytes(info.estimate.usage) : t('settings.storage.unavailable')} ›</span></Button>
+    <Sheet open={sheet !== null} title={t(sheet === 'protection' ? 'settings.protection' : 'settings.usage')} onClose={() => setSheet(null)}>
+      {sheet === 'protection' ? <><p role="status">{t('settings.storage.' + (info?.protection ?? 'loading'))}</p><p>{t('persistence.backup')}</p>
+        {info?.canRequest && <Button disabled={busy} disabledReason={t('common.loading')} onClick={() => { setBusy(true); void requestStorageProtection().then(setInfo).finally(() => setBusy(false)); }}>{t('settings.requestProtection')}</Button>}</> :
+        <><p>{info?.estimate ? '≈ ' + bytes(info.estimate.usage) : t('settings.storage.unavailable')}</p>{info?.estimate?.quota !== undefined && <p>{t('settings.quota', { value: bytes(info.estimate.quota) })}</p>}<p>{t('settings.estimateNote')}</p></>}
+    </Sheet>
   </section>;
 }

@@ -1,0 +1,12 @@
+.nf-settings-page { gap: var(--nf-space-3); }
+.nf-settings-page > .nf-card { border: 0; padding: 0; background: transparent; }
+.nf-settings-page .nf-preference { min-block-size: 48px; text-align: start; }
+.nf-settings-page .nf-button, .nf-settings-page input[type='range'] { min-block-size: max(48px, var(--nf-control-min)); }
+.nf-settings-page .nf-preference > span { align-items: center; }
+.nf-settings-page .nf-preference > span > span { flex: 1 1 auto; }
+.nf-settings-page a.nf-preference > span:first-child { flex: 1 1 auto; }
+.nf-settings-page a.nf-preference > span:last-child { flex: 0 0 auto; }
+.nf-settings-section, .nf-settings-advanced { padding-block-start: var(--nf-space-2); border-block-start: 1px solid var(--nf-border); }
+.nf-settings-advanced > div { padding-block: var(--nf-space-2); }
+.nf-settings-fields { border: 0; padding: 0; }
+.nf-settings-fields select { inline-size: 100%; min-block-size: 48px; padding: min(var(--nf-control-pad), 4vw); }

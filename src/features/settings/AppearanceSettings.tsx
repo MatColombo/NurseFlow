@@ -4,7 +4,7 @@ import { useAppearance } from '@app/appearance-context';
 import { AppearanceSaveError } from '@app/AppearanceSaveError';
 import { Button, Card, List, ListItem, Sheet } from '@shared/components';
 
-/** F02 interface preferences only. Remaining Page 10 sections belong to F12. */
+/** The same global appearance controls are used by Settings and the development showcase. */
 export function AppearanceSettings() {
   const { preferences, update } = useAppearance();
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export function AppearanceSettings() {
       <h3>{t('appearance.interface')}</h3>
       <List>{(['locale', 'uiScalePt', 'theme'] as const).map((key) => <ListItem key={key}>
         <Button className="nf-preference" onClick={() => setPicker(key)} aria-haspopup="dialog" aria-label={`${titles[key]} ${values[key]}`}>
-          <span>{titles[key]}</span><span>{values[key]}</span>
+          <span>{titles[key]}</span><span>{values[key]} <span aria-hidden="true">›</span></span>
         </Button>
       </ListItem>)}</List>
       <Button onClick={() => update({ uiScalePt: 13 })}>{t('appearance.reset')}</Button>

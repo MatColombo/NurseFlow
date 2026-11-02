@@ -160,7 +160,7 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
       <ul className="nf-list nf-recent-overflow">{recent.map((procedure) => row(procedure, true))}</ul>
     </Sheet>
     <Dialog open={modal === 'app'} title={t('library.more')} onClose={() => setModal(null)}>
-      <Link to="/data/app">{t('pages.11B')}</Link><Link to="/settings">{t('pages.10')}</Link>
+      <Link to="/data/app" state={{ dataReturn: '/library' }}>{t('pages.11B')}</Link><Link to="/settings">{t('pages.10')}</Link>
       <Button onClick={() => setModal('archived')}>{t('procedure.archivedList')}</Button>
     </Dialog>
     <Sheet open={modal === 'archived'} title={t('procedure.archivedList')} onClose={() => setModal(null)}>

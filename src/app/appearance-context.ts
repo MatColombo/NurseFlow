@@ -6,6 +6,8 @@ export interface AppearanceContextValue {
   update(patch: Partial<Appearance>): void;
   saveFailed: boolean;
   retry(): void;
+  flush(): Promise<void>;
+  acceptCommitted(value: Appearance): void;
 }
 export const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 export function useAppearance() {

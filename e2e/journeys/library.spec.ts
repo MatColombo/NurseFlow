@@ -29,12 +29,12 @@ for (const outcome of ['granted', 'denied', 'unsupported', 'error'] as const) te
     // Replace the manager, rather than one transient WebKit StorageManager wrapper.
     Object.defineProperty(navigator, 'storage', { value: {
       persist: outcome === 'unsupported' ? undefined : () => outcome === 'error' ? Promise.reject(new Error('Denied')) : Promise.resolve(outcome === 'granted'),
-      persisted: () => Promise.resolve(outcome === 'granted'),
+      persisted: outcome === 'unsupported' ? undefined : () => outcome === 'error' ? Promise.reject(new Error('Unavailable')) : Promise.resolve(outcome === 'granted'),
     } });
   }, outcome);
   await completeSetup(page); await page.goto('./#/settings');
-  await expect(page.getByText(outcome === 'granted' ? 'Persistenza concessa dal browser.' : outcome === 'denied' ? 'Persistenza non concessa dal browser.' : outcome === 'error'
-    ? 'Stato di persistenza non disponibile.' : 'Richiesta di persistenza non supportata.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /^Protezione archivio/ }).click();
+  await expect(page.getByRole('dialog').getByRole('status')).toHaveText(outcome === 'granted' ? 'Concessa' : outcome === 'denied' ? 'Non concessa' : outcome === 'error' ? 'Non disponibile' : 'Non supportata');
 });
 
 test('browser locale non supportato usa English', async ({ page }) => {

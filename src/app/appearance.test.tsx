@@ -26,7 +26,7 @@ describe('Preferenze UI', () => {
   it('segue System anche quando l’OS cambia, e conserva l’override esplicito', async () => {
     const save = vi.fn(async (value: Appearance) => value);
     render(<App appearanceService={service({ save })} />);
-    await screen.findByRole('heading', { name: 'Impostazioni', level: 2 });
+    await screen.findByRole('heading', { name: 'Impostazioni', level: 1 });
     expect(document.documentElement.dataset.theme).toBe('light');
     act(() => { osDark = true; query.dispatchEvent(new Event('change')); });
     expect(document.documentElement.dataset.theme).toBe('dark');
@@ -82,7 +82,7 @@ describe('Preferenze UI', () => {
     render(<App appearanceService={service({ load })} />);
     expect(await screen.findByRole('alert')).toHaveTextContent('IndexedDB deve essere accessibile');
     fireEvent.click(screen.getByRole('button', { name: 'Riprova' }));
-    expect(await screen.findByRole('heading', { name: 'Impostazioni', level: 2 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Impostazioni', level: 1 })).toBeInTheDocument();
   });
   it('IT/EN funziona offline e aggiorna document.lang', async () => {
     render(<App appearanceService={service()} />);
@@ -90,6 +90,6 @@ describe('Preferenze UI', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'English' }));
     expect(await screen.findByRole('button', { name: 'Close' })).toBeInTheDocument();
     expect(document.documentElement.lang).toBe('en');
-    expect(screen.getByRole('heading', { name: 'Settings', level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Settings', level: 1 })).toBeInTheDocument();
   });
 });

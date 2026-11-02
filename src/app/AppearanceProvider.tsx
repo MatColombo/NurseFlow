@@ -69,12 +69,18 @@ export function AppearanceProvider({ service, children }: PropsWithChildren<{ se
       }
     });
   }, [service]);
+  const flush = useCallback(async () => { await queue.current; if (failed.current) throw new Error('Appearance not saved'); }, []);
+  const acceptCommitted = useCallback(({ locale, theme, uiScalePt }: Appearance) => {
+    const value = { locale, theme, uiScalePt };
+    generation.current++; desired.current = committed.current = value; failed.current = null;
+    setPreferences(value); setSaveFailed(false);
+  }, []);
 
   if (status === 'loading') return <p role="status">{t('common.loading')}</p>;
   if (status === 'error') return <Card><p role="alert">{t('library.loadError')}</p>
     <Button onClick={() => { setStatus('loading'); void load(); }}>{t('common.retry')}</Button></Card>;
   return (
-    <AppearanceContext value={{ preferences, update, saveFailed, retry: () => { if (failed.current) update(failed.current); } }}>
+    <AppearanceContext value={{ preferences, update, saveFailed, flush, acceptCommitted, retry: () => { if (failed.current) update(failed.current); } }}>
       <AppearanceSaveError />
       {children}
     </AppearanceContext>
