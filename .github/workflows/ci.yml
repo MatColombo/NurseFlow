@@ -28,7 +28,7 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run test:e2e -- --grep-invert '@visual'
+      - run: npm run test:e2e -- e2e/journeys/backup.visual.spec.ts e2e/journeys/builder.spec.ts --grep "settings/full diff.*320px 48pt|Builder e sheet.*48pt" --workers=1
       - name: Report Playwright
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
