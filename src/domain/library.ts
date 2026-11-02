@@ -22,7 +22,7 @@ export function hasFilters(filters: LibraryFilters) {
   return filters.quick !== 'all' || filters.groupIds.length > 0 || filters.tags.length > 0 || filters.priority !== 'any'
     || filters.status !== 'all' || filters.includeSteps;
 }
-function stepText(revision: Revision | undefined): string {
+export function stepText(revision: Revision | undefined): string {
   if (!revision) return '';
   return revision.graph.nodes.map((node) => {
     const parts: string[] = [];

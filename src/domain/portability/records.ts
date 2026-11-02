@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { groupSchema, mediaAssetSchema, procedureSchema, revisionSchema, runSessionSchema } from '@domain/model';
 import type { Destination, Graph, Procedure, Revision, RunSession } from '@domain/model';
-import { assertGraphReferences, assertRunReferences, invariant, uniqueIds } from '@domain/model/integrity';
+import { assertGraphReferences, assertRunReferences, destinations, invariant, uniqueIds } from '@domain/model/integrity';
 import { ROOT_TOKEN, activityTokenId } from '@domain/runtime/model';
 
 // Internal record staging only. Archive parsing/security and scope routing are F13/F14.
@@ -63,6 +63,7 @@ export function prepareImportedRecords(input: unknown, newId: () => string): Imp
     ...batch.revisions.map((item) => item.id), ...batch.mediaAssets.map((item) => item.id),
     ...batch.runSessions.map((item) => item.id),
     ...batch.revisions.flatMap((item) => [...graphIdentities(item.graph), ...assetReferences(item.graph)]),
+    ...batch.revisions.flatMap((item) => item.graph.nodes.flatMap((node) => destinations(node).flatMap((destination) => destination.kind === 'broken' ? [destination.formerNodeId] : []))),
   ]));
   const generated = new Set<string>();
   const freshId = () => {
@@ -156,7 +157,7 @@ export function prepareImportedRecords(input: unknown, newId: () => string): Imp
       revisions: batch.revisions.map((revision): Revision => ({ ...revision, id: mapped(revisionIds, revision.id),
         procedureId: mapped(procedureIds, revision.procedureId), graph: remapGraph(revision.graph, graphMap(revision.procedureId)),
         ...(revision.state === 'ready' ? { warningsAtConfirmation: revision.warningsAtConfirmation.map((warning) => ({ ...warning,
-          ...(warning.locationId !== undefined ? { locationId: mapped(new Map([...assetIds, ...graphMap(revision.procedureId)]), warning.locationId) } : {}) })) } : {}),
+          ...(warning.locationId !== undefined ? { locationId: new Map([...assetIds, ...graphMap(revision.procedureId)]).get(warning.locationId) ?? warning.locationId } : {}) })) } : {}),
       })),
       mediaAssets: batch.mediaAssets.filter((asset) => usedAssets.has(asset.id)).map((asset) => ({ ...asset, id: mapped(assetIds, asset.id) })),
       runSessions: batch.runSessions.map(remapRun),

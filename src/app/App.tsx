@@ -7,7 +7,7 @@ import { ApplicationGate } from '@features/settings/ApplicationGate';
 function AppFrame() {
   const { pathname } = useLocation();
   const map = /^\/procedure\/[^/]+\/map$/.test(pathname);
-  const primary = map || ['/', '/setup', '/library', '/new', '/settings'].includes(pathname) || /^\/(procedure|build)\/[^/]+$/.test(pathname) || /^\/build\/[^/]+\/(step\/[^/]+|check)$/.test(pathname) || /^\/run\/[^/]+(\/end)?$/.test(pathname);
+  const primary = map || ['/', '/setup', '/library', '/new', '/settings', '/data/procedures'].includes(pathname) || /^\/(procedure|build)\/[^/]+$/.test(pathname) || /^\/build\/[^/]+\/(step\/[^/]+|check)$/.test(pathname) || /^\/run\/[^/]+(\/end)?$/.test(pathname);
   return <><ApplicationGate /><main className={'nf-stack' + (map ? ' nf-map-frame' : '')}>{!primary && <h1>NurseFlow</h1>}<AppRoutes /></main></>;
 }
 

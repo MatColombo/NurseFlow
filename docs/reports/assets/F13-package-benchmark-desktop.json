@@ -1,0 +1,104 @@
+﻿[
+    {
+        "browser":  "chromium",
+        "limits":  {
+                       "bytes":  134217728,
+                       "batchBytes":  134217728,
+                       "entries":  10000,
+                       "jsonBytes":  8388608,
+                       "jsonUnits":  250000,
+                       "files":  32
+                   },
+        "measurements":  [
+                             {
+                                 "mib":  8,
+                                 "entries":  2,
+                                 "bytes":  8388858,
+                                 "writeMs":  568.5,
+                                 "readMs":  566.1999999992549
+                             },
+                             {
+                                 "mib":  32,
+                                 "entries":  5,
+                                 "bytes":  33555006,
+                                 "writeMs":  1077.0999999996275,
+                                 "readMs":  386.40000000037253
+                             },
+                             {
+                                 "mib":  96,
+                                 "entries":  13,
+                                 "bytes":  100664734,
+                                 "writeMs":  848.1999999992549,
+                                 "readMs":  558.5999999996275
+                             }
+                         ]
+    },
+    {
+        "browser":  "firefox",
+        "limits":  {
+                       "bytes":  134217728,
+                       "batchBytes":  134217728,
+                       "entries":  10000,
+                       "jsonBytes":  8388608,
+                       "jsonUnits":  250000,
+                       "files":  32
+                   },
+        "measurements":  [
+                             {
+                                 "mib":  8,
+                                 "entries":  2,
+                                 "bytes":  8388858,
+                                 "writeMs":  416,
+                                 "readMs":  337
+                             },
+                             {
+                                 "mib":  32,
+                                 "entries":  5,
+                                 "bytes":  33555006,
+                                 "writeMs":  1069,
+                                 "readMs":  874
+                             },
+                             {
+                                 "mib":  96,
+                                 "entries":  13,
+                                 "bytes":  100664734,
+                                 "writeMs":  2758,
+                                 "readMs":  2403
+                             }
+                         ]
+    },
+    {
+        "browser":  "webkit",
+        "limits":  {
+                       "bytes":  134217728,
+                       "batchBytes":  134217728,
+                       "entries":  10000,
+                       "jsonBytes":  8388608,
+                       "jsonUnits":  250000,
+                       "files":  32
+                   },
+        "measurements":  [
+                             {
+                                 "mib":  8,
+                                 "entries":  2,
+                                 "bytes":  8388858,
+                                 "writeMs":  757,
+                                 "readMs":  507
+                             },
+                             {
+                                 "mib":  32,
+                                 "entries":  5,
+                                 "bytes":  33555006,
+                                 "writeMs":  1870,
+                                 "readMs":  2253
+                             },
+                             {
+                                 "mib":  96,
+                                 "entries":  13,
+                                 "bytes":  100664734,
+                                 "writeMs":  6173,
+                                 "readMs":  5076
+                             }
+                         ]
+    }
+]

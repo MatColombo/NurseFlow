@@ -10,6 +10,7 @@ import { canonical } from '@domain/validation/validator';
 import { resumeRun, unwrap, viewRun } from '@domain/runtime';
 import { previewSessionSchema } from '@domain/runtime/preview';
 import { localInventory } from './settings';
+import { portabilityRepository } from './portability';
 
 function reader<T extends { id: string }>(table: Table<T, string>, schema: z.ZodType<T>) {
   return {
@@ -24,6 +25,7 @@ function reader<T extends { id: string }>(table: Table<T, string>, schema: z.Zod
 // Detached, schema-checked values only: no Table, Dexie or generic write capability.
 export function createRepositories(db: NurseFlowDatabase) {
   return {
+    portability: portabilityRepository(db),
     localData: {
       async inventory() { return db.transaction('r', db.tables, () => localInventory(db)); },
       async hasSessions() { return db.transaction('r', [db.runSessions, db.previewSessions], async () => (await db.runSessions.count()) + (await db.previewSessions.count()) > 0); },

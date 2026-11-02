@@ -7,6 +7,7 @@ import { checkResources } from './check-resources';
 import { runResources } from './run-resources';
 import { mapResources } from './map-resources';
 import { settingsResources } from './settings-resources';
+import { portableResources } from './portable-resources';
 export const resources = {
   it: { translation: {
     ...libraryResources.it,
@@ -18,6 +19,7 @@ export const resources = {
     ...runResources.it,
     ...mapResources.it,
     ...settingsResources.it,
+    ...portableResources.it,
     common: { close: 'Chiudi', cancel: 'Annulla', retry: 'Riprova', back: 'Indietro', loading: 'Caricamento…',
       library: 'Torna alla libreria', search: 'Cerca', clearSearch: 'Cancella ricerca' },
     shell: { preview: 'Anteprima tecnica F02', pending: 'Pagina {{page}}: funzionalità non ancora implementata.',
@@ -44,6 +46,7 @@ export const resources = {
     ...runResources.en,
     ...mapResources.en,
     ...settingsResources.en,
+    ...portableResources.en,
     common: { close: 'Close', cancel: 'Cancel', retry: 'Retry', back: 'Back', loading: 'Loading…',
       library: 'Return to Library', search: 'Search', clearSearch: 'Clear search' },
     shell: { preview: 'F02 technical preview', pending: 'Page {{page}}: feature not implemented yet.',

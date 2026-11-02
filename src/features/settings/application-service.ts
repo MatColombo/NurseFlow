@@ -17,10 +17,10 @@ export function createApplicationService(environment: ApplicationEnvironment) {
     snapshot = { ...snapshot, ...patch }; listeners.forEach((listener) => listener());
   }
   async function idle() {
-    if (/^\/(run|build)\//.test(path) || environment.pending()) return false;
+    if (/^\/(run|build|data)\//.test(path) || environment.pending()) return false;
     await environment.flush();
     const sessions = await environment.hasSessions();
-    return !sessions && !environment.pending() && !/^\/(run|build)\//.test(path);
+    return !sessions && !environment.pending() && !/^\/(run|build|data)\//.test(path);
   }
   function whenIdle(): Promise<void> {
     if (!queued) return Promise.resolve(); if (idlePromise) return idlePromise;

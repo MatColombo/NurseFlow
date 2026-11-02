@@ -11,6 +11,8 @@ import { BuilderPage } from '@features/builder/BuilderPage';
 import StepEditorPage from '@features/step-editor/StepEditorPage';
 import CheckPage from '@features/check/CheckPage';
 import RunPage from '@features/run/RunPage';
+import ProceduresDataPage from '@features/portability/ProceduresDataPage';
+import { AppScopeGuard } from '@features/portability/AppScopeGuard';
 
 type Page = typeof routeDefinitions[number]['page'];
 export function RouteContent({ page }: { page: Page }) {
@@ -26,12 +28,13 @@ export function RouteContent({ page }: { page: Page }) {
   if (page === '08') return <StepEditorPage key={`${parameters.id}-${parameters.nodeId}`} />;
   if (page === '09') return <CheckPage key={parameters.id} />;
   if (page === '10') return <SettingsPage />;
+  if (page === '11A') return <ProceduresDataPage />;
   if (page === '03' || page === '04') return <RunPage key={`${parameters.id}-${search.get('preview')}-${search.get('revision')}`} />;
   const content = <section className="nf-stack" aria-labelledby="page-title">
     <h2 id="page-title" className="nf-title">{t(`pages.${page}`)}</h2>
     <Card><p>{t('shell.preview')}</p><p className="nf-note">{t('shell.pending', { page })}</p></Card>
     {import.meta.env.DEV && Object.entries(parameters).map(([name, value]) => <p key={name}>{name}: <code>{value}</code></p>)}
-    {(page === '11A' || page === '11B') && <Link to={['/setup', '/library'].includes(location.state?.dataReturn) ? location.state.dataReturn : '/settings'}>{t('common.back')}</Link>}
+    {page === '11B' && <><AppScopeGuard /><Link to={['/setup', '/library'].includes(location.state?.dataReturn) ? location.state.dataReturn : '/settings'}>{t('common.back')}</Link></>}
   </section>;
   return content;
 }

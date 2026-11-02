@@ -1,0 +1,28 @@
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import { AppearanceContext } from '@app/appearance-context';
+import { createUiI18n } from '@shared/i18n';
+import { portableRecords } from '@test/fixtures/portable';
+import { manifestSchema } from '@domain/portability/package-schema';
+import { ImportSection } from './ImportSection';
+import { portabilityService } from './service';
+import * as browserStorage from '@features/settings/browser-storage';
+afterEach(() => vi.restoreAllMocks());
+it('E11 stage defaults to selected, preview does not require selection, Cancel is read-only and quota Retry waits for the durable commit', async () => {
+  const records = await portableRecords(2, false);
+  vi.spyOn(browserStorage, 'readStorageInfo').mockResolvedValue({ protection: 'denied', canRequest: true, estimate: { usage: 1024 ** 2, quota: 3 * 1024 ** 2 } });
+  const file = { id: 'file', name: 'source.nflib', bytes: 10, parsed: { manifest: manifestSchema.parse({ format: 'nurseflow-portable', formatVersion: 1, schemaVersion: 1, packageKind: 'library', packageId: 'source', exportedAt: '2026-11-02T00:00:00Z', appVersion: '0.0.0', counts: { procedures: 2, groups: 3, revisions: 3, media: 0, runs: 0 }, entries: [], missingAssets: [] }), records, warnings: new Map() } };
+  vi.spyOn(portabilityService, 'stage').mockResolvedValue({ valid: [file], rejected: [] });
+  let finish: (value: { procedureIds: string[]; runIds: string[] }) => void = () => {};
+  const commit = vi.spyOn(portabilityService, 'importSelected').mockRejectedValueOnce(new DOMException('quota', 'QuotaExceededError')).mockImplementation(() => new Promise((resolve) => { finish = resolve; }));
+  const imported = vi.fn(); const preview = vi.fn(); render(<I18nextProvider i18n={createUiI18n()}><AppearanceContext value={{ preferences: { locale: 'it', uiScalePt: 13, theme: 'light' }, update: vi.fn(), saveFailed: false, retry: vi.fn(), flush: async () => {}, acceptCommitted: vi.fn() }}><MemoryRouter><ImportSection local={[]} imported={imported} preview={preview} /></MemoryRouter></AppearanceContext></I18nextProvider>);
+  fireEvent.change(screen.getByLabelText('Carica uno o più file'), { target: { files: [new File(['x'], 'source.nflib')] } }); await screen.findByText('2 selezionate / 2 visibili');
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Cartoncino 0' })); fireEvent.click(screen.getByRole('button', { name: 'Anteprima: Cartoncino 0' })); expect(preview).toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Importa le procedure selezionate' })); let dialog = screen.getByRole('dialog'); expect(await within(dialog).findByText('Quota disponibile stimata: ≈ 2 MiB')).toBeVisible(); fireEvent.click(within(dialog).getByRole('button', { name: 'Annulla' })); expect(commit).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Importa le procedure selezionate' })); dialog = screen.getByRole('dialog'); fireEvent.click(within(dialog).getByRole('button', { name: 'Aggiungi come copie' }));
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent('Nessun dato è stato aggiunto'); expect(imported).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Riprova' })); await waitFor(() => expect(commit).toHaveBeenCalledTimes(2)); expect(screen.queryByText('1 procedure aggiunte')).toBeNull();
+  finish({ procedureIds: ['copy'], runIds: [] }); expect(await screen.findByRole('heading', { name: '1 procedure aggiunte' })).toBeVisible(); expect(imported).toHaveBeenCalledTimes(1);
+});

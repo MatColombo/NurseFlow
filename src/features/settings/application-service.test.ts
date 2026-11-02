@@ -16,7 +16,7 @@ describe('F12 actual update capability and idle activation', () => {
     const { service, environment, worker } = setup(); await service.check(); expect(service.getSnapshot().update).toBe('available');
     await service.controllerChanged(); service.later(); expect(environment.reload).not.toHaveBeenCalled(); expect(worker.postMessage).not.toHaveBeenCalled();
   });
-  it.each(['/run/id', '/run/id/end', '/build/id', '/build/id/step/node'])('never activates or reloads while %s is open', async (path) => {
+  it.each(['/run/id', '/run/id/end', '/build/id', '/build/id/step/node', '/data/procedures', '/data/app'])('never activates or reloads while %s is open', async (path) => {
     const { service, worker, environment } = setup(); await service.check(); service.setPath(path); service.defer(); await service.whenIdle(); await service.controllerChanged();
     expect(worker.postMessage).not.toHaveBeenCalled(); expect(environment.reload).not.toHaveBeenCalled();
   });

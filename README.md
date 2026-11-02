@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11** e Settings **F12**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12** e pacchetti/11A **F13**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -61,7 +61,7 @@ storage.close();
 - `createDraft` aggiunge procedura, Draft e asset preparati atomicamente. Con `{ procedureId }` riapre la Draft esistente o ne crea una indipendente dalla Ready; `updateDraft` salva grafo/asset con controllo `expectedEditVersion`.
 - Page 09 usa `checkDraft`/`markCheckedReady`: validatore P/W concreto, lettura durabile, token anti-stale, nuova snapshot e puntatore Ready nella stessa transazione. `markReadyUnitOfWork` resta l'API interna con validatore sincrono esplicito del nucleo F01; nessun validatore permissivo predefinito.
 - F09: `startOrResumeReady`, `resumeRunSession` e `transitionRun` usano il reducer puro OR/AND e la Ready pinnata. Ogni evento riceve la `saveVersion` visualizzata; conflitti e quota non avanzano la run. `finishRun` elimina soltanto la sessione sul suo End authored. `saveRun` resta l'API interna di staging con controllo identità/versione e invarianti del percorso.
-- `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. Formato file, sicurezza archivi, staging/preview e consenso Settings sono F13/F14.
+- `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. F13 prepara e valida i pacchetti procedure/library prima di invocarlo; consenso Settings e full backup restano F14.
 
 Il DB ha nove tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03; v4 aggiunge la cronologia Builder; v5 aggiunge le sessioni Draft Preview indipendenti, senza cambiare snapshot, run, asset o preferenze esistenti. Ready e Blob non sono sovrascrivibili; non viene eseguita garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
@@ -79,11 +79,21 @@ Solo con `npm run dev`, `/#/dev/components` mostra i componenti con fixture neut
 
 Page 10 completa preferenze Interfaccia e Immagini con soft limit On 1..32/default 2 e Off che conserva il massimo; compressione Small/Medium/High/Original per importazioni locali successive. Le modifiche non cambiano contenuti authored, Blob già presenti, Ready o sessioni pinnate. Ogni preferenza autosalva indipendentemente e offre Retry su errore.
 
-I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route 11A e 11B, con ritorno a Settings. I relativi formati e download rimangono F13/F14. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
+I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route 11A e 11B, con ritorno a Settings. 11A e i suoi download sono F13; le funzionalità complete di 11B rimangono F14. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
 
 Verifica aggiornamenti usa un eventuale worker registrato per lo scope dell'app, solo online e su richiesta. `Aggiorna quando inattiva` attende run/sessioni salvate, editor e salvataggi; un evento controllerchange da solo non forza reload. Install compare solo quando il browser espone il prompt; About è su richiesta. Registrazione del worker, manifest e cache offline restano F15.
 
 Advanced è inizialmente collassata. Reset vista preserva contenuto e record recenti. Clear offre export prima, due cautele e checkbox finale; verifica che il riepilogo sia ancora attuale e cancella/reinizializza in una transazione con rollback. Torna a First Launch solo dopo commit. [ADR-013](docs/adr/013-settings-and-local-data-controls.md) e [report F12](docs/reports/F12.md) documentano verifiche, matrice e limiti.
+
+## Procedure e libreria F13
+
+`/#/data/procedures` usa procedure e gruppi reali, ricerca locale anche nei contenuti Ready/Draft, filtri gruppo/etichetta e checkbox. Le selezioni nascoste restano attive: Seleziona gruppo comprende tutti i membri, Seleziona visibili soltanto i risultati. Il comando indipendente Esporta tutta la libreria ignora la scelta manuale. L'ingresso dai Details/Builder con `?procedure=id` preseleziona quel record; l'ingresso ordinario parte senza scelte.
+
+Il file preparato è un pacchetto ZIP stored `.nfproc` (una scelta) o `.nflib` (più scelte o intera libreria), con manifest versionata, CRC/SHA-256 e immagini locali separate; conserva tutte le revisioni, metadata, gruppi necessari e riferimenti remoti, escludendo run e Settings. Download/Share sono consegne al browser/sistema, senza promessa di backup conservato.
+
+Import accetta più pacchetti, verifica sicurezza/schema/hash/raster/riferimenti e prepara candidati effimeri tutti selezionati. Preview List/inspector mostra contenuti reali, Blob isolati e W07/W08, senza eseguire run o caricare URL remoti. Conferma aggiunge solo le scelte, con nuove identità e transazione atomica; quota e altri errori fanno rollback. Ready valide restano subito Ready, Draft incomplete restano Draft. Nomi/gruppi uguali creano copie indipendenti. Settings/full vengono rifiutati con collegamento 11B; in 11B è attivo il solo rifiuto reciproco F13, mentre import/export Settings/full è F14.
+
+Profilo ZIP e limiti documentati in [formato v1](docs/portable-format-v1.md) e [ADR-014](docs/adr/014-portable-packages-and-additive-staging.md). Non ricomprimere i pacchetti con strumenti esterni: v1 accetta solo il proprio profilo stored. File/batch massimo 128 MiB, errori espliciti per selezioni oltre soglia. [Report F13](docs/reports/F13.md) per prove, benchmark e limiti fisici/mobile ancora da verificare.
 
 ## GitHub Pages e `base`
 
@@ -128,7 +138,7 @@ Dettagli tecnici: [ADR-004](docs/adr/004-first-launch-library.md). Comandi, esit
 
 `/#/procedure/:id` legge metadati e revisioni reali. Draft-only: Modifica grafo, Anteprima bozza, Mappa; Ready-only: Avvia, Mappa e copia di lavoro per Modifica; Ready+Draft: Avvia Ready, Mappa Ready e Continua modifica della Draft. Aprire l'editor di una Ready-only non crea una Draft prima del primo cambiamento del grafo. I destinatari ricevono e verificano l'ID della revisione. Avvia/Riprendi salva o riusa una sessione pinned e apre Guided Run F10, anche quando la sessione è già sul suo End.
 
-Il menu More offre modifica metadati con autosave, duplicazione come Draft indipendente, collegamento export alla futura 11A, archiviazione e cancellazione confermata. Le sessioni salvate impediscono la cancellazione; Ready e Blob restano protetti dalle scritture ordinarie. L'elenco Archiviate nel menu Library permette di riaprire e ripristinare le procedure. Esporta non produce ancora file: formato e download sono F13.
+Il menu More offre modifica metadati con autosave, duplicazione come Draft indipendente, collegamento export a 11A con procedura preselezionata, archiviazione e cancellazione confermata. Le sessioni salvate impediscono la cancellazione; Ready e Blob restano protetti dalle scritture ordinarie. L'elenco Archiviate nel menu Library permette di riaprire e ripristinare le procedure. Da F13 Esporta prepara pacchetti e download reali.
 
 `/#/new` richiede soltanto il nome (massimo 120 caratteri), con gruppo singolo e tag; Altri dettagli apre ribbon, priorità, alias e descrizione. Il picker permette di creare un gruppo senza perdere il form. Crea bozza salva metadati, Draft e un solo Start editoriale in transazione, poi apre Builder. Nessun passaggio clinico o Ready precompilato. Back conferma lo scarto degli input; gli errori di salvataggio mantengono i valori e offrono Retry. La lingua UI non traduce il contenuto authored.
 
