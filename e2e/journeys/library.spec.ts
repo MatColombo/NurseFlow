@@ -126,7 +126,9 @@ test('gruppi: creazione/duplicato/rinomina/ordine/collapse e cancellazione conse
   await page.getByRole('button', { name: 'Rinomina', exact: true }).click();
   dialog = page.getByRole('dialog', { name: 'Rinomina', exact: true });
   await dialog.getByRole('textbox').fill('Rinominato'); await dialog.getByRole('button', { name: 'Applica', exact: true }).click();
-  await page.getByRole('button', { name: /Materiali \(13\)/ }).click(); await page.reload();
+  await page.getByRole('button', { name: /Materiali \(13\)/ }).click();
+  await attachLibraryHarness(page); await expect.poll(() => page.evaluate(async () => (await window.NurseFlowF03.inspectLibrary()).view?.collapsedGroupIds)).toContain('materials');
+  await page.reload();
   await expect(page.getByRole('button', { name: /Materiali \(13\)/ })).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('button', { name: 'Gestisci gruppo Materiali', exact: true }).click();
   await page.getByRole('button', { name: 'Elimina gruppo', exact: true }).click();

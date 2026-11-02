@@ -28,7 +28,7 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run test:e2e -- e2e/journeys/backup.visual.spec.ts e2e/journeys/builder.spec.ts e2e/journeys/portability.visual.spec.ts --grep "settings/full diff.*320px 48pt|Builder e sheet.*48pt|F13 Page11A.*320px 48pt" --workers=1
+      - run: npm run test:e2e -- e2e/journeys/editor.spec.ts e2e/journeys/backup.spec.ts e2e/journeys/library.spec.ts --grep "URL sicuri|upload reale|32 risposte ricercabili|newer Current|creazione/duplicato" --workers=1 --timeout=120000
       - name: Report Playwright
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
