@@ -54,8 +54,9 @@ test('recupera un hash sconosciuto', async ({ page, baseURL }) => {
   await expect(page.getByRole('heading', { name: 'Procedure', exact: true })).toBeVisible();
 });
 
-test('F00 non registra service worker PWA', async ({ page }) => {
-  await page.goto('./');
+test('F15 il server di sviluppo non registra service worker PWA', async ({ page, baseURL }) => {
+  const development = new URL(baseURL!); development.port = '4174';
+  await page.goto(development.href);
   await expect(page.getByRole('heading', { name: 'NurseFlow', level: 1 })).toBeVisible();
   expect(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length)).toBe(0);
 });

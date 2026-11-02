@@ -176,9 +176,12 @@ test('F11 two-pointer pinch changes only camera and taps on an outcome inspect w
   expect(await runState(page)).toEqual(before);
 });
 
+test.describe('F11 network failure without an installed cache', () => {
+test.use({ serviceWorkers: 'block' });
 test('F11 graph load failure keeps List available and missing revision offers Retry without changing pin', async ({ page }) => {
   await page.route('**/MapGraph-*.js', (route) => route.abort()); await setupRun(page); const before = await runState(page); await page.getByRole('button', { name: 'Mappa', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Grafico non disponibile'); await list(page); await page.getByRole('button', { name: 'Esamina Revisione comune' }).click();
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Revisione comune' })).toBeVisible(); expect(await runState(page)).toEqual(before);
   await page.goto('./#/procedure/procedure/map?revision=missing'); await expect(page.getByRole('alert')).toContainText('Impossibile aprire la mappa'); await page.getByRole('button', { name: 'Riprova' }).click(); await expect(page.getByRole('alert')).toContainText('Impossibile aprire la mappa'); expect(await runState(page)).toEqual(before);
+});
 });

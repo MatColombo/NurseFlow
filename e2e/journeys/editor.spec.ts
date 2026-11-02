@@ -212,8 +212,11 @@ test('32 risposte ricercabili, rimozione separata con impatto e Undo senza perde
 
 test('ricompressione esplicita crea Blob nuovo, default futuro non tocca il vecchio; Undo conserva entrambi', async ({ page }) => {
   await setupBuilder(page); await openEditor(page); await addPhoto(page, 'before-note', 'Originale locale'); await done(page); const before = await records(page);
-  await page.goto('./#/settings'); await page.getByRole('combobox', { name: 'Compressione per le prossime foto', exact: true }).selectOption('small');
-  await expect.poll(async () => (await records(page)).settings?.photoPreset).toBe('small'); expect((await records(page)).assets).toEqual(before.assets);
+  await page.goto('./#/settings'); await page.getByRole('button', { name: /^Compressione per le prossime foto/ }).click();
+  await dialog(page).getByRole('radio', { name: 'Piccola', exact: true }).click();
+  await expect.poll(async () => (await records(page)).settings?.photoPreset).toBe('small');
+  await expect(dialog(page).getByRole('radio', { name: 'Piccola', exact: true })).toBeChecked();
+  await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); expect((await records(page)).assets).toEqual(before.assets);
   await openEditor(page); const mediaId = (before.revision.graph.nodes.find((node) => node.id === 'shared') as { media: { id: string }[] }).media[0]!.id;
   await page.locator(`[data-media-row="${mediaId}"]`).getByRole('button', { name: 'Ricomprimi', exact: true }).click(); await expect(dialog(page).locator('output')).toContainText('640 × 197');
   await dialog(page).getByRole('button', { name: 'Applica', exact: true }).click(); await expect(dialog(page)).toHaveCount(0); await done(page);
