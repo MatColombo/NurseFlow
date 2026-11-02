@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12**, pacchetti/11A **F13** e backup app/11B **F14**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi F15/F16 restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12**, pacchetti/11A **F13**, backup app/11B **F14** e PWA **F15**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Nessun contenuto clinico o fixture precaricato. Restano i gate esterni F15 di installazione mobile/deploy e la QA F16. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -81,7 +81,7 @@ Page 10 completa preferenze Interfaccia e Immagini con soft limit On 1..32/defau
 
 I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route implementate 11A/F13 e 11B/F14, con ritorno a Settings. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
 
-Verifica aggiornamenti usa un eventuale worker registrato per lo scope dell'app, solo online e su richiesta. `Aggiorna quando inattiva` attende run/sessioni salvate, editor e salvataggi; un evento controllerchange da solo non forza reload. Install compare solo quando il browser espone il prompt; About è su richiesta. Registrazione del worker, manifest e cache offline restano F15.
+Verifica aggiornamenti usa il worker dello scope dell'app, solo online e su richiesta. `Aggiorna quando inattiva` attende run/sessioni salvate, editor e salvataggi in tutte le schede; un evento controllerchange da solo non forza reload. Install compare solo quando il browser espone il prompt; About include istruzioni per il menu browser/iOS e limiti di conservazione.
 
 Advanced è inizialmente collassata. Reset vista preserva contenuto e record recenti. Clear offre export prima, due cautele e checkbox finale; verifica che il riepilogo sia ancora attuale e cancella/reinizializza in una transazione con rollback. Torna a First Launch solo dopo commit. [ADR-013](docs/adr/013-settings-and-local-data-controls.md) e [report F12](docs/reports/F12.md) documentano verifiche, matrice e limiti.
 
@@ -128,9 +128,17 @@ Il link risultante è `http://127.0.0.1:4173/nurseflow-preview/#/build/example/s
 Pubblicare il repository su GitHub con branch `main` e selezionare **Settings → Pages → Build and deployment → Source: GitHub Actions**. Il nome repository è passato automaticamente al workflow. Per un dominio custom impostare la variabile repository **VITE_BASE_PATH** a `/`; un diverso prefisso può essere impostato nella stessa variabile. Non sono richiesti token personali o secret applicativi.
 
 - `ci.yml`: controlli su pull request e avvio manuale; riusabile da altri workflow. Esegue `npm ci`, lint, typecheck, unit test, build ed E2E sui tre browser Linux sotto la base repository; un job Windows/Chromium confronta gli snapshot visivi.
-- `deploy.yml`: su push a `main` richiama CI; solo dopo tutti i controlli pubblica lo stesso artefatto verificato nell'ambiente `github-pages`. Avvio manuale disponibile, deploy limitato a `main`.
+- `deploy.yml`: su push a `main` richiama CI; solo dopo tutti i controlli pubblica lo stesso artefatto verificato nell'ambiente `github-pages` e testa il `page_url` HTTPS con Chromium, manifest/icone e reload offline. Avvio manuale disponibile, deploy limitato a `main`.
 
 I workflow sono predisposti; una verifica GitHub Actions/Pages reale richiede un remote e il primo push. L'esito locale non costituisce un deploy già effettuato.
+
+## PWA e resilienza F15
+
+`npm run build` produce manifest installabile, icone locali e `sw.js` Workbox con precache dei bundle effettivi, incluso MapGraph. `npm run dev` non registra worker. In production/preview, Settings mostra “Pronta offline” solo con controller e tutte le entry cache presenti; una prima visita offline o una cache rimossa non offrono questa garanzia. Dati e Blob sono in IndexedDB, separati dalla cache; immagini HTTPS facoltative restano link con placeholder offline. Nessun CDN o tracker.
+
+Gli aggiornamenti sono su consenso: Later oppure Update when idle. Si attendono tutte le schede dello scope, run attive/salvate, editor, nuove procedure, import/export e scritture durabili. Un flush fallito o una scheda non rispondente impedisce l'attivazione. Solo il richiedente ricarica dopo un ulteriore controllo; nessun reload imposto alle altre schede. Terminare le operazioni e chiudere le vecchie schede che non rispondono. Le migrazioni chiudono le vecchie connessioni senza cancellare dati, con avvisi blocked/versionchange e senza reload automatico.
+
+Per lo smoke dopo un deploy: `node tooling/pages-smoke.mjs https://OWNER.github.io/REPO/`. Installazione mobile e limiti effettivi richiedono il [protocollo su dispositivo](docs/F15-device-and-pages-checks.md). Sul WebKit Windows disponibile fallisce anche il Cache.put nativo: la UI segnala errore e gli E2E SW vengono esplicitamente saltati, mentre le migrazioni sono eseguite. Questo limite non descrive Safari iOS. [ADR-016](docs/adr/016-pwa-offline-and-safe-updates.md) e [report F15](docs/reports/F15.md) distinguono prove automatiche, test non eseguiti e gate aperti.
 
 ## First Launch e Library F03
 
@@ -196,7 +204,7 @@ Page 05 legge la revisione scelta dai Details o la snapshot pinnata della Run/Pr
 
 Il percorso evidenziato esclude il futuro oltre il cursore e i rami abbandonati. Draft incomplete restano consultabili con collegamenti mancanti espliciti. Back ripristina contesto, scroll e focus senza aggiornare recenti o sessioni. Geometria e camera restano transitorie; nessuna migrazione DB. List resta disponibile se fallisce il renderer grafico lazy. [ADR-012](docs/adr/012-read-only-map-list.md), [report F11](docs/reports/F11.md).
 
-## Moduli e limiti F00–F11
+## Moduli e limiti F00–F15
 
 ```text
 src/app/          HashRouter, provider appearance/i18n, error boundaries
@@ -212,8 +220,8 @@ tooling/          risoluzione e test della base statica
 
 Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@test/*` sono coerenti fra TypeScript e Vite/Vitest. Le cartelle riservate usano `.gitkeep`, senza implementazioni fittizie. ESLint protegge i confini principali: dominio indipendente da React/DOM/DB, storage senza componenti React, UI senza accessi diretti a Dexie.
 
-Le Pages 00/01/02/03/04/05/06, le viste Outline/Graph della 07, l'editor contenuti/media della 08 e Check/Ready della 09 sono implementati. Le pagine successive restano incomplete; Settings espone Interfaccia, Immagini, persistenza e due collegamenti dati. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale.
+Le Pages 00–11 sono implementate, comprese Settings, Procedure e libreria e Backup app e impostazioni. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale. I gate di rilascio e dispositivo restano quelli dei report di fase.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. PWA, cache offline e aggiornamenti differiti appartengono a **F15**. La shell non registra service worker e non attiva reload forzati. Non dichiarare questa anteprima pronta offline dopo riavvio o pronta all'uso.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. Da F15 la build production registra il service worker locale; l'uso offline richiede una prima cache completata, verificabile in Settings. I gate di dispositivo e deploy descritti nel report F15 restano necessari prima del rilascio.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).

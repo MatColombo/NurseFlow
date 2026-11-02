@@ -12,7 +12,7 @@ jobs:
   checks:
     name: Lint, types, tests, build, E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 60
     env:
       REPOSITORY_NAME: ${{ github.event.repository.name }}
       VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH }}

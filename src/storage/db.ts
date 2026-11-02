@@ -8,6 +8,7 @@ import type { BuilderState } from '@domain/builder/model';
 import type { PreviewSession } from '@domain/runtime/preview';
 import { canonical } from '@domain/validation/validator';
 import { canClearLocalData } from './local-data-removal';
+import { storageLifecycle } from './lifecycle';
 
 /** Internal persistence implementation. Features import storage/index instead. */
 export class NurseFlowDatabase extends Dexie {
@@ -31,6 +32,7 @@ export class NurseFlowDatabase extends Dexie {
     // Install write guards after the versionchange transaction has completed.
     // Migrations are reviewed DB code; ordinary transactions never bypass guards.
     this.on('ready', () => {
+      if (storageLifecycle.getSnapshot() === 'blocked') storageLifecycle.report('ready');
       this.revisions.hook('updating', (_changes, _id, revision) => {
         if (revision.state === 'ready') throw new ImmutableRecordError('Ready snapshots are write-once');
       });
@@ -48,6 +50,7 @@ export class NurseFlowDatabase extends Dexie {
         })) throw new ImmutableRecordError('Preview snapshots are pinned');
       });
     });
-    this.on('versionchange', () => this.close());
+    this.on('blocked', () => storageLifecycle.report('blocked'));
+    this.on('versionchange', () => { this.close(); storageLifecycle.report('changed'); });
   }
 }

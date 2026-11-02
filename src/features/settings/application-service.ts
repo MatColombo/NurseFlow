@@ -17,10 +17,11 @@ export function createApplicationService(environment: ApplicationEnvironment) {
     snapshot = { ...snapshot, ...patch }; listeners.forEach((listener) => listener());
   }
   async function idle() {
-    if (/^\/(run|build|data)\//.test(path) || environment.pending()) return false;
+    const protectedPath = () => path === '/new' || /^\/(run|build|data)\//.test(path);
+    if (protectedPath() || environment.pending()) return false;
     await environment.flush();
     const sessions = await environment.hasSessions();
-    return !sessions && !environment.pending() && !/^\/(run|build|data)\//.test(path);
+    return !sessions && !environment.pending() && !protectedPath();
   }
   function whenIdle(): Promise<void> {
     if (!queued) return Promise.resolve(); if (idlePromise) return idlePromise;
@@ -39,7 +40,9 @@ export function createApplicationService(environment: ApplicationEnvironment) {
   function watch(value: UpdateRegistration) {
     releaseRegistration(); let worker: EventTarget | null = null;
     const changed = () => {
-      worker?.removeEventListener('statechange', changed); worker = value.installing; worker?.addEventListener('statechange', changed); refresh();
+      const failed = worker && 'state' in worker && worker.state === 'redundant';
+      worker?.removeEventListener('statechange', changed); worker = value.installing; worker?.addEventListener('statechange', changed);
+      if (failed) emit({ update: 'error' }); else refresh();
     };
     value.addEventListener('updatefound', changed); changed();
     releaseRegistration = () => { value.removeEventListener('updatefound', changed); worker?.removeEventListener('statechange', changed); };
@@ -61,6 +64,8 @@ export function createApplicationService(environment: ApplicationEnvironment) {
     later() { queued = false; if (registration?.waiting) emit({ update: 'available' }); },
     setPath(value: string) { path = value; void whenIdle(); },
     whenIdle,
+    isIdle: idle,
+    updateBlocked() { activating = false; controllerReady = false; if (queued) emit({ update: 'deferred' }); },
     async controllerChanged() {
       // A worker changing controller never authorizes a reload by itself.
       if (!queued || !activating) return;

@@ -20,7 +20,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
@@ -31,3 +33,14 @@ jobs:
       - name: Pubblica l'artefatto che ha superato CI
         id: deployment
         uses: actions/deploy-pages@v5.0.1
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Smoke sul vero URL pubblicato
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node tooling/pages-smoke.mjs "$PAGES_URL"

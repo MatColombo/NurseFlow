@@ -16,7 +16,7 @@ describe('F12 actual update capability and idle activation', () => {
     const { service, environment, worker } = setup(); await service.check(); expect(service.getSnapshot().update).toBe('available');
     await service.controllerChanged(); service.later(); expect(environment.reload).not.toHaveBeenCalled(); expect(worker.postMessage).not.toHaveBeenCalled();
   });
-  it.each(['/run/id', '/run/id/end', '/build/id', '/build/id/step/node', '/data/procedures', '/data/app'])('never activates or reloads while %s is open', async (path) => {
+  it.each(['/new', '/run/id', '/run/id/end', '/build/id', '/build/id/step/node', '/data/procedures', '/data/app'])('never activates or reloads while %s is open', async (path) => {
     const { service, worker, environment } = setup(); await service.check(); service.setPath(path); service.defer(); await service.whenIdle(); await service.controllerChanged();
     expect(worker.postMessage).not.toHaveBeenCalled(); expect(environment.reload).not.toHaveBeenCalled();
   });
@@ -33,9 +33,26 @@ describe('F12 actual update capability and idle activation', () => {
     const { service, worker, environment } = setup(); environment.hasSessions = async () => { throw new Error('DB'); };
     await service.check(); service.defer(); await service.whenIdle(); expect(worker.postMessage).not.toHaveBeenCalled(); expect(environment.reload).not.toHaveBeenCalled();
   });
+  it('failed durable flush blocks both local and other-tab idle queries', async () => {
+    const { service, worker, environment } = setup(); environment.flush = async () => { throw new Error('unsaved editor'); };
+    await service.check(); service.defer(); await service.whenIdle();
+    expect(worker.postMessage).not.toHaveBeenCalled(); await expect(service.isIdle()).rejects.toThrow('unsaved editor'); expect(environment.reload).not.toHaveBeenCalled();
+  });
+  it('another busy tab defers activation and permits a later unanimous retry', async () => {
+    const { service, worker, environment } = setup(); await service.check(); service.defer(); await service.whenIdle();
+    expect(worker.postMessage).toHaveBeenCalledTimes(1); service.updateBlocked(); expect(service.getSnapshot().update).toBe('deferred');
+    expect(environment.reload).not.toHaveBeenCalled(); await service.whenIdle(); expect(worker.postMessage).toHaveBeenCalledTimes(2);
+    await service.controllerChanged(); expect(environment.reload).toHaveBeenCalledTimes(1);
+  });
   it('only a successful real registration update can report no waiting update; failure remains explicit', async () => {
     const { service, registration } = setup(); Object.assign(registration, { waiting: null }); await service.check(); expect(service.getSnapshot().update).toBe('current');
     registration.update.mockRejectedValueOnce(new Error('network')); await service.check(); expect(service.getSnapshot().update).toBe('error');
+  });
+  it('a newly installing update that fails remains an error even with an older active worker', async () => {
+    const { service, registration, environment } = setup(); Object.assign(registration, { waiting: null }); await service.check();
+    const worker = Object.assign(new EventTarget(), { state: 'installing' }); Object.assign(registration, { installing: worker }); registration.dispatchEvent(new Event('updatefound'));
+    worker.state = 'redundant'; Object.assign(registration, { installing: null }); worker.dispatchEvent(new Event('statechange'));
+    expect(service.getSnapshot().update).toBe('error'); expect(environment.reload).not.toHaveBeenCalled();
   });
   it('installation is offered only with a prompt and is hidden when standalone; dismissal is not success', async () => {
     const { service, environment } = setup(); const prompt = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), { prompt: vi.fn(async () => {}), userChoice: Promise.resolve({ outcome: 'dismissed' as const }) }) satisfies InstallPrompt;
