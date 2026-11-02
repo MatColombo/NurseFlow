@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { SettingsPage } from '@features/settings/SettingsPage';
-import { Card } from '@shared/components';
 import type { routeDefinitions } from './route-definitions';
 import { StartupPage } from '@features/first-launch/StartupPage';
 import { ProcedureDetails } from '@features/procedures/ProcedureDetails';
@@ -12,12 +11,10 @@ import StepEditorPage from '@features/step-editor/StepEditorPage';
 import CheckPage from '@features/check/CheckPage';
 import RunPage from '@features/run/RunPage';
 import ProceduresDataPage from '@features/portability/ProceduresDataPage';
-import { AppScopeGuard } from '@features/portability/AppScopeGuard';
+import AppBackupPage from '@features/portability/AppBackupPage';
 
 type Page = typeof routeDefinitions[number]['page'];
 export function RouteContent({ page }: { page: Page }) {
-  const { t } = useTranslation();
-  const location = useLocation();
   const parameters = useParams();
   const [search] = useSearchParams();
   if (page === '00' || page === '01') return <StartupPage key={page} setup={page === '00'} />;
@@ -29,14 +26,9 @@ export function RouteContent({ page }: { page: Page }) {
   if (page === '09') return <CheckPage key={parameters.id} />;
   if (page === '10') return <SettingsPage />;
   if (page === '11A') return <ProceduresDataPage />;
+  if (page === '11B') return <AppBackupPage />;
   if (page === '03' || page === '04') return <RunPage key={`${parameters.id}-${search.get('preview')}-${search.get('revision')}`} />;
-  const content = <section className="nf-stack" aria-labelledby="page-title">
-    <h2 id="page-title" className="nf-title">{t(`pages.${page}`)}</h2>
-    <Card><p>{t('shell.preview')}</p><p className="nf-note">{t('shell.pending', { page })}</p></Card>
-    {import.meta.env.DEV && Object.entries(parameters).map(([name, value]) => <p key={name}>{name}: <code>{value}</code></p>)}
-    {page === '11B' && <><AppScopeGuard /><Link to={['/setup', '/library'].includes(location.state?.dataReturn) ? location.state.dataReturn : '/settings'}>{t('common.back')}</Link></>}
-  </section>;
-  return content;
+  return null;
 }
 
 export function RouteNotFound() {

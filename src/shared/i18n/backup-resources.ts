@@ -1,0 +1,28 @@
+export const backupResources = {
+  it: { backup: {
+    settingsOnly: 'Solo impostazioni', full: 'Backup completo', settingsDescription: 'Lingua, tema, scala e preferenze immagini. Nessuna procedura o sessione.', fullDescription: 'Libreria, gruppi, Ready e Draft, immagini locali, sessioni salvate e impostazioni. Esclude cache e permessi del browser.',
+    prepare: 'Prepara file', local: 'Dati locali · nessun invio automatico', preparedAt: 'Ultimo file preparato: {{date}}', never: 'Nessun file preparato in questa visita',
+    chooseFile: 'Scegli file', changeFile: 'Cambia file', cancelImport: 'Annulla importazione', exportedAt: 'Esportato: {{date}}', counts: '{{procedures}} procedure · {{groups}} gruppi · {{revisions}} revisioni · {{media}} immagini locali · {{runs}} sessioni', bytes: 'Immagini locali: ≈ {{value}} kB',
+    current: 'Attuale', imported: 'Importato', compare: 'Confronto impostazioni', noChanges: 'Nessuna differenza nelle impostazioni.', max: 'massimo {{count}}',
+    replaceAlso: 'Sostituisci anche le impostazioni', replace: 'Sostituisci impostazioni…', confirmReplace: 'Conferma sostituzione', confirmBoth: 'Conferma sostituzione',
+    warning: 'Le preferenze attuali verranno sostituite. Lingua, tema, scala e impostazioni per le nuove immagini possono cambiare. Nessuna procedura esistente verrà modificata.',
+    importFull: 'Importa backup', confirmFull: 'Aggiungi libreria e sessioni', settingsKept: 'Le impostazioni attuali saranno conservate.', additionsFirst: 'Questa conferma autorizza le nuove copie. La sostituzione delle impostazioni richiede un consenso distinto al passaggio successivo.', nextConsent: 'Prosegui al consenso impostazioni',
+    declinedTitle: 'Sostituzione impostazioni annullata', declined: 'Nessun dato è stato importato. Puoi confermare separatamente l’aggiunta delle copie senza sostituire le impostazioni, oppure annullare tutto.', withoutSettings: 'Continua senza sostituire impostazioni', cancelAll: 'Annulla tutto',
+    failure: 'Importazione non completata. Nessun dato è stato aggiunto o sostituito.', stale: 'Le impostazioni attuali sono cambiate dopo il confronto. Rivedi i nuovi valori e conferma di nuovo.', review: 'Rileggi impostazioni attuali',
+    replaced: 'Impostazioni sostituite', complete: 'Importazione completata', result: 'Procedure aggiunte: {{procedures}} · Sessioni aggiunte: {{runs}}', resultKept: 'Impostazioni conservate.', resultReplaced: 'Impostazioni sostituite dopo consenso separato.', resume: 'Riprendi sessione {{count}}',
+    remote: 'Le immagini HTTPS restano collegamenti e non sono garantite offline. Questa anteprima non le carica.',
+  } },
+  en: { backup: {
+    settingsOnly: 'Settings only', full: 'Complete backup', settingsDescription: 'Language, theme, scale and image preferences. No procedures or sessions.', fullDescription: 'Library, groups, Ready and Draft revisions, local images, saved sessions and settings. Excludes browser caches and permissions.',
+    prepare: 'Prepare file', local: 'Local data · no automatic upload', preparedAt: 'Last file prepared: {{date}}', never: 'No file prepared during this visit',
+    chooseFile: 'Choose file', changeFile: 'Change file', cancelImport: 'Cancel import', exportedAt: 'Exported: {{date}}', counts: '{{procedures}} procedures · {{groups}} groups · {{revisions}} revisions · {{media}} local images · {{runs}} sessions', bytes: 'Local images: ≈ {{value}} kB',
+    current: 'Current', imported: 'Imported', compare: 'Settings comparison', noChanges: 'No settings differences.', max: 'maximum {{count}}',
+    replaceAlso: 'Also replace settings', replace: 'Replace settings…', confirmReplace: 'Confirm replacement', confirmBoth: 'Confirm replacement',
+    warning: 'Current preferences will be replaced. Language, theme, scale and preferences for new images may change. No existing procedure will be modified.',
+    importFull: 'Import backup', confirmFull: 'Add library and sessions', settingsKept: 'Current settings will be kept.', additionsFirst: 'This confirmation authorizes new copies. Replacing settings requires separate consent in the next step.', nextConsent: 'Continue to settings consent',
+    declinedTitle: 'Settings replacement cancelled', declined: 'No data were imported. You can separately confirm adding copies without replacing settings, or cancel everything.', withoutSettings: 'Continue without replacing settings', cancelAll: 'Cancel everything',
+    failure: 'Import not completed. No data were added or replaced.', stale: 'Current settings changed after the comparison. Review the new values and confirm again.', review: 'Read current settings again',
+    replaced: 'Settings replaced', complete: 'Import completed', result: 'Procedures added: {{procedures}} · Sessions added: {{runs}}', resultKept: 'Settings kept.', resultReplaced: 'Settings replaced after separate consent.', resume: 'Resume session {{count}}',
+    remote: 'HTTPS images remain links and are not guaranteed offline. This preview does not load them.',
+  } },
+} as const;

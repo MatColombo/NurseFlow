@@ -1,7 +1,7 @@
 /** NurseFlow v1 ZIP profile: stored entries only, no extraction or decompression. */
 export const PACKAGE_LIMITS = { bytes: 128 * 1024 * 1024, batchBytes: 128 * 1024 * 1024, entries: 10_000, jsonBytes: 8 * 1024 * 1024, jsonUnits: 250_000, files: 32 } as const;
 export class PackageError extends Error {
-  constructor(readonly code: 'archive' | 'limit' | 'version' | 'schema' | 'hash' | 'scope' | 'references' | 'ready' | 'media', readonly kind?: string) { super(code); this.name = 'PackageError'; }
+  constructor(readonly code: 'archive' | 'limit' | 'version' | 'schema' | 'hash' | 'scope' | 'references' | 'ready' | 'media' | 'stale', readonly kind?: string) { super(code); this.name = 'PackageError'; }
 }
 export function requirePackage(value: unknown, code: PackageError['code'] = 'archive'): asserts value { if (!value) throw new PackageError(code); }
 const allowedPath = /^(manifest\.json|groups\.json|media\.json|settings\.json|(?:procedures|revisions|runs)\/\d{6}\.json|media\/\d{6}\.bin)$/;

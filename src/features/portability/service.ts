@@ -12,7 +12,7 @@ export function createPortabilityService(storage = createNurseFlowStorage()) {
     async preview(id: string) { await storage.open(); return storage.repositories.portability.snapshot([id]); },
     async prepareExport(selected?: readonly string[]) {
       await storage.open(); const records = await storage.repositories.portability.snapshot(selected);
-      const kind = selected && records.procedures.length === 1 ? 'procedure' : 'library';
+      const kind: 'procedure' | 'library' = selected && records.procedures.length === 1 ? 'procedure' : 'library';
       const blob = await createPackage(records, kind, { packageId: crypto.randomUUID(), exportedAt: new Date().toISOString(), appVersion: version });
       return { blob, kind, name: 'NurseFlow-' + new Date().toISOString().slice(0, 10) + (kind === 'procedure' ? '.nfproc' : '.nflib'), count: records.procedures.length,
         warnings: [...validatePortableRecords(records).values()].flat() };

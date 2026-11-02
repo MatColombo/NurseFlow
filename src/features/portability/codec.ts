@@ -25,12 +25,18 @@ async function verifyAsset(asset: ImportedRecords['mediaAssets'][number]) {
   } catch (error) { if (error instanceof PackageError) throw error; throw new PackageError('media'); }
 }
 const pathAt = (folder: string, index: number, extension = 'json') => folder + '/' + String(index).padStart(6, '0') + '.' + extension;
-export async function createPackage(records: ImportedRecords, kind: 'procedure' | 'library', context: PackageContext) {
-  requirePackage(records.runSessions.length === 0 && records.procedures.length > 0 && (kind !== 'procedure' || records.procedures.length === 1), 'scope');
-  requirePackage(records.procedures.length + records.revisions.length + records.mediaAssets.length + 3 <= PACKAGE_LIMITS.entries && records.mediaAssets.reduce((sum, asset) => sum + asset.blob.size, 0) <= PACKAGE_LIMITS.bytes, 'limit');
+export async function createPackage(records: ImportedRecords, kind: PackageKind, context: PackageContext, settings?: Settings) {
+  const app = kind === 'settings' || kind === 'full';
+  requirePackage(app === Boolean(settings) && (kind === 'full' || records.runSessions.length === 0) && (app || records.procedures.length > 0) && (kind !== 'procedure' || records.procedures.length === 1), 'scope');
+  if (kind === 'settings') {
+    requirePackage(Object.values(records).every((items) => items.length === 0), 'scope');
+    return sealPackage(new Map([['settings.json', jsonBytes(settingsSchema.parse(settings))]]), { ...context, packageKind: kind, counts: { procedures: 0, groups: 0, revisions: 0, media: 0, runs: 0 }, missingAssets: [] });
+  }
+  requirePackage(records.procedures.length + records.revisions.length + records.runSessions.length + records.mediaAssets.length + 3 + Number(app) <= PACKAGE_LIMITS.entries && records.mediaAssets.reduce((sum, asset) => sum + asset.blob.size, 0) <= PACKAGE_LIMITS.bytes, 'limit');
   validatePortableRecords(records); const entries = new Map<string, Uint8Array>();
   entries.set('groups.json', jsonBytes(records.groups));
-  for (const [folder, values] of [['procedures', records.procedures], ['revisions', records.revisions]] as const)
+  if (settings) entries.set('settings.json', jsonBytes(settingsSchema.parse(settings)));
+  for (const [folder, values] of [['procedures', records.procedures], ['revisions', records.revisions], ['runs', records.runSessions]] as const)
     [...values].sort((a, b) => a.id.localeCompare(b.id)).forEach((value, index) => entries.set(pathAt(folder, index), jsonBytes(value)));
   const media = [];
   for (const [index, asset] of [...records.mediaAssets].sort((a, b) => a.id.localeCompare(b.id)).entries()) {
@@ -38,7 +44,7 @@ export async function createPackage(records: ImportedRecords, kind: 'procedure' 
   }
   entries.set('media.json', jsonBytes(media)); const present = new Set(records.mediaAssets.map((asset) => asset.id));
   const missingAssets = [...new Set(records.revisions.flatMap((revision) => assetReferences(revision.graph)))].filter((id) => !present.has(id)).sort();
-  return sealPackage(entries, { ...context, packageKind: kind, counts: { procedures: records.procedures.length, revisions: records.revisions.length, groups: records.groups.length, media: media.length, runs: 0 }, missingAssets });
+  return sealPackage(entries, { ...context, packageKind: kind, counts: { procedures: records.procedures.length, revisions: records.revisions.length, groups: records.groups.length, media: media.length, runs: records.runSessions.length }, missingAssets });
 }
 export type ParsedPackage = { manifest: Manifest; records: ImportedRecords; warnings: ReturnType<typeof validatePortableRecords>; settings?: Settings };
 export async function parsePackage(file: Blob, accepted: readonly PackageKind[] = ['procedure', 'library']): Promise<ParsedPackage> {

@@ -55,7 +55,7 @@ function mapped(map: ReadonlyMap<string, string>, id: string): string {
 }
 
 /** Each array item is an independent source file, even if source IDs coincide. */
-export function prepareImportedRecords(input: unknown, newId: () => string): ImportedRecords[] {
+export function prepareImportedRecords(input: unknown, newId: () => string, preserveEmptyGroups = false): ImportedRecords[] {
   const batches = z.array(importedRecordsSchema).parse(input);
   batches.forEach(assertImportedReferences);
   const sourceIds = new Set(batches.flatMap((batch) => [
@@ -75,7 +75,7 @@ export function prepareImportedRecords(input: unknown, newId: () => string): Imp
   return batches.map((batch) => {
     const procedureIds = new Map(batch.procedures.map((item) => [item.id, freshId()]));
     const revisionIds = new Map(batch.revisions.map((item) => [item.id, freshId()]));
-    const usedGroups = new Set(batch.procedures.flatMap((item) => item.groupId === null ? [] : [item.groupId]));
+    const usedGroups = new Set(preserveEmptyGroups ? batch.groups.map((group) => group.id) : batch.procedures.flatMap((item) => item.groupId === null ? [] : [item.groupId]));
     const groupIds = new Map([...usedGroups].map((id) => [id, freshId()]));
     // Allocate missing asset references too (W07) without inventing a Blob.
     const usedAssets = new Set(batch.revisions.flatMap((revision) => assetReferences(revision.graph)));

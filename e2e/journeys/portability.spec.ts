@@ -56,7 +56,7 @@ test('F13 I03/I04/I11/I13/I19 each rejected file is distinct, wrong scope cross-
   await setupPortable(page); const before = await portableState(page); const full = await portableFile(page, 'full', 'looks-like-library.nflib'); const bad = await portableFile(page, 'corrupt'); const future = await portableFile(page, 'future'); const single = await portableFile(page, 'single');
   await importTab(page); await page.getByLabel('Carica uno o più file').setInputFiles([full, bad, future]); await expect(page.getByRole('link', { name: 'Vai a Backup app e impostazioni', exact: true })).toHaveCount(1);
   await expect(page.getByText('Controllo di integrità non superato. Il file è corrotto.', { exact: true })).toBeVisible(); await expect(page.getByText('Versione del formato non supportata.', { exact: true })).toBeVisible(); expect(await portableState(page)).toEqual(before);
-  await page.getByRole('link', { name: 'Vai a Backup app e impostazioni', exact: true }).click(); await page.getByLabel('Carica uno o più file').setInputFiles(single);
+  await page.getByRole('link', { name: 'Vai a Backup app e impostazioni', exact: true }).click(); await page.getByRole('button', { name: 'Importa', exact: true }).click(); await page.getByLabel('Scegli file', { exact: true }).setInputFiles(single);
   await expect(page.getByRole('link', { name: 'Vai a Procedure e libreria', exact: true })).toBeVisible(); expect(await portableState(page)).toEqual(before);
 });
 

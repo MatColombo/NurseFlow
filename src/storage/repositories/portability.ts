@@ -1,9 +1,19 @@
 import type { NurseFlowDatabase } from '../db';
 import { importedRecordsSchema, assetReferences } from '@domain/portability/records';
-import { procedureSchema, groupSchema, revisionSchema } from '@domain/model';
+import { procedureSchema, groupSchema, revisionSchema, settingsSchema } from '@domain/model';
 import { invariant } from '@domain/model/integrity';
 export function portabilityRepository(db: NurseFlowDatabase) {
   return {
+    async appSnapshot(kind: 'settings' | 'full') {
+      return db.transaction('r', [db.procedures, db.groups, db.revisions, db.mediaAssets, db.runSessions, db.settings], async () => {
+        const settings = settingsSchema.parse(await db.settings.get('main'));
+        const empty = { procedures: [], groups: [], revisions: [], mediaAssets: [], runSessions: [] };
+        if (kind === 'settings') return { settings, records: importedRecordsSchema.parse(empty) };
+        const revisions = await db.revisions.toArray(); const assets = [...new Set(revisions.flatMap((revision) => assetReferences(revision.graph)))];
+        return { settings, records: importedRecordsSchema.parse({ procedures: await db.procedures.toArray(), groups: await db.groups.toArray(), revisions,
+          mediaAssets: (await db.mediaAssets.bulkGet(assets)).filter((asset) => asset !== undefined), runSessions: await db.runSessions.toArray() }) };
+      });
+    },
     async list() { return db.transaction('r', [db.procedures, db.groups, db.revisions], async () => ({
       procedures: (await db.procedures.toArray()).map((item) => procedureSchema.parse(item)),
       groups: (await db.groups.toArray()).map((item) => groupSchema.parse(item)),

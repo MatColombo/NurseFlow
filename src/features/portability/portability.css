@@ -8,3 +8,4 @@
 .nf-portable-preview .nf-map-list { max-block-size: 50dvh; }
 .nf-portable-preview .nf-map-list-shell { min-block-size: 0; }
 .nf-portable-preview .nf-map-list-heading { flex-wrap: wrap; }
+.nf-portable .nf-block { display: block; }

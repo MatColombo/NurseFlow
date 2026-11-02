@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12** e pacchetti/11A **F13**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi successive restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12**, pacchetti/11A **F13** e backup app/11B **F14**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Le fasi F15/F16 restano incomplete, senza contenuti clinici o fixture precaricati. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
@@ -61,7 +61,7 @@ storage.close();
 - `createDraft` aggiunge procedura, Draft e asset preparati atomicamente. Con `{ procedureId }` riapre la Draft esistente o ne crea una indipendente dalla Ready; `updateDraft` salva grafo/asset con controllo `expectedEditVersion`.
 - Page 09 usa `checkDraft`/`markCheckedReady`: validatore P/W concreto, lettura durabile, token anti-stale, nuova snapshot e puntatore Ready nella stessa transazione. `markReadyUnitOfWork` resta l'API interna con validatore sincrono esplicito del nucleo F01; nessun validatore permissivo predefinito.
 - F09: `startOrResumeReady`, `resumeRunSession` e `transitionRun` usano il reducer puro OR/AND e la Ready pinnata. Ogni evento riceve la `saveVersion` visualizzata; conflitti e quota non avanzano la run. `finishRun` elimina soltanto la sessione sul suo End authored. `saveRun` resta l'API interna di staging con controllo identità/versione e invarianti del percorso.
-- `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. F13 prepara e valida i pacchetti procedure/library prima di invocarlo; consenso Settings e full backup restano F14.
+- `addImportedRecords` riceve un array di batch interni già decodificati: `{ procedures, groups, revisions, mediaAssets, runSessions }`. Ogni batch ha un namespace sorgente indipendente. Remappa tutte le identità e aggiunge i batch in una sola transazione; richiede il validatore anche per Ready importate, senza nuova conferma personale. Settings non sono accettate da questo comando. F13 prepara e valida i pacchetti procedure/library prima di invocarlo. `importAppPackage` gestisce F14 con gruppi full anche vuoti, run e sostituzione Settings opzionale, consenso separato e controllo anti-stale nella stessa transazione.
 
 Il DB ha nove tabelle e versioni append-only: v1 introduce gli store; v2 aggiunge i token mancanti; v3 conserva la lingua già scelta e introduce le preferenze F03; v4 aggiunge la cronologia Builder; v5 aggiunge le sessioni Draft Preview indipendenti, senza cambiare snapshot, run, asset o preferenze esistenti. Ready e Blob non sono sovrascrivibili; non viene eseguita garbage collection. `QuotaExceededError`, `TransactionInactiveError`, conflitti e altri fallimenti propagano al chiamante soltanto dopo rollback; la UI mostra successo solo dopo risoluzione del comando. UUID e timestamp sono preparati fuori dalle transazioni; nessun file I/O, rete o hashing asincrono al loro interno.
 
@@ -79,7 +79,7 @@ Solo con `npm run dev`, `/#/dev/components` mostra i componenti con fixture neut
 
 Page 10 completa preferenze Interfaccia e Immagini con soft limit On 1..32/default 2 e Off che conserva il massimo; compressione Small/Medium/High/Original per importazioni locali successive. Le modifiche non cambiano contenuti authored, Blob già presenti, Ready o sessioni pinnate. Ogni preferenza autosalva indipendentemente e offre Retry su errore.
 
-I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route 11A e 11B, con ritorno a Settings. 11A e i suoi download sono F13; le funzionalità complete di 11B rimangono F14. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
+I due ingressi `Procedure e libreria` e `Backup app e impostazioni` aprono rispettivamente le route implementate 11A/F13 e 11B/F14, con ritorno a Settings. Protezione archivio usa lo stato effettivo del browser e permette una richiesta esplicita; uso e quota sono stime dell'origine, non una promessa di conservazione.
 
 Verifica aggiornamenti usa un eventuale worker registrato per lo scope dell'app, solo online e su richiesta. `Aggiorna quando inattiva` attende run/sessioni salvate, editor e salvataggi; un evento controllerchange da solo non forza reload. Install compare solo quando il browser espone il prompt; About è su richiesta. Registrazione del worker, manifest e cache offline restano F15.
 
@@ -91,9 +91,17 @@ Advanced è inizialmente collassata. Reset vista preserva contenuto e record rec
 
 Il file preparato è un pacchetto ZIP stored `.nfproc` (una scelta) o `.nflib` (più scelte o intera libreria), con manifest versionata, CRC/SHA-256 e immagini locali separate; conserva tutte le revisioni, metadata, gruppi necessari e riferimenti remoti, escludendo run e Settings. Download/Share sono consegne al browser/sistema, senza promessa di backup conservato.
 
-Import accetta più pacchetti, verifica sicurezza/schema/hash/raster/riferimenti e prepara candidati effimeri tutti selezionati. Preview List/inspector mostra contenuti reali, Blob isolati e W07/W08, senza eseguire run o caricare URL remoti. Conferma aggiunge solo le scelte, con nuove identità e transazione atomica; quota e altri errori fanno rollback. Ready valide restano subito Ready, Draft incomplete restano Draft. Nomi/gruppi uguali creano copie indipendenti. Settings/full vengono rifiutati con collegamento 11B; in 11B è attivo il solo rifiuto reciproco F13, mentre import/export Settings/full è F14.
+Import accetta più pacchetti, verifica sicurezza/schema/hash/raster/riferimenti e prepara candidati effimeri tutti selezionati. Preview List/inspector mostra contenuti reali, Blob isolati e W07/W08, senza eseguire run o caricare URL remoti. Conferma aggiunge solo le scelte, con nuove identità e transazione atomica; quota e altri errori fanno rollback. Ready valide restano subito Ready, Draft incomplete restano Draft. Nomi/gruppi uguali creano copie indipendenti. Settings/full vengono rifiutati con collegamento 11B; questa rifiuta reciprocamente procedure/library.
 
 Profilo ZIP e limiti documentati in [formato v1](docs/portable-format-v1.md) e [ADR-014](docs/adr/014-portable-packages-and-additive-staging.md). Non ricomprimere i pacchetti con strumenti esterni: v1 accetta solo il proprio profilo stored. File/batch massimo 128 MiB, errori espliciti per selezioni oltre soglia. [Report F13](docs/reports/F13.md) per prove, benchmark e limiti fisici/mobile ancora da verificare.
+
+## Backup app e impostazioni F14
+
+`/#/data/app` prepara `.nfsettings` o `.nfbackup` con snapshot consistente. Settings-only contiene solo lingua, tema, scala, compressione futura e soft limit. Full contiene tutte le procedure/gruppi, Ready/Draft e revisioni storiche pinnate, Blob referenziati, sessioni Run salvate e Settings. Non include permessi, cache/PWA, layout, cronologia Undo o sessioni temporanee Draft Preview.
+
+Import Settings mostra Attuale → Importato, avviso e conferma separata. Full aggiunge copie indipendenti di Library/run; il toggle Settings parte Off. Quando On, la conferma delle aggiunte precede il consenso distinto per sostituire le preferenze. Annullare quel consenso non importa nulla: continuare senza Settings richiede una nuova conferma additiva. Token anti-stale e transazione unica proteggono da preferenze cambiate e quota anche nell'ultima scrittura Settings. Lingua/tema/scala vengono applicati dopo commit, senza reload o autosave aggiuntivi. Ready valide rimangono usabili e le run conservano la propria revisione, focus e progressi indipendenti.
+
+I limiti del formato v1 F13 restano applicati anche al full: oltre 128 MiB il file non viene preparato; full in più volumi non è implementato. Download/Share non provano conservazione esterna. [ADR-015](docs/adr/015-app-backups-and-settings-consent.md) e [report F14](docs/reports/F14.md) descrivono consensi, rollback, round-trip su profili browser distinti e limiti mobile ancora da verificare.
 
 ## GitHub Pages e `base`
 
@@ -126,7 +134,7 @@ I workflow sono predisposti; una verifica GitHub Actions/Pages reale richiede un
 
 ## First Launch e Library F03
 
-La root apre `#/setup` solo prima del completamento del primo avvio; lingua IT/EN, Start e collegamento alla futura 11B. Start salva il completamento e richiede persistenza senza attendere il permesso. Lo stato effettivo si consulta in Settings, con Retry e senza garanzia di conservazione.
+La root apre `#/setup` solo prima del completamento del primo avvio; lingua IT/EN, Start e collegamento a 11B. Start salva il completamento e richiede persistenza senza attendere il permesso. Il completamento locale del primo avvio e i permessi non vengono importati da un backup. Lo stato effettivo si consulta in Settings, con Retry e senza garanzia di conservazione.
 
 `#/library` legge procedure e gruppi da IndexedDB: gruppi collassabili, creazione/rinomina/ordine/eliminazione conservativa, ribbon allowlist, tag, alias ricercabili, preferiti, priorità 0/!/!! e viste Gruppi/Priorità/Recenti/A–Z. Ricerca locale normalizzata su titolo/gruppo/tag/alias/descrizione e opzionalmente passaggi; facet multiple con OR interno e AND fra facet. Filtri e ricerca producono risultati piatti e rimuovono Recent. Testo, filtri, ordinamento, collapse e posizione sono conservati al ritorno da Details.
 

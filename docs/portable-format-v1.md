@@ -1,6 +1,6 @@
 # NurseFlow portable — formato 1
 
-Stato: implementazione F13 del contratto 05, [ADR-014](adr/014-portable-packages-and-additive-staging.md). Formato file indipendente da versione app e versione IndexedDB. Nessuna firma digitale, crittografia o verifica di provenienza.
+Stato: implementazione F13/F14 del contratto 05, [ADR-014](adr/014-portable-packages-and-additive-staging.md) e [ADR-015](adr/015-app-backups-and-settings-consent.md). Formato file indipendente da versione app e versione IndexedDB. Nessuna firma digitale, crittografia o verifica di provenienza.
 
 Il file è ZIP stored, header locali e directory centrale con CRC32 e nomi UTF-8 ASCII allowlist. Metodo 0, flag 0/UTF-8, nessun descriptor/extra/commento/volume/ZIP64/cifratura. Entrate locali contigue dall'offset zero fino alla directory; directory immediatamente seguita da EOCD senza trailer. Non estrarre file su disco. Rifiutare metodi diversi, entry duplicate, path non ammessi o dimensioni discordanti; non decomprimere per tentare il recupero.
 
@@ -36,7 +36,9 @@ Manifest v1:
 
 L'esempio illustra i campi: `entries` reale elenca **ogni payload tranne manifest**, con dimensione esatta e SHA-256 dei byte reali. Conteggi e path devono coincidere con quanto presente; nessuna entry extra o payload non dichiarato. La manifest non include il proprio hash; CRC32 ne verifica i byte. Gli hash non sono firme.
 
-`procedure`: esattamente una procedura; `library`: una o più; entrambe senza Settings/run. `settings`: solo settings.json con tutti i conteggi libreria a zero. `full`: sezioni libreria + Settings e run opzionali, senza cache o permessi browser. F13 esporta procedure/library e riconosce/rifiuta gli scope dell'altra pagina; i flussi settings/full restano F14.
+`procedure`: esattamente una procedura; `library`: una o più; entrambe senza Settings/run. `settings`: solo settings.json con tutti i conteggi libreria a zero. `full`: sezioni libreria + Settings e run opzionali, senza cache o permessi browser; anche una libreria vuota con gruppi vuoti è valida. 11A esporta/importa procedure/library; 11B esporta/importa settings/full. Ogni pagina rifiuta integralmente gli scope dell'altra.
+
+Settings usa il record app strict con default v1 espliciti del modello, senza campi browser o estensioni sconosciute. Gli export scrivono tutti i campi. Full conserva tutte le revisioni e sessioni Ready pinnate, anche storiche rispetto al puntatore corrente. I contatori locali delle visite restano locali alla nuova sessione; i token attività incorporano gli activity ID rimappati. Un restore full conserva anche gruppi vuoti; un import selettivo 11A crea soltanto i gruppi associati alle scelte. Le preferenze di layout e la cronologia editoriale non sono parte del formato.
 
 Ogni Blob presente deve avere hash, byte count, MIME, dimensioni e decodifica raster coerenti. Ogni riferimento locale senza Blob deve essere elencato una sola volta in `missingAssets`; l'insieme deve essere esatto. Un asset presente ma corrotto è errore, non W07. URL HTTPS/GIF restano solo metadata e non causano fetch durante parsing/preview. `kind:broken`, formerNodeId e formerTitle restano storici, senza conversione a End o unassigned.
 
