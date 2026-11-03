@@ -55,12 +55,46 @@ restano recuperabili e possono richiedere una scelta esplicita nel Check.
 | `npm run test` | PASS: 444 test, 57 file |
 | Build production avviata dalla configurazione Playwright | PASS, CSP e precache attive |
 | E2E mirati Chromium/Firefox/WebKit | PASS: 21/21, zero retry |
-| Matrice visuale, CI completa e deploy | In corso: esito da registrare separatamente |
+| Matrice visuale 320/390/768px × 4/13/30/48pt | PASS: 120/120 combinazioni, zero retry |
+| Snapshot componenti light/dark, Dialog/Sheet | PASS: 1 test, 4 snapshot; nessun baseline modificato |
+| Editor/media nei tre browser desktop su Windows | PASS: 69/69, zero retry |
+| Regressioni focus Outline e font alternativi, tre browser | PASS: 9/9, zero retry |
+| CI completa e deploy | Prima CI bloccata da un difetto di reflow; verifica della correzione in corso |
 
 Gli E2E mirati coprono sette casi nei tre browser: AND/Stop autorizzato,
 ritorno Details/Library, ricerca nei passi, nuovo collettore/follow-up,
 ancore/frecce, note/movimento ridotto e ritorno Settings/Library.
 Screenshot ispezionato: [AND con follow-up e collettore esterno](assets/RC2/and-horizontal.png).
+Altri screenshot ispezionati a 320px/13pt in dark:
+[Library](assets/RC2/library-320-13-dark.png),
+[Run con nota visibile](assets/RC2/run-320-13-dark.png),
+[Preview con foto locali e didascalie](assets/RC2/media-320-13-dark.png).
+Inventari macchina: [21 E2E mirati](assets/RC2/critical.json),
+[120 combinazioni + snapshot](assets/RC2/matrix.json).
+[69 regressioni editor/media](assets/RC2/editor.json).
+
+La matrice comprende 96 combinazioni per le otto viste richieste in F16
+(Library, Run, Builder, Step Editor, Check, Settings, 11A e 11B), più 24
+per Details e Map. Temi light/dark alternati tra i casi; non si dichiara
+una matrice raddoppiata di 240 combinazioni.
+
+Prima revisione inviata alla CI: `5e23afd58dad2ff44a6eb44423ebfb73b816b008`.
+[Prima pipeline](https://github.com/MatColombo/NurseFlow/actions/runs/41623183622):
+791 PASS, 1 FAIL, 3 skip condizionali; deploy non eseguito. Il FAIL
+Linux era `Library 320px 48pt`: il pulsante del titolo gruppo aveva
+86px di contenuto in 81px. Riprodotto anche su Windows con Georgia;
+corretto consentendo il reflow dell'intestazione gruppo, senza ridurre
+font, icone, target o la severità delle asserzioni.
+[Evidenza del primo FAIL](assets/RC2/ci-initial.json).
+
+Una prova aggiuntiva ha individuato l'annullamento del salto Outline da
+due chiamate di scroll consecutive con `scroll-behavior: smooth`. Ora
+il salto calcola la destinazione in un'unica chiamata, tenendo conto
+della toolbar. Il test 320px a 4/48pt verifica focus, area interattiva
+visibile di almeno 44px sotto la toolbar, apertura da tastiera e grafo
+immutato. Un titolo molto grande può richiedere scroll verticale:
+non viene compresso per far entrare tutta la card nello stesso frame.
+[Misura reale dopo il salto a 48pt](assets/RC2/outline-focus.json).
 
 Nuovi test: geometria/ancore/tangenti a 320/390/768px × 4/13/30/48pt;
 2/3/32 attività con follow-up, completamenti indipendenti, reload,

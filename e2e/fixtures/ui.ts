@@ -34,7 +34,7 @@ export async function expectNoBleeding(page: Page) {
       // Recent explicitly permits horizontal scrolling inside its single-row strip at large scales.
       if (bounds.left < -1 || bounds.right > innerWidth + 1) errors.push(`${element.tagName} outside viewport: ${bounds.left}/${bounds.right}`);
       // Native single-line inputs scroll their editable value; their box must still fit.
-      if (!(element instanceof HTMLInputElement) && element.scrollWidth > element.clientWidth + 2) errors.push(`${element.tagName} clipping: ${element.scrollWidth}/${element.clientWidth}`);
+      if (!(element instanceof HTMLInputElement) && element.scrollWidth > element.clientWidth + 2) errors.push(`${element.tagName} ${element.getAttribute('aria-label') ?? element.className} clipping: ${element.scrollWidth}/${element.clientWidth}`);
     }
     return errors;
   });

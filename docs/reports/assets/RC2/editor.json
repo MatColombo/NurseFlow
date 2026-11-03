@@ -1,0 +1,840 @@
+{
+  "stats": {
+    "startTime": "2026-11-03T11:01:00.929Z",
+    "duration": 909452.818,
+    "expected": 69,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "Instruction: testo, nota, fase e Done attende il commit; reload e Ready indipendente",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Decision: Outcome editor solo answer/nota/path, F06 cambia solo B e ritorna allo stesso outcome",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Arrange cambia solo ordine, Undo/Redo Builder conserva ID/note/destinazioni",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "media: upload reale, due gallerie, move/reorder/replace oltre soft cap; Blob e objectURL senza perdite",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "E13: wire export/import conserva bytes locali, URL remoto e due gallerie offline; W07 non blocca",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota autosave: Done non esce, testo resta, Retry salva una sola modifica",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota fase: Retry crea e assegna una sola fase senza ripetere la proposta",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Change path annullato conserva camera/modalità; nuovo passo collegato apre Page08 dopo il commit",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "XSS e W07: contenuti escaped; Alert sempre visibile e preview senza sessioni",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota ritorno: Retry recupera la selezione senza alterare il grafo o uscire con falso successo",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ready-only Page08: nessuna Draft per ingresso/Done; primo autosave crea Draft indipendente e regge reload",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tema scuro a 320px: target form 48px, foto nei due slot e preview senza clipping",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "End: quattro tipi, fase facoltativa e nota; reload senza media o Continue",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "32 risposte ricercabili, rimozione separata con impatto e Undo senza perdere i passi",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricompressione esplicita crea Blob nuovo, default futuro non tocca il vecchio; Undo conserva entrambi",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota media: rollback include Blob, Retry mantiene proposta e inserisce una sola foto",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/4pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/30pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/48pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 390px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 768px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Instruction: testo, nota, fase e Done attende il commit; reload e Ready indipendente",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Decision: Outcome editor solo answer/nota/path, F06 cambia solo B e ritorna allo stesso outcome",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Arrange cambia solo ordine, Undo/Redo Builder conserva ID/note/destinazioni",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "media: upload reale, due gallerie, move/reorder/replace oltre soft cap; Blob e objectURL senza perdite",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "E13: wire export/import conserva bytes locali, URL remoto e due gallerie offline; W07 non blocca",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota autosave: Done non esce, testo resta, Retry salva una sola modifica",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota fase: Retry crea e assegna una sola fase senza ripetere la proposta",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Change path annullato conserva camera/modalità; nuovo passo collegato apre Page08 dopo il commit",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "XSS e W07: contenuti escaped; Alert sempre visibile e preview senza sessioni",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota ritorno: Retry recupera la selezione senza alterare il grafo o uscire con falso successo",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ready-only Page08: nessuna Draft per ingresso/Done; primo autosave crea Draft indipendente e regge reload",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tema scuro a 320px: target form 48px, foto nei due slot e preview senza clipping",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "End: quattro tipi, fase facoltativa e nota; reload senza media o Continue",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "32 risposte ricercabili, rimozione separata con impatto e Undo senza perdere i passi",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricompressione esplicita crea Blob nuovo, default futuro non tocca il vecchio; Undo conserva entrambi",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota media: rollback include Blob, Retry mantiene proposta e inserisce una sola foto",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/4pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/30pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/48pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 390px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 768px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Instruction: testo, nota, fase e Done attende il commit; reload e Ready indipendente",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Decision: Outcome editor solo answer/nota/path, F06 cambia solo B e ritorna allo stesso outcome",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Arrange cambia solo ordine, Undo/Redo Builder conserva ID/note/destinazioni",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "media: upload reale, due gallerie, move/reorder/replace oltre soft cap; Blob e objectURL senza perdite",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "E13: wire export/import conserva bytes locali, URL remoto e due gallerie offline; W07 non blocca",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota autosave: Done non esce, testo resta, Retry salva una sola modifica",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota fase: Retry crea e assegna una sola fase senza ripetere la proposta",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Change path annullato conserva camera/modalità; nuovo passo collegato apre Page08 dopo il commit",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "XSS e W07: contenuti escaped; Alert sempre visibile e preview senza sessioni",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota ritorno: Retry recupera la selezione senza alterare il grafo o uscire con falso successo",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ready-only Page08: nessuna Draft per ingresso/Done; primo autosave crea Draft indipendente e regge reload",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "tema scuro a 320px: target form 48px, foto nei due slot e preview senza clipping",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "End: quattro tipi, fase facoltativa e nota; reload senza media o Continue",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "32 risposte ricercabili, rimozione separata con impatto e Undo senza perdere i passi",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricompressione esplicita crea Blob nuovo, default futuro non tocca il vecchio; Undo conserva entrambi",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "quota media: rollback include Blob, Retry mantiene proposta e inserisce una sola foto",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/4pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/30pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 320px/48pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 390px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Page08 768px/13pt: form, outcome e preview senza overflow",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    }
+  ]
+}

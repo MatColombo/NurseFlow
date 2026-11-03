@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { setupBuilder, readBuilder } from '../fixtures/builder';
 import { openGraph } from '../fixtures/graph';
 import { runState, setupRun } from '../fixtures/run';
+import { expectNoBleeding, setScale } from '../fixtures/ui';
+import { setupSettings } from '../fixtures/settings';
 
 const row = (page: Page, id: string) => page.locator(`[data-outline-node="${id}"]`);
 const sheet = (page: Page) => page.getByRole('dialog');
@@ -74,4 +76,34 @@ test('Light motion, reduced motion and compact default-open note preserve Run st
   expect(await sheet(page).evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
   expect(await page.locator('html').evaluate((element) => getComputedStyle(element).scrollBehavior)).toBe('auto');
   await page.keyboard.press('Escape'); expect((await runState(page)).runs).toEqual(before.runs);
+});
+
+for (const scale of [4, 48]) test(`Outline focus scrolls once under its toolbar at 320px/${scale}pt`, async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 }); await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await setupBuilder(page, 'many'); const before = await readBuilder(page, 'many');
+  await page.goto('./#/settings'); await setScale(page, scale); await page.getByRole('button', { name: 'Chiudi', exact: true }).click();
+  await page.goto('./#/build/many');
+  await row(page, 'tasks').locator('button[aria-label*="Operazione 32"]').last().click();
+  const target = row(page, 'task-32').getByRole('button', { name: 'Operazione 32', exact: true });
+  await expect(target).toBeFocused();
+  await expect.poll(async () => target.evaluate((element) => {
+    const bounds = element.getBoundingClientRect(); const toolbar = document.querySelector('.nf-builder-toolbar')!.getBoundingClientRect();
+    // A large authored title can be taller than the remaining viewport. It must
+    // start below the sticky toolbar and expose a usable target, with natural scrolling.
+    const visible = Math.min(bounds.bottom, innerHeight) - Math.max(bounds.top, toolbar.bottom);
+    return bounds.top >= toolbar.bottom - 1 && visible >= 44;
+  })).toBe(true);
+  await target.press('Enter'); await expect(sheet(page)).toBeVisible(); await page.keyboard.press('Escape');
+  const after = await readBuilder(page, 'many'); expect(after.revision.graph).toEqual(before.revision.graph); expect(after.ready).toEqual(before.ready);
+});
+
+test('Library group header reflows at 320px/48pt with wide fallback font glyphs', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 }); await setupSettings(page, 48, 'light', true);
+  await page.goto('./#/library'); await page.reload(); await expect(page.getByTestId('library-pane')).toBeVisible();
+  await page.evaluate(() => { document.documentElement.style.fontFamily = 'Georgia, serif'; });
+  await expectNoBleeding(page);
+  const group = page.getByRole('button', { name: /Esempi \(1\)/ });
+  await group.click(); await expect(group).toHaveAttribute('aria-expanded', 'false');
+  await group.click(); await expect(group).toHaveAttribute('aria-expanded', 'true');
+  await expectNoBleeding(page);
 });

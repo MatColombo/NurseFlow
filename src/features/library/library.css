@@ -31,8 +31,9 @@
 select, .nf-dialog input:not([type]) { min-block-size: var(--nf-control-min); border: 1px solid var(--nf-text-muted); background: var(--nf-surface); border-radius: var(--nf-radius); }
 .nf-library-scroll { flex: 1; overflow: auto; min-block-size: 48px; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .nf-group { border: 1px solid var(--nf-border); border-radius: var(--nf-radius); background: var(--nf-surface); margin-block-end: var(--nf-space-1); }
-.nf-group-header { display: flex; align-items: center; background: var(--nf-surface-soft); }
-.nf-group-header h3 { flex: 1; font-size: var(--nf-font-base); }
+.nf-group-header { display: flex; flex-wrap: wrap; align-items: center; background: var(--nf-surface-soft); }
+.nf-group-header h3 { flex: 1 1 8ch; font-size: var(--nf-font-base); }
+.nf-group-header > .nf-button { margin-inline-start: auto; }
 .nf-group-header h3 button { inline-size: 100%; min-block-size: max(48px, var(--nf-control-min)); padding: var(--nf-space-1);
   border: 0; background: transparent; text-align: start; cursor: pointer; }
 .nf-procedure-row { display: flex; border-block-start: 1px solid var(--nf-border); background: var(--nf-surface); }

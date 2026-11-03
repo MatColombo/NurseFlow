@@ -1,0 +1,120 @@
+{
+  "stats": {
+    "startTime": "2026-11-03T11:33:41.606Z",
+    "duration": 93700.091,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    }
+  ]
+}

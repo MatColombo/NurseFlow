@@ -115,8 +115,9 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
   function focus(id: string) {
     if (displayMode === 'graph') { select(null); setFocusRequest({ id, sequence: ++focusSequence.current }); return; }
     select(null); requestAnimationFrame(() => {
-      const row = document.getElementById('builder-node-' + id); row?.scrollIntoView({ block: flow ? 'start' : 'nearest' });
-      if (flow) window.scrollBy({ top: -(toolbarRef.current?.getBoundingClientRect().height ?? 0) - 8 });
+      const row = document.getElementById('builder-node-' + id);
+      if (row && flow) window.scrollTo({ top: Math.max(0, window.scrollY + row.getBoundingClientRect().top - (toolbarRef.current?.getBoundingClientRect().height ?? 0) - 8) });
+      else row?.scrollIntoView({ block: 'nearest' });
       row?.querySelector('button')?.focus({ preventScroll: true });
     });
   }
