@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03T08:11:58.590Z",
+  "platform": "win32",
+  "release": "10.0.26200",
+  "node": "v26.13.0",
+  "browsers": {
+    "chromium": "156.0.8078.4",
+    "firefox": "157.0",
+    "webkit": "27.2"
+  },
+  "physicalDevices": "NON ESEGUITI: iOS Safari / Android Chrome not accessible",
+  "screenReaders": "NON ESEGUITI: no accessible real screen reader session"
+}

@@ -1,6 +1,6 @@
 # F15 — Verifiche su dispositivo e Pages
 
-Data: 2026-11-02. Stato **NON ESEGUITO** per iOS/Android fisici e URL pubblico. Non sono collegati dispositivi WPD, `adb`/Xcode non sono disponibili e il repository locale non ha remote. Le prove Playwright Windows non sostituiscono queste verifiche. Risultati automatici: [report F15](reports/F15.md).
+Aggiornamento: **2026-11-03**. iOS/Android fisici: **NON ESEGUITO**, nessun dispositivo WPD collegato né `adb`/Xcode accessibile. URL pubblico: **PASS**, [NurseFlow](https://matcolombo.github.io/NurseFlow/), deploy e smoke reali della [CI41604415777](https://github.com/MatColombo/NurseFlow/actions/runs/41604415777), più Full+Resume in profilo nuovo. Le prove Playwright desktop non sostituiscono le verifiche fisiche. Evidenze finali: [report F16](reports/F16.md); storia F15: [report F15](reports/F15.md).
 
 ## Riscontri disponibili
 
@@ -31,4 +31,4 @@ Il push `main` o workflow_dispatch esegue CI, pubblica l'artefatto verificato e 
 node tooling/pages-smoke.mjs https://OWNER.github.io/REPO/
 ```
 
-Lo smoke richiede HTTPS e un Chromium Playwright installato, usa un profilo nuovo, controlla risposta, manifest/base/icone, stato cache e reload offline di `#/settings`. Registrare URL finale e run Actions; finché mancano, deploy e gate G3/G5 rimangono aperti.
+Lo smoke richiede HTTPS e un Chromium Playwright installato, usa un profilo nuovo, controlla risposta, CSP, manifest/base/icone, stato cache e reload offline di `#/settings`. Eseguito con PASS sull'URL reale sopra. Eseguito anche `NF_PAGES_URL=https://matcolombo.github.io/NurseFlow/ npm run test:e2e -- --config playwright.pages.config.ts`:1/1 PASS, Download Full, import e Resume OR/AND/W08 su pin storico. G5 tecnico chiuso per la candidata; G3 resta aperto per hardware mobile reale.

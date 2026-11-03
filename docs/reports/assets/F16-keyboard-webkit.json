@@ -1,0 +1,30 @@
+{
+  "commit": "540e4e113962b63933ed10102dbdb2024a851949",
+  "rawSha256": "43aa2510d3048c39c217d712184df03a9fe5111ca06dae2a02f5e66af081dffa",
+  "stats": {
+    "startTime": "2026-11-03T08:34:03.336Z",
+    "duration": 49190.111000000004,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "32 risposte ricercabili, rimozione separata con impatto e Undo senza perdere i passi",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "32 risposte ricercabili, rimozione separata con impatto e Undo senza perdere i passi",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "url": "https://matcolombo.github.io/NurseFlow/",
+  "commit": "540e4e113962b63933ed10102dbdb2024a851949",
+  "rawSha256": "22c842e9f86ef9531216fe1afefee748fbff9dce98974e8136e07f5d3b6c2d2c",
+  "stats": {
+    "startTime": "2026-11-03T08:56:05.814Z",
+    "duration": 10131.517,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "file": "backup.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "annotations": [],
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 8940
+        }
+      ]
+    }
+  ]
+}

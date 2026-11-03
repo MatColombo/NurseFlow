@@ -1,0 +1,13 @@
+{
+  "commit": "540e4e113962b63933ed10102dbdb2024a851949",
+  "rawSha256": "ab278a37fb3e6046c8b2f7c49f03c4e3470a2eaeb132c5e7f83b24df2b09ac2f",
+  "stats": {
+    "startTime": "2026-11-03T08:38:39.853Z",
+    "duration": 28346.856,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "note": "Windows WebKit native Cache.put failure observed; app never claims offline readiness, Retry verified."
+}

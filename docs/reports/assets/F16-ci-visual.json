@@ -1,0 +1,30 @@
+{
+  "run": "https://github.com/MatColombo/NurseFlow/actions/runs/41604415777",
+  "commit": "540e4e113962b63933ed10102dbdb2024a851949",
+  "artifactId": 13216230544,
+  "artifactSha256": "b7767a6ab79f02b66df421cafad0c828471ce6db7f325e942f3e092896614690",
+  "rawSha256": "918f79a1879963614d93e6154875585ae21ee70023fdbb27215350d7bf4d1ac3",
+  "stats": {
+    "startTime": "2026-11-03T08:36:55.433Z",
+    "duration": 21264.48,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "@visual componenti default 13pt e overlay",
+      "file": "components.visual.spec.ts",
+      "project": "chromium",
+      "status": "expected",
+      "annotations": [],
+      "attempts": [
+        {
+          "status": "passed",
+          "durationMs": 2141
+        }
+      ]
+    }
+  ]
+}

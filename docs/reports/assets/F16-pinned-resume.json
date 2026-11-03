@@ -1,0 +1,63 @@
+{
+  "commit": "f037d83d4dde047eeaff02b3c062d09645688bec",
+  "note": "Final CSP and pinned Resume via Details, Map, confirmed Exit, latest Ready; Windows desktop.",
+  "rawSha256": "fd930c392028abaa382613d4bf38f53439128a3056129bf7d7d7174a3e563f05",
+  "stats": {
+    "startTime": "2026-11-03T08:05:37.177Z",
+    "duration": 116901.414,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F11 Details Resume and Map share the old pinned Ready; confirmed Exit exposes the latest Ready over a Draft",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F11 Details Resume and Map share the old pinned Ready; confirmed Exit exposes the latest Ready over a Draft",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F11 Details Resume and Map share the old pinned Ready; confirmed Exit exposes the latest Ready over a Draft",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    }
+  ]
+}

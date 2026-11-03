@@ -2,6 +2,8 @@
 
 Candidata tecnica **0.1.0-rc.1**, funzionalità F00–F15 e audit F16: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale 4–48pt e IT/EN. Nessun contenuto clinico o fixture precaricato. Non dichiarata pronta per l'uso operativo: prove su dispositivi fisici e screen reader reali restano necessarie. [Esito F16](docs/reports/F16.md), [note versione](CHANGELOG.md), [piano backup e recupero](docs/backup-and-recovery.md). I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
+**[Apri NurseFlow su GitHub Pages](https://matcolombo.github.io/NurseFlow/)** · [CI verificata](https://github.com/MatColombo/NurseFlow/actions/runs/41604415777):438 unit test,783 E2E PASS/3 SKIP condizionali/0 flaky,120 combinazioni visuali. Smoke HTTPS/cache/offline e Full+Resume su profilo nuovo eseguiti sul vero URL. Gate G1/G2/G5 tecnici PASS; G3/G4 restano FAIL per prove mobile/assistite non eseguite, come dettagliato nel report.
+
 ## Avvio riproducibile
 
 Richiesti **Node 26.13.0 LTS** e **npm 11.20.0**, fissati in `.nvmrc`, `.node-version`, `package.json` e ADR-001. Con nvm, eseguire `nvm install` e `nvm use` (su nvm-windows specificare `26.13.0`).
@@ -222,6 +224,6 @@ Gli alias `@app/*`, `@domain/*`, `@storage/*`, `@features/*`, `@shared/*`, `@tes
 
 Le Pages 00–11 sono implementate, comprese Settings, Procedure e libreria e Backup app e impostazioni. In sviluppo sono disponibili parametri hash e catalogo componenti, esclusi dalla build production. Nessuna bottom navigation globale. I gate di rilascio e dispositivo restano quelli dei report di fase.
 
-Non sono presenti account, backend, sync, CDN, font remoti o tracker. Da F15 la build production registra il service worker locale; l'uso offline richiede una prima cache completata, verificabile in Settings. I gate di dispositivo e deploy descritti nel report F15 restano necessari prima del rilascio.
+Non sono presenti account, backend, sync, CDN, font remoti o tracker. Da F15 la build production registra il service worker locale; l'uso offline richiede una prima cache completata, verificabile in Settings. F16 aggiunge CSP statica e ripresa da Details delle sessioni storiche dopo nuova Ready/import Full: Resume e Map usano lo stesso pin; dopo Exit esplicito torna disponibile la Ready corrente. [ADR-017](docs/adr/017-static-content-security-policy.md), [ADR-018](docs/adr/018-details-resumes-pinned-ready.md). Deploy e smoke sono eseguiti; i gate hardware/assistiti F16 restano aperti.
 
 Decisioni tecniche: [ADR-001](docs/adr/001-bootstrap-toolchain.md). Risultati effettivi: [report F00](docs/reports/F00.md).
