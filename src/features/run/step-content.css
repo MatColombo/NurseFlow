@@ -2,6 +2,13 @@
 .nf-authored { white-space: pre-wrap; overflow-wrap: anywhere; }
 .nf-step-warning { border-inline-start: 3px solid var(--nf-warning); padding: min(var(--nf-card-pad), 4vw); background: var(--nf-surface-soft); }
 .nf-step-content h2 { white-space: pre-wrap; }
+.nf-step-content { line-height: 1.6; }
+.nf-step-content > h2 { padding-block-end: var(--nf-space-1); border-block-end: 1px solid var(--nf-border); font-weight: 650; }
+.nf-step-content > .nf-gallery, .nf-step-note { padding-block: var(--nf-space-2); border-block: 1px solid var(--nf-border); }
+.nf-step-content .nf-step-note { color: var(--nf-text); font-size: var(--nf-font-base); }
+.nf-step-content .nf-note-toggle { align-self: flex-start; min-block-size: max(48px, var(--nf-control-min));
+  padding: var(--nf-space-1); font-size: var(--nf-font-note); border-color: var(--nf-border); }
+.nf-step-content figcaption { font-size: var(--nf-font-meta); font-style: italic; color: var(--nf-text-muted); line-height: 1.5; padding-block-start: var(--nf-space-1); }
 .nf-step-content [data-preview-outcome] > .nf-button:first-child { flex: 1 1 10ch; min-block-size: max(56px, var(--nf-action-min)); }
 .nf-step-content [data-preview-outcome] > .nf-note { flex: 1 0 100%; }
 .nf-step-content .nf-note[id] { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }

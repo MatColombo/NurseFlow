@@ -47,6 +47,9 @@ export function editStep(source: Graph, nodeId: string, edit: StepEdit, settings
     requireEdit(edit.name.trim().length > 0); graph.phases.push({ id: edit.id, name: edit.name, order: graph.phases.length }); node.phaseId = edit.id;
   } else if (edit.type === 'change-type') {
     requireEdit(node.kind !== edit.kind);
+    if ((assertEditableGraph(source).get(node.id)?.length ?? 0) > 0 && node.kind !== 'end') {
+      requireEdit(edit.kind === 'instruction' || edit.kind === 'alert', 'scope');
+    }
     const common = { id: node.id, ...('phaseId' in node ? { phaseId: node.phaseId } : {}), ...(node.note ? { note: node.note } : {}) };
     const title = node.kind === 'end' ? node.heading : node.title ?? '';
     const body = node.kind === 'end' ? node.message : node.kind === 'decision' ? node.context ?? '' : node.text;

@@ -1,5 +1,14 @@
 .nf-library { display: flex; flex-direction: column; block-size: calc(100dvh - min(var(--nf-space-3), 4vw) * 2); gap: var(--nf-space-1); }
 .nf-library-toolbar { flex: 0 0 auto; }
+.nf-library-toolbar { padding: min(var(--nf-card-pad), 3vw); border: 1px solid var(--nf-border); border-block-start: var(--nf-space-1) solid var(--nf-primary);
+  border-radius: var(--nf-radius); background: linear-gradient(120deg, var(--nf-primary-tint), var(--nf-surface)); }
+.nf-library-toolbar header h1 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nf-space-1); color: var(--nf-primary-strong); }
+.nf-library-toolbar header h1 .nf-icon { inline-size: 1.4em; block-size: 1.4em; flex-basis: 1.4em; }
+.nf-library-toolbar .nf-button[aria-pressed='true'] { background: var(--nf-primary); color: var(--nf-on-primary); }
+.nf-group-header { border-inline-start: var(--nf-space-1) solid var(--nf-primary); }
+.nf-procedure-open:enabled:hover { background: var(--nf-primary-tint); }
+.nf-procedure-title { font-weight: 600; }
+.nf-favorite[aria-pressed='true'] { color: var(--nf-warning); background: var(--nf-primary-tint); }
 .nf-library-toolbar header h1 { flex: 1 1 auto; }
 .nf-library-search { display: flex; align-items: end; gap: var(--nf-space-1); }
 .nf-library-search > div { flex: 1; }

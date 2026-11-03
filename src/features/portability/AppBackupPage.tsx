@@ -78,7 +78,7 @@ export default function AppBackupPage() {
         {failure}<div className="nf-row"><Button autoFocus disabled={busy} disabledReason={t('common.loading')} onClick={dismiss}>{t('common.cancel')}</Button><Button variant="primary" disabled={busy || error === 'stale'} disabledReason={t(error === 'stale' ? 'backup.stale' : 'common.loading')} onClick={() => { if (modal === 'replacement') commit(true); else if (replace) setModal('replacement'); else commit(false); }}>{t(modal === 'replacement' ? full ? 'backup.confirmBoth' : 'backup.confirmReplace' : replace ? 'backup.nextConsent' : 'portable.confirmAdd')}</Button></div>
       </>}
     </Dialog>
-    {preview && staged && <ProcedurePreview item={preview} assets={staged.parsed.records.mediaAssets} close={() => { setPreview(null); requestAnimationFrame(() => { returnTo.current.anchor?.focus({ preventScroll: true }); scrollTo(0, returnTo.current.top); }); }} />}
+    {preview && staged && <ProcedurePreview item={preview} assets={staged.parsed.records.mediaAssets} close={() => { setPreview(null); requestAnimationFrame(() => { returnTo.current.anchor?.focus({ preventScroll: true }); scrollTo({ top: returnTo.current.top, behavior: 'instant' }); }); }} />}
     {prepared && <ExportDialog prepared={prepared} close={() => setPrepared(null)} />}
   </section>;
 }

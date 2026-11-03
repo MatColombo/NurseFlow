@@ -100,9 +100,9 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
     void edit({ type: 'connect', edge: picking.edge, destination: { kind: 'node', nodeId: id } }, true);
   }
   useLayoutEffect(() => {
-    if (flow && displayMode === 'outline') window.scrollTo({ top: outlineTop.current });
+    if (flow && displayMode === 'outline') window.scrollTo({ top: outlineTop.current, behavior: 'instant' });
     else {
-      if (window.scrollY !== 0) window.scrollTo({ top: 0 });
+      if (window.scrollY !== 0) window.scrollTo({ top: 0, behavior: 'instant' });
       if (scroll.current) scroll.current.scrollTop = displayMode === 'outline' ? outlineTop.current : 0;
     }
     return () => { if (timer.current) clearTimeout(timer.current); };
@@ -141,7 +141,9 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
     try {
       const result = applyEdit(current.current.revision.graph, value, () => crypto.randomUUID());
       if (JSON.stringify(result.graph) === JSON.stringify(current.current.revision.graph)) {
-        select(null); setModal(null); return true;
+        select(null); setModal(null); setPicking(null); setFocusRequest(null);
+        if (pathReturn) void navigate(editorPath(procedure.id, current.current.revision.id, pathReturn), { replace: true });
+        return true;
       }
       const proposed = { ...result, label: value.type, openEditor };
       setError(null); if (preview) { setPlan(proposed); return false; } return commit(proposed);
@@ -196,7 +198,7 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
   const retry = () => { if (failed.current) void run(failed.current); };
   function autoLayout() {
     const width = scroll.current?.clientWidth ?? window.innerWidth; const metrics = graphMetrics(preferences.uiScalePt, width);
-    const scene = makeScene(current.current.revision.graph, camera.current.focusItems, width, metrics, false);
+    const scene = makeScene(current.current.revision.graph, camera.current.focusItems, width, metrics);
     void edit({ type: 'layout', positions: Object.fromEntries(scene.nodes.map((node) => [node.id, { x: node.x / metrics.ratio, y: node.y / metrics.ratio }])) }, false);
   }
   return <section className={'nf-builder nf-stack' + (flow ? ' nf-builder-flow' : '')} aria-label={t('pages.07')} onKeyDown={shortcuts}>

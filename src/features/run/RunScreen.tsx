@@ -37,7 +37,7 @@ export function RunScreen({ initial, adapter, onData }: { initial: RunData; adap
   useEffect(() => { if (location.pathname + location.search !== runPath) void navigate(runPath, { replace: true, state: location.state }); }, [navigate, runPath, location.pathname, location.search, location.state]);
   useEffect(() => {
     const restoreMap = fromMap.current;
-    const frame = requestAnimationFrame(() => { fromMap.current = false; (restoreMap ? mapButton.current : content.current?.querySelector<HTMLElement>('h2'))?.focus({ preventScroll: true }); window.scrollTo(0, restoreMap ? location.state?.runMapContext?.scrollTop ?? 0 : 0); });
+    const frame = requestAnimationFrame(() => { fromMap.current = false; (restoreMap ? mapButton.current : content.current?.querySelector<HTMLElement>('h2'))?.focus({ preventScroll: true }); window.scrollTo({ top: restoreMap ? location.state?.runMapContext?.scrollTop ?? 0 : 0, behavior: 'instant' }); });
     return () => cancelAnimationFrame(frame);
   }, [run.currentNodeId, run.status, run.focusTokenId, location.state]);
   useEffect(() => { if (modal !== 'exit') return; const frame = requestAnimationFrame(() => stay.current?.focus()); return () => cancelAnimationFrame(frame); }, [modal]);

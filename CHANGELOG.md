@@ -1,5 +1,15 @@
 # NurseFlow — versioni
 
+## 0.1.0-rc.2 — 3 novembre 2026
+
+- Graph e Map da sinistra a destra, ancore destra/sinistra e curve con arrivo perpendicolare; convergenze sempre su un solo nodo.
+- Nuove attività AND con istruzioni/avvisi di follow-up già terminabili sul successore esterno comune. Il picker riconosce quel successore come completamento dell'attività, senza saltare le altre; nessuna riscrittura di Ready o run esistenti.
+- Transizioni leggere per pagine, passaggi, popup e sheet; movimento ridotto rispettato, scroll del grafo immediato e ripristini di posizione senza animazione.
+- Note inizialmente aperte, controllo compatto, testo principale e nota della stessa misura; figure numerate tra le due gallerie, didascalie in corsivo e separatori discreti.
+- Libreria con accenti turchesi e icona ospedaliera locale, conservando ricerca, gruppi, recenti e scala 4–48pt.
+
+Regole aggiornate su richiesta esplicita dell'utente nell'[addendum](docs/adr/019-graph-and-reading-refinement.md). Schema IndexedDB v5 e formato package v1 invariati. Restano da verificare i dispositivi mobili e gli screen reader reali elencati nel report F16.
+
 ## 0.1.0-rc.1 — 3 novembre 2026
 
 Candidata tecnica per uso personale, sottoposta all'audit F16. Non è dichiarata pronta per l'uso operativo: installazione, lifecycle storage e accessibilità assistita su dispositivi mobili reali devono ancora essere verificati. L'esito puntuale dei gate è nel [report F16](docs/reports/F16.md).

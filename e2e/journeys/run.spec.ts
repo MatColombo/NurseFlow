@@ -11,7 +11,12 @@ test('F10 one step, phase, dual galleries, independent notes and explicit decisi
   await setupRun(page); await expect(page.getByText('PASSO 1 / 3', { exact: true })).toBeVisible(); await expect(page.getByText('Fase esempio', { exact: true })).toBeVisible();
   await expect(page.getByText('Avviso B essenziale authored', { exact: true })).toBeVisible(); await expect(page.getByText('W07 · Immagine non disponibile', { exact: true })).toHaveCount(2);
   const before = await runState(page); await page.getByRole('button', { name: 'Nota per: A', exact: true }).click(); await expect(page.getByText('Informazione A authored', { exact: true })).toBeVisible();
+  await expect(page.getByText('Nota del passo authored', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Nascondi nota', exact: true }).click(); await expect(page.getByText('Nota del passo authored', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Mostra nota', exact: true }).click(); await expect(page.getByText('Nota del passo authored', { exact: true })).toBeVisible(); expect((await runState(page)).runs).toEqual(before.runs);
+  await expect(step(page).locator('figcaption').first()).toHaveText(/^fig\.1 - /);
+  await expect(step(page).locator('figcaption').last()).toHaveText(/^fig\.2 - /);
+  expect(await step(page).locator('figcaption').first().evaluate((element) => getComputedStyle(element).fontStyle)).toBe('italic');
   expect(await page.locator('.nf-step-content').evaluate((element) => { const first = element.querySelector('[data-media-id="before"]')!; const note = [...element.querySelectorAll('p')].find((p) => p.textContent === 'Nota del passo authored')!; const last = element.querySelector('[data-media-id="after"]')!; return Boolean(first.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING) && Boolean(note.compareDocumentPosition(last) & Node.DOCUMENT_POSITION_FOLLOWING); })).toBe(true);
   await chooseA(page); await expect(page.getByRole('complementary', { name: 'PASSO PRECEDENTE' })).toContainText('Percorso A o B? · A'); await expect(step(page)).toHaveCount(1);
   const chosen = await runState(page); await page.reload(); await expect(step(page)).toHaveAttribute('data-step-content', 'a-step'); expect((await runState(page)).runs).toEqual(chosen.runs);
@@ -19,7 +24,7 @@ test('F10 one step, phase, dual galleries, independent notes and explicit decisi
 for (const [kind, label] of [['completed', 'Completata'], ['stopped', 'Interrotta'], ['escalation', 'Escalation'], ['neutral', 'Fine']] as const) test(`F10 ${kind} authored End, reload, Back, Restart confirmation and exact cleanup`, async ({ page }) => {
   await setupRun(page, 'or', kind); await reachEnd(page); await expect(page.locator('[data-end-kind]')).toHaveText(label); await expect(page.getByText('FINE · 3 passi', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Titolo finale authored', exact: true })).toBeFocused();
-  await page.getByRole('button', { name: 'Mostra nota', exact: true }).click(); await expect(page.getByText('Nota finale authored', { exact: true })).toBeVisible();
+  await expect(page.getByText('Nota finale authored', { exact: true })).toBeVisible();
   const before = await runState(page); await page.reload(); await expect(page.locator('[data-end-kind]')).toHaveText(label); expect((await runState(page)).runs).toEqual(before.runs);
   await page.getByRole('button', { name: 'Ricomincia', exact: true }).click(); await page.getByRole('button', { name: 'Annulla', exact: true }).click(); expect((await runState(page)).runs).toEqual(before.runs);
   await back(page).click(); await expect(step(page)).toHaveAttribute('data-step-content', 'shared'); await page.getByRole('button', { name: 'Continua', exact: true }).click(); await expect(page).toHaveURL(/\/end$/);

@@ -116,9 +116,10 @@ test('AND: Finish attività, After all, Stop entire con tipo e consenso esplicit
   await row(page, 'task-1').getByRole('button', { name: 'Passo successivo · Attività terminata', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Cambia collegamento', exact: true }).click();
   await locateGraphNode(page, 'Operazione 2'); await expect(graphSurface(page).getByRole('button', { name: 'Scegli destinazione: Operazione 2', exact: true })).toBeDisabled();
-  await locateGraphNode(page, 'Fine esempio'); await expect(graphSurface(page).getByRole('button', { name: 'Scegli destinazione: Fine esempio', exact: true })).toBeDisabled();
-  await cancelGraphTarget(page);
-  await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click();
+  // Selecting the common collector means Finish, and must not bypass the other activities.
+  await locateGraphNode(page, 'Fine esempio'); await expect(graphSurface(page).getByRole('button', { name: 'Scegli destinazione: Fine esempio', exact: true })).toBeEnabled();
+  await pickGraphNode(page, 'Fine esempio'); await expect(dialog(page)).toHaveCount(0);
+  expect((await readBuilder(page, 'multi')).revision.graph).toEqual(before.revision.graph);
   await row(page, 'task-1').getByRole('button', { name: 'Passo successivo · Attività terminata', exact: true }).click();
   await dialog(page).getByRole('button', { name: 'Scollega', exact: true }).click(); await apply(page);
   await row(page, 'task-1').getByRole('button', { name: 'Passo successivo · +', exact: true }).click();

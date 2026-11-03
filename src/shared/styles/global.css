@@ -88,6 +88,19 @@ input[type='range'] { inline-size: 100%; min-block-size: var(--nf-control-min); 
 .nf-gallery--full-width img { inline-size: 100%; }
 .nf-unavailable { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nf-space-1);
   padding: var(--nf-card-pad); color: var(--nf-text-muted); background: var(--nf-surface-soft); }
+@keyframes nf-popup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes nf-slide-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes nf-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nf-content-in { from { opacity: .65; } to { opacity: 1; } }
+.nf-step-content { animation: nf-content-in 160ms ease-out; }
+.nf-step-note p { animation: nf-content-in 140ms ease-out; }
+.nf-dialog[open] { animation: nf-popup 160ms ease-out; }
+.nf-sheet[open] { animation: nf-slide-in 180ms ease-out; }
+.nf-dialog[open]::backdrop { animation: nf-backdrop-in 160ms ease-out; }
+.nf-button, a, .nf-procedure-open { transition: background-color 120ms ease-out, border-color 120ms ease-out; }
+html, .nf-library-scroll, .nf-image-scroll { scroll-behavior: smooth; }
+.nf-graph-viewport { scroll-behavior: auto; }
+html:has(.nf-graph-viewport) { scroll-behavior: auto; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

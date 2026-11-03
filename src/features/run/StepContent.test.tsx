@@ -6,7 +6,7 @@ import { editableStep } from '@domain/editor/edits';
 import { outlineGraph } from '@test/fixtures/builder';
 import type { StepMedia } from '@domain/model';
 import { StepContent } from './StepContent';
-vi.mock('@features/step-editor/media/MediaImage', () => ({ MediaImage: ({ item }: { item: StepMedia }) => <figure>{item.caption}</figure> }));
+vi.mock('@features/step-editor/media/MediaImage', () => ({ MediaImage: ({ item, figureNumber }: { item: StepMedia; figureNumber?: number }) => <figure><figcaption>fig.{figureNumber} - {item.caption}</figcaption></figure> }));
 const wrap = (node: ReturnType<typeof editableStep>) => render(<I18nextProvider i18n={createUiI18n()}><StepContent node={node} preview /></I18nextProvider>);
 it('renderer condiviso: testo, galleria prima, disclosure nota, galleria dopo e azione inerte', () => {
   const node = editableStep(outlineGraph().nodes.find((node) => node.id === 'shared')!); if (node.kind !== 'instruction') throw new Error('fixture');
@@ -14,9 +14,11 @@ it('renderer condiviso: testo, galleria prima, disclosure nota, galleria dopo e 
   node.media = [{ id: 'before', slot: 'before-note', order: 0, source: { kind: 'local', assetId: 'a', mime: 'image/png' }, caption: 'Prima' },
     { id: 'after', slot: 'after-note', order: 0, source: { kind: 'local', assetId: 'a', mime: 'image/png' }, caption: 'Dopo' }];
   const { container } = wrap(node);
-  expect(screen.getByText(node.text)).toBeInTheDocument(); expect(container.querySelector('img')).toBeNull(); expect(screen.queryByText('Nota autore')).toBeNull();
-  const disclosure = screen.getByRole('button', { name: 'Mostra nota' }); fireEvent.click(disclosure); expect(disclosure).toHaveAttribute('aria-expanded', 'true');
-  const before = screen.getByText('Prima'); const note = screen.getByText('Nota autore'); const after = screen.getByText('Dopo');
+  expect(screen.getByText(node.text)).toBeInTheDocument(); expect(container.querySelector('img')).toBeNull(); expect(screen.getByText('Nota autore')).toBeVisible();
+  const disclosure = screen.getByRole('button', { name: 'Nascondi nota' }); expect(disclosure).toHaveAttribute('aria-expanded', 'true');
+  fireEvent.click(disclosure); expect(screen.queryByText('Nota autore')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Mostra nota' }));
+  const before = screen.getByText('fig.1 - Prima'); const note = screen.getByText('Nota autore'); const after = screen.getByText('fig.2 - Dopo');
   expect(before.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy(); expect(note.compareDocumentPosition(after) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Continua' })).toBeDisabled();
 });

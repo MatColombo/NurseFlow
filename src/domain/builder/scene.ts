@@ -8,6 +8,67 @@ export type SceneNode = Point & { id: string; width: number; height: number; por
 export type SceneEdge = { edge: EdgeRef; targetId: string; completion: boolean; draw: boolean; path: string; start: Point; end: Point };
 export type Scene = { nodes: SceneNode[]; edges: SceneEdge[]; width: number; height: number; capacity: number };
 
+/** All views share right-to-left-face anchors and horizontal terminal tangents. */
+export function horizontalPath(start: Point, end: Point, gap: number) {
+  // Keep long completion edges inside their activity lane until the final column gap.
+  const turn = Math.max(start.x, end.x - gap * 3);
+  const bend = (end.x - turn) / 2;
+  return `M${start.x},${start.y} L${turn},${start.y} C${turn + bend},${start.y} ${end.x - bend},${end.y} ${end.x},${end.y}`;
+}
+
+/** Tolerant view-only scopes also support an incomplete or cyclic Draft in Map. */
+export function layoutScopes(graph: Graph) {
+  const scopes = new Map<string, string[]>(); const byId = new Map(graph.nodes.map((node) => [node.id, node]));
+  function visit(id: string, scope: string[]) {
+    const node = byId.get(id); if (!node || scopes.has(id)) return;
+    scopes.set(id, node.kind === 'end' ? [] : scope);
+    for (const { edge, destination } of outlets(node)) if (destination.kind === 'node') {
+      visit(destination.nodeId, edge.slot === 'activity' ? [...scope, activityScopeKey(id, edge.itemId!)] : scope);
+    }
+  }
+  for (const node of graph.nodes.filter((node) => node.kind === 'start')) visit(node.id, []);
+  for (const node of graph.nodes) visit(node.id, []);
+  return scopes;
+}
+
+/** Rank columns progress left to right; parallel branches occupy separate vertical lanes. */
+export function layoutColumns(boxes: SceneNode[], ranks: ReadonlyMap<string, number>, metrics: SceneMetrics, scopes: ReadonlyMap<string, string[]>) {
+  const layers = new Map<number, SceneNode[]>();
+  for (const box of boxes) { const rank = ranks.get(box.id) ?? 0; const layer = layers.get(rank) ?? []; layer.push(box); layers.set(rank, layer); }
+  const heightOf = (layer: SceneNode[]) => layer.reduce((height, box) => height + box.height + metrics.gap * 2, 0);
+  const laneOf = (box: SceneNode) => {
+    const scope = scopes.get(box.id) ?? [];
+    return JSON.stringify(scope[0] === '$terminal' ? [] : scope);
+  };
+  const lanes = new Map<string, number>();
+  for (const layer of layers.values()) for (const box of layer) {
+    const lane = laneOf(box); if (lane === '[]') continue;
+    lanes.set(lane, Math.max(lanes.get(lane) ?? 0, heightOf(layer.filter((other) => laneOf(other) === lane))));
+  }
+  const laneTop = new Map<string, number>(); let laneHeight = 0;
+  for (const [lane, height] of lanes) { laneTop.set(lane, laneHeight); laneHeight += height; }
+  const height = Math.max(laneHeight, 0, ...[...layers.values()].map((layer) => heightOf(layer.filter((box) => laneOf(box) === '[]'))));
+  let x = metrics.gap;
+  for (const [, layer] of [...layers].sort(([a], [b]) => a - b)) {
+    const pending = new Set(layer);
+    for (const first of layer) {
+      if (!pending.has(first)) continue;
+      const lane = laneOf(first); const members = layer.filter((box) => laneOf(box) === lane);
+      let y = metrics.gap + (lane === '[]' ? (height - heightOf(members)) / 2 :
+        (height - laneHeight) / 2 + laneTop.get(lane)! + (lanes.get(lane)! - heightOf(members)) / 2);
+      for (const box of members) { box.x = x; box.y = y; y += box.height + metrics.gap * 2; pending.delete(box); }
+    }
+    // An unrelated root branch may share this rank with activity nodes.
+    for (const box of layer.filter((box) => laneOf(box) === '[]')) {
+      const others = layer.filter((other) => other !== box);
+      while (others.some((other) => box.y < other.y + other.height + metrics.gap && box.y + box.height + metrics.gap > other.y)) {
+        box.y = Math.max(...others.map((other) => other.y + other.height)) + metrics.gap * 2;
+      }
+    }
+    x += metrics.width + metrics.gap * 4;
+  }
+}
+
 export function graphMetrics(scale: number, viewportWidth: number): SceneMetrics {
   const font = scale * 4 / 3; const ratio = scale / 13;
   const pad = Math.min(10 * (scale - 4) / 9, viewportWidth * .04);
@@ -52,7 +113,7 @@ export function focusPath(graph: Graph, nodeId: string, current: Record<string, 
 }
 
 /** Projection contains identities/geometry, never a second editable Graph or synthetic join. */
-export function makeScene(graph: Graph, focus: Record<string, string>, viewportWidth: number, metrics: SceneMetrics, authored = true): Scene {
+export function makeScene(graph: Graph, focus: Record<string, string>, viewportWidth: number, metrics: SceneMetrics): Scene {
   const capacity = Math.max(1, Math.min(3, Math.floor((viewportWidth + metrics.gap) / (metrics.width + metrics.gap))));
   const owners = assertEditableGraph(graph); const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
   const ports = new Map(graph.nodes.map((node) => [node.id, visiblePorts(node, focus, capacity)]));
@@ -86,42 +147,24 @@ export function makeScene(graph: Graph, focus: Record<string, string>, viewportW
     rank.set(edge.targetId, Math.max(rank.get(edge.targetId)!, rank.get(edge.edge.nodeId)! + 1));
     indegree.set(edge.targetId, indegree.get(edge.targetId)! - 1); if (!indegree.get(edge.targetId)) pending.push(edge.targetId);
   }
-  const layers = new Map<number, string[]>();
-  for (const id of visible) { const level = rank.get(id)!; const layer = layers.get(level) ?? []; layer.push(id); layers.set(level, layer); }
-  const maxColumns = Math.min(3, Math.max(1, ...[...layers.values()].map((layer) => layer.length)));
-  const sceneNodes: SceneNode[] = []; let y = metrics.gap;
-  for (const [, ids] of [...layers].sort(([a], [b]) => a - b)) {
-    for (let offset = 0; offset < ids.length; offset += 3) {
-      const row = ids.slice(offset, offset + 3); let height = 0;
-      row.forEach((id, index) => {
-        const node = nodes.get(id)!; const visibleOutlets = ports.get(id)!;
-        const total = node.kind === 'decision' ? node.outcomes.length : node.kind === 'multitask' ? node.activities.length : 0;
-        const browseRows = node.kind === 'multitask' || node.kind === 'decision' && total > 3 ? 2 : 0;
-        const box = { id, x: metrics.gap + ((maxColumns - row.length) / 2 + index) * (metrics.width + metrics.gap), y,
-          width: metrics.width, height: metrics.header + (visibleOutlets.length + browseRows) * metrics.row + 4, ports: visibleOutlets, total };
-        const preferred = authored && graph.layout && Object.hasOwn(graph.layout.positions, id) ? graph.layout.positions[id] : undefined;
-        if (preferred) {
-          const candidate = { ...box, x: Math.max(metrics.gap, preferred.x * metrics.ratio), y: Math.max(metrics.gap, preferred.y * metrics.ratio) };
-          if (!sceneNodes.some((other) => overlaps(candidate, other, metrics.gap / 2))) Object.assign(box, candidate);
-        }
-        while (sceneNodes.some((other) => overlaps(box, other, metrics.gap / 2))) box.y += metrics.row + metrics.gap;
-        sceneNodes.push(box); height = Math.max(height, box.y + box.height - y);
-      }); y += height + metrics.gap * 2;
-    }
-  }
+  const sceneNodes: SceneNode[] = [...visible].map((id) => {
+    const node = nodes.get(id)!; const visibleOutlets = ports.get(id)!;
+    const total = node.kind === 'decision' ? node.outcomes.length : node.kind === 'multitask' ? node.activities.length : 0;
+    const browseRows = node.kind === 'multitask' || node.kind === 'decision' && total > 3 ? 2 : 0;
+    return { id, x: 0, y: 0,
+      width: metrics.width, height: metrics.header + (visibleOutlets.length + browseRows) * metrics.row + 4, ports: visibleOutlets, total };
+  });
+  layoutColumns(sceneNodes, rank, metrics, owners);
   const byId = new Map(sceneNodes.map((node) => [node.id, node]));
   const edges = connections.map((edge) => {
     const source = byId.get(edge.edge.nodeId)!; const target = byId.get(edge.targetId)!;
     const inbound = connections.filter((item) => item.draw && item.targetId === edge.targetId);
-    const index = inbound.indexOf(edge); const span = Math.min(target.width - 32, Math.max(1, inbound.length - 1) * 24 * metrics.ratio);
+    const index = inbound.indexOf(edge);
     const start = { x: source.x + source.width, y: source.y + metrics.header + (source.ports.findIndex((port) => edgeKey(port.edge) === edgeKey(edge.edge)) + .5) * metrics.row };
-    const end = { x: target.x + target.width / 2 + (inbound.length > 1 ? (index / (inbound.length - 1) - .5) * span : 0), y: target.y };
-    const path = `M${start.x},${start.y} C${start.x + metrics.gap},${start.y} ${end.x},${end.y - metrics.gap} ${end.x},${end.y}`;
+    const end = { x: target.x, y: target.y + metrics.header * (index + 1) / (inbound.length + 1) };
+    const path = horizontalPath(start, end, metrics.gap);
     return { ...edge, path, start, end };
   });
   return { nodes: sceneNodes, edges, capacity, width: Math.max(metrics.width + 2 * metrics.gap, ...sceneNodes.map((node) => node.x + node.width + metrics.gap * 2)),
     height: Math.max(200, ...sceneNodes.map((node) => node.y + node.height + metrics.gap)) };
-}
-function overlaps(a: Point & { width: number; height: number }, b: Point & { width: number; height: number }, gap: number) {
-  return a.x < b.x + b.width + gap && a.x + a.width + gap > b.x && a.y < b.y + b.height + gap && a.y + a.height + gap > b.y;
 }

@@ -7,7 +7,7 @@ import { remotePhoto } from './images';
 import { MediaAssetContext } from './asset-context';
 import './media.css';
 
-export function MediaImage({ item, allowRemote = true, onInspect }: { item: StepMedia; allowRemote?: boolean; onInspect?: (item: StepMedia) => void }) {
+export function MediaImage({ item, figureNumber, allowRemote = true, onInspect }: { item: StepMedia; figureNumber?: number; allowRemote?: boolean; onInspect?: (item: StepMedia) => void }) {
   const { t } = useTranslation(); const assetReader = useContext(MediaAssetContext); const [state, setState] = useState<{ url: string; failed: boolean; key: string }>({ url: '', failed: false, key: '' });
   const [attempt, setAttempt] = useState(0); const source = item.source; const key = JSON.stringify(source);
   useEffect(() => {
@@ -27,6 +27,6 @@ export function MediaImage({ item, allowRemote = true, onInspect }: { item: Step
       <Button onClick={() => setAttempt((value) => value + 1)}>{t('common.retry')}</Button></div> : state.key === key && state.url ?
       <button type="button" className="nf-media-zoom" aria-label={t('media.zoom') + ': ' + (item.altText || item.caption || t('media.image'))} disabled={!onInspect} onClick={() => onInspect?.(item)}>
         <img src={state.url} alt={item.altText ?? ''} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setState({ key, url: '', failed: true })} /></button> : <span className="nf-meta" role="status">{t('common.loading')}</span>}
-    {item.caption && <figcaption>{item.caption}</figcaption>}
+    {item.caption && <figcaption>{figureNumber ? `fig.${figureNumber} - ` : ''}{item.caption}</figcaption>}
   </figure>;
 }

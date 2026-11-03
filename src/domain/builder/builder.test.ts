@@ -101,16 +101,39 @@ describe('comandi puri Outline', () => {
     expect(() => applyEdit(graph, { type: 'connect', edge: { nodeId: 'start', slot: 'next' }, destination: { kind: 'node', nodeId: 'task-2' } }, newId)).toThrow('scope');
     expect(() => assertEditableGraph(convergenceGraph())).not.toThrow();
   });
-  it('supporta Decision e multitask annidati; cancellazione del gruppo conserva i discendenti incompleti', () => {
+  it('legge ancora Decision e multitask annidati legacy; cancellazione conserva i discendenti', () => {
     const graph = multitaskGraph();
-    const nested = applyEdit(graph, { type: 'create', edge: { nodeId: 'task-1', slot: 'next' }, kind: 'multitask' }, newId);
-    const group = nodeAt(nested.graph, nested.createdId!); if (group.kind !== 'multitask') throw new Error('fixture');
-    const decision = applyEdit(nested.graph, { type: 'create', edge: { nodeId: group.id, slot: 'activity', itemId: group.activities[0]!.id }, kind: 'decision' }, newId);
-    expect(() => assertEditableGraph(decision.graph)).not.toThrow();
-    const removed = applyEdit(decision.graph, { type: 'delete', nodeId: 'tasks' }, newId).graph;
+    const group = freshNode('multitask', newId); if (group.kind !== 'multitask') throw new Error('fixture');
+    const choice = freshNode('decision', newId); graph.nodes.push(group, choice);
+    const task = nodeAt(graph, 'task-1'); if (task.kind !== 'instruction') throw new Error('fixture');
+    task.next = { kind: 'node', nodeId: group.id }; group.afterAll = { kind: 'activity-complete' };
+    group.activities[0]!.first = { kind: 'node', nodeId: choice.id };
+    expect(() => assertEditableGraph(graph)).not.toThrow();
+    const removed = applyEdit(graph, { type: 'delete', nodeId: 'tasks' }, newId).graph;
     expect(nodeAt(removed, group.id).kind).toBe('multitask');
     expect(destinationAt(removed, { nodeId: 'start', slot: 'next' })).toMatchObject({ kind: 'broken', formerNodeId: 'tasks' });
-    expect(removed.nodes).toHaveLength(decision.graph.nodes.length - 1);
+    expect(removed.nodes).toHaveLength(graph.nodes.length - 1);
+  });
+  it('nuovo authoring AND: follow-up già terminabile, unico successore scelto nel picker, niente salti', () => {
+    const graph = multitaskGraph(); const edge = { nodeId: 'task-1', slot: 'next' as const };
+    const empty = applyEdit(graph, { type: 'disconnect', edge }, newId).graph;
+    const result = applyEdit(empty, { type: 'create', edge, kind: 'alert' }, newId);
+    expect(destinationAt(result.graph, { nodeId: result.createdId!, slot: 'next' })).toEqual({ kind: 'activity-complete' });
+    const fork = nodeAt(result.graph, 'tasks'); if (fork.kind !== 'multitask') throw new Error('fixture');
+    const linked = applyEdit(result.graph, { type: 'connect', edge: { nodeId: result.createdId!, slot: 'next' }, destination: fork.afterAll }, newId).graph;
+    expect(destinationAt(linked, { nodeId: result.createdId!, slot: 'next' })).toEqual({ kind: 'activity-complete' });
+    expect(nodeAt(linked, 'task-2')).toEqual(nodeAt(graph, 'task-2'));
+    for (const kind of ['decision', 'multitask'] as const) expect(() => applyEdit(graph, { type: 'create', edge, kind }, newId)).toThrow('scope');
+  });
+  it('assegnare il collettore chiude i terminali semplici incompleti in un solo comando, senza riparare W08', () => {
+    const graph = multitaskGraph(); const first = nodeAt(graph, 'task-1'); const second = nodeAt(graph, 'task-2');
+    if (first.kind !== 'instruction' || second.kind !== 'instruction') throw new Error('fixture');
+    first.next = { kind: 'unassigned' }; second.next = { kind: 'broken', formerNodeId: 'removed' };
+    const before = structuredClone(graph);
+    const changed = applyEdit(graph, { type: 'create', edge: { nodeId: 'tasks', slot: 'afterAll' }, kind: 'instruction' }, newId).graph;
+    expect(destinationAt(changed, { nodeId: 'task-1', slot: 'next' })).toEqual({ kind: 'activity-complete' });
+    expect(nodeAt(changed, 'task-2')).toEqual(second); expect(graph).toEqual(before);
+    expect(impact(graph, changed).changed.map((change) => change.edge)).toContainEqual({ nodeId: 'task-1', slot: 'next' });
   });
 });
 describe('clipboard strutturale', () => {

@@ -90,7 +90,7 @@ test('selezione, ricerca su alias/gruppo/tag, preferiti e priorità non alterano
 test('ritorno da Details mantiene ricerca, filtri, scroll e registra solo l’apertura vera', async ({ page }) => {
   await seedLibrary(page); await page.getByLabel('Vista', { exact: true }).selectOption('priority');
   await page.getByRole('searchbox', { name: 'Cerca procedure' }).fill('fittizia');
-  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTop = 250; });
+  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTo({ top: 250, behavior: 'instant' }); });
   const scroll = await pane.evaluate((element) => element.scrollTop);
   // Click one visible row without changing the preserved list scroll first.
   const id = await pane.evaluate((element) => {
@@ -190,7 +190,7 @@ test('ricerca nei passaggi opzionale e stato Ready con filtri persistenti dopo D
   await dialog.getByRole('radio', { name: 'Ready', exact: true }).check();
   await dialog.getByRole('button', { name: 'Fine', exact: true }).click();
   await expect(page.getByTestId('library-scroll').locator('.nf-procedure-row')).toHaveCount(9);
-  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTop = 200; });
+  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTo({ top: 200, behavior: 'instant' }); });
   const scroll = await pane.evaluate((element) => element.scrollTop); expect(scroll).toBeGreaterThan(0);
   const id = await pane.evaluate((element) => {
     const top = element.getBoundingClientRect().top;

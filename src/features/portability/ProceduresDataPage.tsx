@@ -33,7 +33,7 @@ function DataContent({ data, imported }: { data: PortableLibrary; imported(): vo
   async function perform(operation: () => Promise<void>) { if (locking.current) return; locking.current = true; setBusy(true); setError(null);
     try { await operation(); retry.current = null; } catch (failure) { retry.current = operation; setError(failure instanceof PackageError ? failure.code : 'unknown'); } finally { locking.current = false; setBusy(false); } }
   function remember() { returnTo.current = { top: window.scrollY, anchor: document.activeElement instanceof HTMLElement ? document.activeElement : null }; }
-  function closePreview() { setPreview(null); requestAnimationFrame(() => { returnTo.current.anchor?.focus({ preventScroll: true }); window.scrollTo(0, returnTo.current.top); }); }
+  function closePreview() { setPreview(null); requestAnimationFrame(() => { returnTo.current.anchor?.focus({ preventScroll: true }); window.scrollTo({ top: returnTo.current.top, behavior: 'instant' }); }); }
   return <>
     <div className="nf-row" role="group" aria-label={t('pages.11A')}><Button aria-pressed={tab === 'export'} onClick={() => setTab('export')}>{t('portable.export')}</Button><Button aria-pressed={tab === 'import'} onClick={() => setTab('import')}>{t('portable.import')}</Button></div>
     {error && <div role="alert" className="nf-stack"><p>{t('portable.exportError')}</p>{error !== 'unknown' && <p>{t('portable.errors.' + error)}</p>}<Button disabled={busy} disabledReason={t('common.loading')} onClick={() => { if (retry.current) void perform(retry.current); }}>{t('common.retry')}</Button></div>}

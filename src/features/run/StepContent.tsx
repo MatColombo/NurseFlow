@@ -13,14 +13,15 @@ export function StepContent({ node, phase, preview, inspection = false, allowRem
   onContinue?: () => void; onChoose?: (id: string) => void;
   busy?: boolean; continueLabel?: string; showEndType?: boolean; stopOutcomeIds?: string[]; finishOutcomeIds?: string[];
 }) {
-  const { t } = useTranslation(); const [noteOpen, setNoteOpen] = useState(false); const [outcomeNote, setOutcomeNote] = useState<string | null>(null);
+  const { t } = useTranslation(); const [noteOpen, setNoteOpen] = useState(true); const [outcomeNote, setOutcomeNote] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<StepMedia | null>(null); const [zoom, setZoom] = useState(1);
   const title = node.kind === 'decision' ? node.question : node.kind === 'end' ? node.heading : node.title;
   const note = node.note?.text.trim() ? node.note : null;
+  const figures = 'media' in node ? [...node.media].sort((a, b) => (a.slot === b.slot ? a.order - b.order : a.slot === 'before-note' ? -1 : 1)) : [];
   const gallery = (slot: StepMedia['slot']) => {
     if (!('media' in node)) return null; const items = node.media.filter((item) => item.slot === slot).sort((a, b) => a.order - b.order); if (!items.length) return null;
     const style = node.galleries[slot === 'before-note' ? 'beforeNote' : 'afterNote'];
-    return <GalleryFrame slot={slot} {...style}>{items.map((item) => <MediaImage key={item.id} item={item} allowRemote={allowRemote} onInspect={(item) => { setZoomed(item); setZoom(1); }} />)}</GalleryFrame>;
+    return <GalleryFrame slot={slot} {...style}>{items.map((item) => <MediaImage key={item.id} item={item} figureNumber={figures.findIndex((figure) => figure.id === item.id) + 1} allowRemote={allowRemote} onInspect={(item) => { setZoomed(item); setZoom(1); }} />)}</GalleryFrame>;
   };
   return <article className="nf-step-content nf-stack" data-step-content={node.id}>
     {phase && <p className="nf-meta">{phase}</p>}
@@ -31,9 +32,9 @@ export function StepContent({ node, phase, preview, inspection = false, allowRem
     {node.kind === 'decision' && node.context && <p className="nf-authored">{node.context}</p>}
     {node.kind === 'end' && <p className="nf-authored">{node.message}</p>}
     {gallery('before-note')}
-    {note && <section className="nf-stack" aria-label={t('editor.note')}>
-      {note.visibility === 'expandable' && <Button aria-expanded={noteOpen} onClick={() => setNoteOpen((value) => !value)}>{t(noteOpen ? 'editor.hideNote' : 'editor.showNote')}</Button>}
-      {(note.visibility === 'always-visible' || noteOpen) && <p className="nf-authored nf-note">{note.text}</p>}
+    {note && <section className="nf-stack nf-step-note" aria-label={t('editor.note')}>
+      {note.visibility === 'expandable' && <Button className="nf-note-toggle" aria-expanded={noteOpen} onClick={() => setNoteOpen((value) => !value)}>{t(noteOpen ? 'editor.hideNote' : 'editor.showNote')}</Button>}
+      {(note.visibility === 'always-visible' || noteOpen) && <p className="nf-authored">{note.text}</p>}
     </section>}
     {gallery('after-note')}
     {!inspection && node.kind === 'decision' && <div className="nf-stack">{[...node.outcomes].sort((a, b) => a.order - b.order).map((item) => <div className="nf-row" key={item.id} data-preview-outcome={item.id}>
@@ -45,7 +46,7 @@ export function StepContent({ node, phase, preview, inspection = false, allowRem
     <Dialog open={Boolean(zoomed)} title={t('media.image')} onClose={() => setZoomed(null)}>
       <div className="nf-row"><Button aria-label={t('canvas.zoomOut')} disabled={zoom <= 1} disabledReason={t('canvas.zoomLimit')} onClick={() => setZoom(Math.max(1, zoom / 1.5))}>−</Button>
         <Button aria-label={t('canvas.zoomIn')} disabled={zoom >= 4} disabledReason={t('canvas.zoomLimit')} onClick={() => setZoom(Math.min(4, zoom * 1.5))}>+</Button></div>
-      {zoomed && <div className="nf-image-scroll"><div style={{ width: `${zoom * 100}%` }}><MediaImage item={zoomed} allowRemote={allowRemote} /></div></div>}
+      {zoomed && <div className="nf-image-scroll"><div style={{ width: `${zoom * 100}%` }}><MediaImage item={zoomed} figureNumber={figures.findIndex((figure) => figure.id === zoomed.id) + 1} allowRemote={allowRemote} /></div></div>}
     </Dialog>
   </article>;
 }

@@ -42,7 +42,7 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
   const editPath = `/build/${encodeURIComponent(procedure.id)}?revision=${encodeURIComponent((draft ?? ready)?.id ?? '')}${draft ? '' : '&copy=ready'}`;
   useLayoutEffect(() => {
     if (!returned) return;
-    const frame = requestAnimationFrame(() => { mapButton.current?.focus({ preventScroll: true }); window.scrollTo(0, returned.scrollTop ?? 0); });
+    const frame = requestAnimationFrame(() => { mapButton.current?.focus({ preventScroll: true }); window.scrollTo({ top: returned.scrollTop ?? 0, behavior: 'instant' }); });
     return () => cancelAnimationFrame(frame);
   }, [returned]);
   const openMap = () => { void navigate(mapPath, { state: { mapDetailsContext: { scrollTop: window.scrollY, expandedTags, expandedDescription } } }); };

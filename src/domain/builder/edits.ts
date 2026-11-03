@@ -1,6 +1,6 @@
 import { nodeSchema, type Destination, type Graph, type Node } from '../model';
 import { requireEdit, type EdgeRef } from './model';
-import { assertEditableGraph, destinationAt, incoming, nodeAt, nodeLabel, outlets, outletScope, setDestination } from './structure';
+import { activityCollector, activityScopeKey, assertEditableGraph, destinationAt, incoming, nodeAt, nodeLabel, outlets, outletScope, setDestination } from './structure';
 
 export type NewKind = Exclude<Node['kind'], 'start'>;
 export type Edit =
@@ -37,16 +37,23 @@ export function applyEdit(source: Graph, edit: Edit, newId: () => string): { gra
     if (edit.stopEntire) requireEdit(edit.kind === 'end' && scope.length > 0 &&
       (edit.endKind === 'stopped' || edit.endKind === 'escalation'), 'scope');
     else if (edit.kind === 'end') requireEdit(scope.length === 0, 'scope');
+    else if (scope.length) requireEdit(edit.kind === 'instruction' || edit.kind === 'alert', 'scope');
     const node = freshNode(edit.kind, newId, edit.endKind); graph.nodes.push(node); createdId = node.id;
     // A simple insertion inherits ONLY the selected edge. Other incoming edges remain intact.
     if (old.kind !== 'unassigned' && ('next' in node || node.kind === 'multitask')) {
       if ('next' in node) node.next = old; else node.afterAll = old;
     }
+    // A new activity/follow-up is already finishable; incomplete authored content remains a Draft.
+    if (scope.length && old.kind === 'unassigned' && 'next' in node) node.next = { kind: 'activity-complete' };
     setDestination(graph, edit.edge, { kind: 'node', nodeId: node.id, ...(edit.stopEntire ? { terminateProcedure: true as const } : {}) });
   } else if (edit.type === 'connect') {
     // Whole-procedure exceptions can only be authored through the explicit confirmed create action.
     requireEdit(edit.destination.kind !== 'node' || !edit.destination.terminateProcedure, 'scope');
-    requireEdit(edit.destination.kind !== 'activity-complete', 'scope'); setDestination(graph, edit.edge, edit.destination);
+    requireEdit(edit.destination.kind !== 'activity-complete', 'scope');
+    const collector = activityCollector(graph, edit.edge);
+    const completes = edit.edge.slot !== 'activity' && collector?.kind === 'multitask' && collector.afterAll.kind === 'node' &&
+      edit.destination.kind === 'node' && collector.afterAll.nodeId === edit.destination.nodeId;
+    setDestination(graph, edit.edge, completes ? { kind: 'activity-complete' } : edit.destination);
   } else if (edit.type === 'disconnect') setDestination(graph, edit.edge, { kind: 'unassigned' });
   else if (edit.type === 'finish') {
     requireEdit(outletScope(graph, edit.edge).length > 0 && edit.edge.slot !== 'activity', 'scope');
@@ -97,7 +104,29 @@ export function applyEdit(source: Graph, edit: Edit, newId: () => string): { gra
       (node.kind === 'decision' ? node.outcomes : node.activities).sort((a, b) => a.order - b.order).forEach((item, order) => { item.order = order; });
     }
   }
-  assertEditableGraph(graph); return { graph, ...(createdId ? { createdId } : {}) };
+  const owners = assertEditableGraph(graph);
+  // Defining the common successor also finishes existing simple, still-empty tails.
+  // Broken paths and legacy Decision/nested AND outlets are never silently repaired.
+  if ((edit.type === 'create' || edit.type === 'connect') && edit.edge.slot === 'afterAll') {
+    const group = nodeAt(graph, edit.edge.nodeId);
+    if (group.kind === 'multitask' && group.afterAll.kind === 'node') {
+      const parent = owners.get(group.id) ?? [];
+      const tokens = new Set(group.activities.map((activity) => activityScopeKey(group.id, activity.id)));
+      for (const node of graph.nodes) {
+        const scope = owners.get(node.id);
+        if ((node.kind === 'instruction' || node.kind === 'alert') && node.next.kind === 'unassigned' &&
+          scope?.length === parent.length + 1 && tokens.has(scope[parent.length]!)) node.next = { kind: 'activity-complete' };
+      }
+    }
+  }
+  if (edit.type === 'connect' && outletScope(source, edit.edge).length) {
+    const destination = destinationAt(graph, edit.edge);
+    if (destination.kind === 'node') {
+      const target = nodeAt(graph, destination.nodeId);
+      requireEdit(target.kind === 'instruction' || target.kind === 'alert', 'scope');
+    }
+  }
+  return { graph, ...(createdId ? { createdId } : {}) };
 }
 
 export function detachedOutlets(node: Node, keep: ReadonlySet<string>) {

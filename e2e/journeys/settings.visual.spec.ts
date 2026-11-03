@@ -41,7 +41,7 @@ for (const width of [320, 390, 768]) for (const scale of [4, 13, 30, 48]) for (c
       await page.getByRole('button', { name: 'Chiudi', exact: true }).click();
     }
     if (width === 320 && (scale === 13 || scale === 48)) {
-      await page.evaluate(() => window.scrollTo(0, 0)); await page.screenshot({ path: info.outputPath(`${name}-${scale}pt-${theme}.png`) });
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await page.screenshot({ path: info.outputPath(`${name}-${scale}pt-${theme}.png`) });
     }
     const after = await settingsData(page); expect(after.runs).toEqual(before.runs);
     expect(after.revisions.filter((revision) => revision.state === 'ready')).toEqual(before.revisions.filter((revision) => revision.state === 'ready'));

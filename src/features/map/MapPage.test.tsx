@@ -38,6 +38,8 @@ describe('Page05 read-only interactions', () => {
     const sheet = await screen.findByRole('dialog', { name: 'Decisione' });
     expect(within(sheet).getByRole('heading', { name: 'Percorso A o B?' })).toBeInTheDocument();
     expect(within(sheet).getByText('<script>contenuto authored</script>')).toBeInTheDocument(); expect(sheet.querySelector('script')).toBeNull();
+    expect(within(sheet).getByText('Nota del passo')).toBeVisible();
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Nascondi nota' }));
     fireEvent.click(within(sheet).getByRole('button', { name: 'Mostra nota' })); expect(within(sheet).getByText('Nota del passo')).toBeInTheDocument();
     expect(within(sheet).getByText('Nota solo A')).not.toBeVisible();
     fireEvent.click(within(sheet).getByText('ⓘ Nota di A')); expect(within(sheet).getByText('Nota solo A')).toBeVisible();

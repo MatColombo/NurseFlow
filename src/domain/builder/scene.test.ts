@@ -6,13 +6,15 @@ import { canvasViewSchema } from './model';
 import { centerAt, fitViewport, zoomAt } from './viewport';
 import { applyEdit } from './edits';
 import { connectionProblem } from './targets';
+import { projectMap } from '../map/projection';
+import { mapScene } from '../map/scene';
 
 it('proietta una sola identità canonica, due frecce dirette con estremità distinte, senza mutare il DAG', () => {
   const graph = outlineGraph(); const original = structuredClone(graph);
   const scene = makeScene(graph, {}, 768, graphMetrics(13, 768));
   expect(scene.nodes.filter((node) => node.id === 'shared')).toHaveLength(1);
   const inbound = scene.edges.filter((edge) => edge.targetId === 'shared'); expect(inbound).toHaveLength(2);
-  expect(new Set(inbound.map((edge) => edge.path)).size).toBe(2); expect(inbound[0]!.end.x).not.toBe(inbound[1]!.end.x);
+  expect(new Set(inbound.map((edge) => edge.path)).size).toBe(2); expect(inbound[0]!.end.y).not.toBe(inbound[1]!.end.y);
   expect(scene.nodes.map((node) => node.id).sort()).toEqual(graph.nodes.map((node) => node.id).sort()); expect(graph).toEqual(original);
 });
 it('32 attività: una corsia a 320px, fino a tre quando c’è spazio, completamenti direttamente sulla continuazione', () => {
@@ -58,6 +60,15 @@ it('property: geometria finita, senza sovrapposizioni dei nodi a 320/390/768px �
       expect([a.x, a.y, a.width, a.height].every(Number.isFinite)).toBe(true);
       for (const b of scene.nodes) if (a.id !== b.id) expect(a.x >= b.x + b.width || a.x + a.width <= b.x || a.y >= b.y + b.height || a.y + a.height <= b.y).toBe(true);
     }
+    for (const edge of scene.edges.filter((edge) => edge.draw)) {
+      const target = scene.nodes.find((node) => node.id === edge.targetId)!;
+      expect(edge.end.x).toBe(target.x); expect(edge.end.x).toBeGreaterThan(edge.start.x);
+      const coordinates = edge.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+      const curve = coordinates.slice(-6);
+      expect(curve[1]).toBe(edge.start.y); // first control is horizontally aligned
+      expect(curve[3]).toBe(edge.end.y); // terminal tangent is perpendicular to left face
+      expect(curve[2]).toBeLessThan(edge.end.x);
+    }
   }
 });
 it('layout è un comando del medesimo DAG, conserva contenuti e rifiuta riferimenti/coordinate non validi', () => {
@@ -66,6 +77,32 @@ it('layout è un comando del medesimo DAG, conserva contenuti e rifiuta riferime
   expect(changed.nodes).toEqual(graph.nodes); expect(changed.layout?.positions.shared).toEqual({ x: 150, y: 300 }); expect(graph).toEqual(original);
   expect(() => applyEdit(graph, { type: 'layout', positions: { missing: { x: 1, y: 2 } } }, () => 'unused')).toThrow();
   expect(() => applyEdit(graph, { type: 'layout', positions: { shared: { x: NaN, y: 2 } } }, () => 'unused')).toThrow();
+});
+it('AND con rami disuguali: corsie stabili e linee mai sotto un altro passo, in Builder e Map a tutte le scale', () => {
+  const initial = activitiesGraph(3); let sequence = 0; const id = () => 'follow-' + ++sequence;
+  const first = applyEdit(initial, { type: 'create', edge: { nodeId: 'task-1', slot: 'next' }, kind: 'alert' }, id);
+  const graph = applyEdit(first.graph, { type: 'create', edge: { nodeId: first.createdId!, slot: 'next' }, kind: 'instruction' }, id).graph;
+  for (const width of [320, 390, 768]) for (const scale of [4, 13, 30, 48]) {
+    for (const scene of [makeScene(graph, {}, width, graphMetrics(scale, width)), mapScene(graph, projectMap(graph), scale, width)]) {
+      const boxes = new Map(scene.nodes.map((node) => [node.id, node]));
+      expect(boxes.get('task-1')!.y).toBeCloseTo(boxes.get(first.createdId!)!.y);
+      const group = boxes.get('tasks')!; const end = boxes.get('end')!;
+      expect(group.y + group.height / 2).toBeCloseTo(end.y + end.height / 2);
+      for (const edge of scene.edges.filter((edge) => !('draw' in edge) || edge.draw)) {
+        const values = edge.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+        const [x0, y0, x1, y1, x2, y2, x3, y3] = values.slice(2) as [number, number, number, number, number, number, number, number];
+        const samples = Array.from({ length: 101 }, (_, index) => {
+          const t = index / 100; const u = 1 - t;
+          return { x: u ** 3 * x0 + 3 * u ** 2 * t * x1 + 3 * u * t ** 2 * x2 + t ** 3 * x3,
+            y: u ** 3 * y0 + 3 * u ** 2 * t * y1 + 3 * u * t ** 2 * y2 + t ** 3 * y3 };
+        });
+        for (const box of scene.nodes.filter((node) => node.id !== edge.edge.nodeId && node.id !== edge.targetId)) {
+          expect(samples.some((point) => point.x > box.x && point.x < box.x + box.width && point.y > box.y && point.y < box.y + box.height)).toBe(false);
+          expect(edge.start.y > box.y && edge.start.y < box.y + box.height && edge.start.x < box.x + box.width && x0 > box.x).toBe(false);
+        }
+      }
+    }
+  }
 });
 it('target picker usa le stesse regole di scrittura: ciclo, cross-arm e target già assegnato', () => {
   const edge = { nodeId: 'decision', slot: 'outcome' as const, itemId: 'a' };

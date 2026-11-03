@@ -36,7 +36,7 @@ export default function CheckPage() {
       const row = [...(section.current?.querySelectorAll<HTMLElement>('[data-issue-id]') ?? [])].find((element) => element.dataset.issueId === context.issue);
       row?.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
     }
-    if (Number.isFinite(context.top) && context.top >= 0) window.scrollTo({ top: context.top });
+    if (Number.isFinite(context.top) && context.top >= 0) window.scrollTo({ top: context.top, behavior: 'instant' });
   }, [checked]);
   const base = '/build/' + encodeURIComponent(id); const blocked = busy || !checked || checked.result.problems.length > 0 || Boolean(error);
   function openConfirmation() { if (!blocked) { setAck(false); setConfirm(true); } }

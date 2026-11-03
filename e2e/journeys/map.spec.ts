@@ -34,7 +34,7 @@ test('F11 E08 run inspection, canonical convergence, notes, List references and 
   await expect(page.getByRole('button', { name: 'Esamina Revisione comune', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Esamina Scelta dimostrativa' }).click(); const sheet = page.getByRole('dialog', { name: 'Decisione', exact: true });
   await expect(sheet.getByRole('heading', { name: 'Percorso A o B?' })).toBeVisible();
-  await sheet.getByRole('button', { name: 'Mostra nota' }).click(); await sheet.getByText('ⓘ Nota di A', { exact: true }).click();
+  await expect(sheet.getByRole('button', { name: 'Nascondi nota' })).toHaveAttribute('aria-expanded', 'true'); await sheet.getByText('ⓘ Nota di A', { exact: true }).click();
   await expect(sheet.getByText('Informazione A authored', { exact: true })).toBeVisible(); await expect(sheet.getByText('Avviso B essenziale authored', { exact: true })).toBeVisible();
   await expect(sheet.getByRole('button', { name: /^(Continua|A|B|Modifica|Termina)/ })).toHaveCount(0);
   expect((await runState(page))).toEqual(before);

@@ -2,7 +2,7 @@ import type { Activity, Graph, Node } from '../model';
 import { cloneProcedureGraph } from '../procedures';
 import { detachedOutlets } from './edits';
 import { requireEdit, type EdgeRef } from './model';
-import { activityScopeKey, assertEditableGraph, destinationAt, incoming, nodeAt, setDestination } from './structure';
+import { activityScopeKey, assertEditableGraph, destinationAt, incoming, nodeAt, outletScope, setDestination } from './structure';
 
 export type ClipSelection = { kind: 'node'; nodeId: string } | { kind: 'activity'; nodeId: string; activityId: string };
 export type GraphClip = {
@@ -49,6 +49,9 @@ export function pasteGraph(source: Graph, target: PasteTarget, clip: GraphClip, 
     requireEdit(clip.editVersion === context.editVersion && JSON.stringify(clip.graph) === JSON.stringify(source), 'stale');
   }
   const region = moving ? assertMovable(clip) : clipRegion(clip); const graph = structuredClone(source);
+  if (target.kind === 'edge' && outletScope(source, target.edge).length) {
+    requireEdit(region.selected.kind === 'instruction' || region.selected.kind === 'alert', 'scope');
+  }
   requireEdit((target.kind === 'activity-list') === (clip.selection.kind === 'activity'), 'clipboard');
   if (moving && target.kind === 'edge') requireEdit(!region.ids.has(target.edge.nodeId), 'cycle');
   let nodes: Node[]; let activity: Activity | undefined; let entryId = region.selected.id;
@@ -91,7 +94,7 @@ export function pasteGraph(source: Graph, target: PasteTarget, clip: GraphClip, 
     for (const node of graph.nodes) if (node.kind === 'multitask') node.activities.sort((a, b) => a.order - b.order).forEach((item, order) => { item.order = order; });
   } else {
     const old = destinationAt(graph, target.edge); const entry = nodeAt(graph, entryId);
-    if ('next' in entry) entry.next = structuredClone(old);
+    if ('next' in entry) entry.next = old.kind === 'unassigned' && outletScope(source, target.edge).length ? { kind: 'activity-complete' } : structuredClone(old);
     else if (entry.kind === 'multitask') entry.afterAll = structuredClone(old);
     setDestination(graph, target.edge, { kind: 'node', nodeId: entry.id });
   }

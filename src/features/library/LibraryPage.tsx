@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppearance } from '@app/appearance-context';
 import { defaultFilters, hasFilters, libraryFiltersSchema, normalize, recentProcedures, selectLibrary } from '@domain/library';
 import type { Group, LibraryViewState, Procedure } from '@domain/model';
-import { Button, Dialog, Search, Sheet } from '@shared/components';
+import { Button, Dialog, Icon, Search, Sheet } from '@shared/components';
 import { FiltersSheet } from './FiltersSheet';
 import { GroupDialogs, type GroupDialog } from './GroupDialogs';
 import { Identity, ProcedureRow } from './ProcedureRow';
@@ -40,7 +40,9 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
   function change(patch: Partial<LibraryViewState>, resetScroll = true) {
     const next = { ...currentView.current, ...patch, ...(resetScroll ? { scrollTop: 0 } : {}) };
     currentView.current = next; setView(next);
-    if (resetScroll && pane.current) pane.current.scrollTop = 0;
+    if (resetScroll && pane.current) {
+      if (pane.current.scrollTo) pane.current.scrollTo({ top: 0, behavior: 'instant' }); else pane.current.scrollTop = 0;
+    }
     persist(next);
   }
   async function reload(focusId?: string) {
@@ -61,7 +63,10 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
       setModal(null); void navigate(`/procedure/${encodeURIComponent(procedure.id)}`);
     });
   }
-  useLayoutEffect(() => { if (pane.current) pane.current.scrollTop = initial.view.scrollTop; }, [initial.view.scrollTop]);
+  useLayoutEffect(() => {
+    if (pane.current?.scrollTo) pane.current.scrollTo({ top: initial.view.scrollTop, behavior: 'instant' });
+    else if (pane.current) pane.current.scrollTop = initial.view.scrollTop;
+  }, [initial.view.scrollTop]);
   useEffect(() => {
     if (!filters.includeSteps) return;
     let active = true;
@@ -105,14 +110,15 @@ export function LibraryPage({ initial }: { initial: LibrarySnapshot }) {
   }
   return <section className="nf-library" aria-labelledby="library-title">
     <div className="nf-library-toolbar nf-stack">
-      <header className="nf-row"><h1 id="library-title">{t('library.title')}</h1><Link to="/new">{t('library.new')}</Link>
+      <header className="nf-row"><h1 id="library-title"><Icon name="hospital" /> <span>{t('library.title')}</span></h1><Link to="/new">{t('library.new')}</Link>
         <Button aria-label={t('library.more')} onClick={() => setModal('app')}>···</Button></header>
       <div className="nf-library-search"><Search label={t('library.search')} value={view.searchText ?? ''}
         onChange={(searchText) => change({ searchText })} /><Button aria-label={t('library.filters')}
         aria-pressed={hasFilters(filters)} onClick={() => setModal('filters')}>☷</Button></div>
       <div className="nf-row" role="group" aria-label={t('library.filters')}>
         {(['all', 'favorites', 'drafts'] as const).map((quick) => <Button key={quick} aria-pressed={filters.quick === quick}
-          onClick={() => change({ filters: { ...filters, quick } })}>{t(`library.${quick}`)}</Button>)}
+          {...(quick !== 'favorites' ? { icon: quick === 'all' ? 'procedure' as const : 'draft' as const } : {})}
+          onClick={() => change({ filters: { ...filters, quick } })}>{quick === 'favorites' && <span aria-hidden="true">☆ </span>}{t(`library.${quick}`)}</Button>)}
       </div>
       {error && <div className="nf-row"><p role="alert">{t('library.saveError')}</p><Button onClick={() => {
         void perform(failed.current ?? (() => reload()));

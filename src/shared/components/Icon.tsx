@@ -1,4 +1,5 @@
 const paths = {
+  hospital: 'M9 3h6v5h6v13H3V8h6V3Zm3 2v4m-2-2h4M8 12v2m8-2v2m-6 7v-4h4v4',
   fork: 'M12 21v-8M5 3v5l7 5 7-5V3',
   check: 'm5 12 4 4L19 6', close: 'm6 6 12 12M6 18 18 6',
   search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',

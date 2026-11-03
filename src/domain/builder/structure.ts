@@ -97,6 +97,13 @@ export function outletScope(graph: Graph, edge: EdgeRef) {
   const owners = assertEditableGraph(graph); const owner = owners.get(edge.nodeId);
   return edge.slot === 'activity' ? [...(owner ?? []), activityScopeKey(edge.nodeId, edge.itemId!)] : owner ?? [];
 }
+
+/** The actual common successor, never a synthetic Join or a cross-arm edge. */
+export function activityCollector(graph: Graph, edge: EdgeRef) {
+  const token = outletScope(graph, edge).at(-1);
+  return graph.nodes.find((node) => node.kind === 'multitask' &&
+    node.activities.some((activity) => activityScopeKey(node.id, activity.id) === token));
+}
 export function impact(before: Graph, after: Graph) {
   const oldEdges = new Map(before.nodes.flatMap(outlets).map((item) => [edgeKey(item.edge), item]));
   const nextEdges = new Map(after.nodes.flatMap(outlets).map((item) => [edgeKey(item.edge), item]));

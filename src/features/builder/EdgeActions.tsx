@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Graph } from '@domain/model';
 import { type Edit, type NewKind } from '@domain/builder/edits';
 import { type EdgeRef } from '@domain/builder/model';
-import { destinationAt, nodeAt, outletScope } from '@domain/builder/structure';
+import { activityCollector, destinationAt, nodeAt, outletScope } from '@domain/builder/structure';
 import { Button, Sheet } from '@shared/components';
 import { destinationLabel, edgeTitle, titleOf } from './labels';
 export function EdgeActions({ graph, edge, close, edit, paste, hasClipboard, focus, busy, error, retry, retryable, chooseTarget }: {
@@ -16,6 +16,7 @@ export function EdgeActions({ graph, edge, close, edit, paste, hasClipboard, foc
   const [ack, setAck] = useState(false);
   const [endKind, setEndKind] = useState<'stopped' | 'escalation' | null>(null);
   const current = destinationAt(graph, edge); const scope = outletScope(graph, edge); const assigned = current.kind !== 'unassigned';
+  const collector = activityCollector(graph, edge);
   const create = (kind: NewKind) => {
     if (kind === 'end') setMode('ends');
     else edit({ type: 'create', edge, kind }, assigned, true);
@@ -23,6 +24,7 @@ export function EdgeActions({ graph, edge, close, edit, paste, hasClipboard, foc
   return <Sheet open title={mode === 'menu' ? t('builder.afterOutlet', { title: edgeTitle(graph, edge, t) }) :
     t('builder.' + (mode === 'types' ? 'addToProcedure' : mode === 'ends' ? 'endHere' : 'stopEntire'))} onClose={close}>
     <p className="nf-meta">{edgeTitle(graph, edge, t)}</p>
+    {collector?.kind === 'multitask' && <p>{t('builder.collectorHint', { target: destinationLabel(graph, collector.afterAll, t) })}</p>}
     {error && <div><p role="alert">{error}</p>{retryable && <Button onClick={retry}>{t('common.retry')}</Button>}</div>}
     <fieldset disabled={busy} className="nf-stack nf-metadata-fields">
       {mode === 'menu' && <>
@@ -35,7 +37,7 @@ export function EdgeActions({ graph, edge, close, edit, paste, hasClipboard, foc
         {scope.length > 0 && <Button variant="danger" onClick={() => setMode('stop')}>{t('builder.stopEntire')}</Button>}
         {hasClipboard && <Button onClick={paste}>{t('builder.pasteHere')}</Button>}
       </>}
-      {mode === 'types' && (['instruction', 'decision', 'multitask', 'alert', 'end'] as const).map((kind) => <Button key={kind}
+      {mode === 'types' && (scope.length ? ['instruction', 'alert'] as const : ['instruction', 'decision', 'multitask', 'alert', 'end'] as const).map((kind) => <Button key={kind}
         disabled={kind === 'end' && scope.length > 0} disabledReason={t('builder.useStop')}
         onClick={() => create(kind)}>{t('builder.picker.' + kind)}</Button>)}
       {mode === 'ends' && (['completed', 'stopped', 'escalation', 'neutral'] as const).map((kind) => <Button key={kind}

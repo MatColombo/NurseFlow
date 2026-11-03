@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { MediaAsset, Settings, StepMedia } from '@domain/model';
 import { editStep, editableStep, type StepEdit } from '@domain/editor/edits';
 import { applyEdit } from '@domain/builder/edits';
-import { nodeAt } from '@domain/builder/structure';
+import { activityCollector, assertEditableGraph, nodeAt } from '@domain/builder/structure';
 import { Button, Dialog, Sheet } from '@shared/components';
 import { useUnsavedNavigation } from '@features/procedures/useUnsavedNavigation';
 import { graphClipboard, type BuilderSnapshot } from '@features/builder/service';
@@ -29,10 +29,11 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
   const focusField = useRef(params.get('focusField')); const focusItem = useRef(params.get('focusItem'));
   const draft = useStepDraft(initial, nodeId, settings, (revisionId) => { markRevision(revisionId); const query = new URLSearchParams(params); query.set('revision', revisionId); void navigate('?' + query.toString(), { replace: true }); });
   const node = editableStep(draft.graph.nodes.find((node) => node.id === nodeId) ?? draft.snapshot.revision.graph.nodes.find((node) => node.id === nodeId) ?? nodeAt(initial.revision.graph, nodeId));
+  const collector = 'next' in node && node.next.kind === 'activity-complete' ? activityCollector(draft.graph, { nodeId: node.id, slot: 'next' }) : undefined;
   const outcome = node.kind === 'decision' ? node.outcomes.find((item) => item.id === outcomeId) : undefined;
   const busy = draft.writing; const failed = draft.failed; const error = draft.error ?? issue;
   const base = '/build/' + encodeURIComponent(initial.procedure.id);
-  useLayoutEffect(() => { if (Number.isFinite(restoreTop) && restoreTop >= 0) window.scrollTo({ top: restoreTop }); }, [restoreTop]);
+  useLayoutEffect(() => { if (Number.isFinite(restoreTop) && restoreTop >= 0) window.scrollTo({ top: restoreTop, behavior: 'instant' }); }, [restoreTop]);
   useLayoutEffect(() => {
     if (!focusField.current) return;
     const field = focusField.current; const itemId = focusItem.current;
@@ -97,11 +98,13 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
     <p role="status" className="nf-meta">{t(error ? 'editor.saveError' : draft.dirty || busy ? 'editor.saving' : 'editor.saved')}</p>
     {!modal && !source && !plan && errorPanel}
     <ContentFields node={node} graph={draft.graph} change={draft.change} newPhase={() => { void open('phase'); }} />
-    {(node.kind === 'instruction' || node.kind === 'alert') && <div className="nf-card nf-stack"><p>{t('editor.continuation')}: {destinationLabel(draft.graph, node.next, t)}</p><Button onClick={() => { void changePath(); }}>{t('editor.changePath')}</Button></div>}
+    {(node.kind === 'instruction' || node.kind === 'alert') && <div className="nf-card nf-stack"><p>{t('editor.continuation')}: {destinationLabel(draft.graph, node.next, t)}</p>
+      {collector?.kind === 'multitask' && <p>{t('builder.collectorHint', { target: destinationLabel(draft.graph, collector.afterAll, t) })}</p>}
+      <Button onClick={() => { void changePath(); }}>{t('editor.changePath')}</Button></div>}
     {node.kind === 'decision' && <OutcomeSection node={node} graph={draft.graph} busy={busy} open={(id) => { setOutcomeId(id); setModal('outcome'); }} arrange={() => { void open('arrange'); }} add={() => { void edit({ type: 'add-outcome' }); }} />}
     <details className="nf-card nf-stack nf-editor-section" open={Boolean(node.note?.text)}><summary>{t('editor.note')}</summary>
-      <label className="nf-stack">{t('editor.noteText')}<textarea rows={4} value={node.note?.text ?? ''} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: event.target.value, visibility: node.note?.visibility ?? 'expandable' } } })} /></label>
-      <label className="nf-stack">{t('editor.note')}<select value={node.note?.visibility ?? 'expandable'} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: node.note?.text ?? '', visibility: event.target.value as 'expandable' | 'always-visible' } } })}>
+      <label className="nf-stack">{t('editor.noteText')}<textarea rows={4} value={node.note?.text ?? ''} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: event.target.value, visibility: node.note?.visibility ?? 'always-visible' } } })} /></label>
+      <label className="nf-stack">{t('editor.note')}<select value={node.note?.visibility ?? 'always-visible'} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: node.note?.text ?? '', visibility: event.target.value as 'expandable' | 'always-visible' } } })}>
         <option value="expandable">{t('editor.expandable')}</option><option value="always-visible">{t('editor.alwaysVisible')}</option></select></label>
     </details>
     {'media' in node && <MediaEditor node={node} settings={settings} busy={busy} change={draft.change} edit={(value) => { void edit(value); }} source={(...args) => { void mediaSource(...args); }} />}
@@ -127,7 +130,8 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
       <Button variant="danger" onClick={() => { void propose('delete'); }}>{t('editor.delete')}</Button>
     </Sheet>
     <Sheet open={modal === 'type' && !plan} title={t('editor.changeType')} onClose={() => setModal(null)}>{errorPanel}<p>{t('editor.typeImpact')}</p>
-      {(['instruction', 'alert', 'decision', 'end'] as const).filter((kind) => kind !== node.kind).map((kind) => <Button key={kind} onClick={() => { void propose({ type: 'change-type', kind }); }}>{t('builder.kinds.' + kind)}</Button>)}
+      {(['instruction', 'alert', 'decision', 'end'] as const).filter((kind) => kind !== node.kind &&
+        (!(assertEditableGraph(draft.graph).get(node.id)?.length) || node.kind === 'end' || kind === 'instruction' || kind === 'alert')).map((kind) => <Button key={kind} onClick={() => { void propose({ type: 'change-type', kind }); }}>{t('builder.kinds.' + kind)}</Button>)}
     </Sheet>
     {plan && <ImpactSheet before={draft.snapshot.revision.graph} plan={plan} busy={busy} error={error}
       details={plan.label === 'change-type' && <div className="nf-stack"><p>{t('editor.typeImpact')}</p>{node.kind === 'decision' && <p>{t('editor.lostQuestion', { text: node.question })}</p>}

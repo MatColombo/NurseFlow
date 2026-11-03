@@ -124,7 +124,7 @@ test('F12 Back restores Library search, filter, sort and scroll after independen
   await seedLibrary(page); await page.getByLabel('Vista', { exact: true }).selectOption('priority');
   await page.getByRole('searchbox', { name: 'Cerca procedure' }).fill('fittizia');
   await page.getByRole('button', { name: 'Bozze', exact: true }).click();
-  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTop = 100; }); const top = await pane.evaluate((element) => element.scrollTop);
+  const pane = page.getByTestId('library-scroll'); await pane.evaluate((element) => { element.scrollTo({ top: 100, behavior: 'instant' }); }); const top = await pane.evaluate((element) => element.scrollTop);
   await page.getByRole('button', { name: 'Menu app', exact: true }).click(); await page.getByRole('link', { name: 'Impostazioni', exact: true }).click();
   await page.getByRole('button', { name: 'Tema Sistema', exact: true }).click(); await page.getByRole('radio', { name: 'Scuro', exact: true }).check(); await close(page);
   await page.getByRole('link', { name: 'Indietro', exact: true }).click();

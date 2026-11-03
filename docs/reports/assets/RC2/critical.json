@@ -1,0 +1,264 @@
+{
+  "stats": {
+    "startTime": "2026-11-03T10:51:25.765Z",
+    "duration": 148494.444,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "AND: Finish attività, After all, Stop entire con tipo e consenso espliciti; no cross-arm",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AND: Finish attività, After all, Stop entire con tipo e consenso espliciti; no cross-arm",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AND: Finish attività, After all, Stop entire con tipo e consenso espliciti; no cross-arm",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ritorno da Details mantiene ricerca, filtri, scroll e registra solo l’apertura vera",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricerca nei passaggi opzionale e stato Ready con filtri persistenti dopo Details",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ritorno da Details mantiene ricerca, filtri, scroll e registra solo l’apertura vera",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricerca nei passaggi opzionale e stato Ready con filtri persistenti dopo Details",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ritorno da Details mantiene ricerca, filtri, scroll e registra solo l’apertura vera",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ricerca nei passaggi opzionale e stato Ready con filtri persistenti dopo Details",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "F12 Back restores Library search, filter, sort and scroll after independent preference changes",
+      "tests": [
+        {
+          "project": "chromium",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "F12 Back restores Library search, filter, sort and scroll after independent preference changes",
+      "tests": [
+        {
+          "project": "firefox",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "F12 Back restores Library search, filter, sort and scroll after independent preference changes",
+      "tests": [
+        {
+          "project": "webkit",
+          "status": "expected",
+          "attempts": [
+            "passed"
+          ]
+        }
+      ]
+    }
+  ]
+}
