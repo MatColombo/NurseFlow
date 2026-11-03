@@ -214,6 +214,7 @@ test('32 risposte ricercabili, rimozione separata con impatto e Undo senza perde
   await dialog(page).getByRole('textbox', { name: 'Nota della risposta', exact: true }).fill('Nota 27'); await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click();
   await page.getByRole('button', { name: 'Anteprima', exact: true }).click(); await dialog(page).getByRole('button', { name: 'Nota per: Esito 27', exact: true }).click(); await expect(dialog(page).getByText('Nota 27', { exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); await expect(dialog(page)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Anteprima', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Riordina risposte', exact: true }).click();
   await expect(dialog(page).getByRole('heading', { name: 'Riordina risposte', exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Rimuovi risposta: Esito 27', exact: true }).click(); await expect(dialog(page)).toContainText('Prima:');
