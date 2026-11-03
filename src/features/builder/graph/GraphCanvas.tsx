@@ -35,7 +35,8 @@ export default function GraphCanvas({ graph, view, scale, selection, picking, re
   function reveal(id: string, focus = focusPath(graph, id, view.focusItems)) {
     const nextScene = makeScene(graph, focus, size.width || 320, metrics); const node = nextScene.nodes.find((node) => node.id === id);
     if (!node) return;
-    setLocated(id); change(centerAt({ ...view, focusItems: focus }, node, size.width, size.height));
+    const leadingHeight = metrics.header + (node.ports.length ? metrics.row : 0) + 8;
+    setLocated(id); change(centerAt({ ...view, focusItems: focus }, node, size.width, size.height, leadingHeight));
     requestAnimationFrame(() => {
       const control = document.getElementById('graph-node-' + id);
       if (control instanceof HTMLButtonElement && !control.disabled) control.focus({ preventScroll: true }); else viewport.current?.focus({ preventScroll: true });

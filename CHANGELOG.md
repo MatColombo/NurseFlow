@@ -2,6 +2,7 @@
 
 ## Modifiche locali successive alla rc.2 — 3 novembre 2026
 
+- Corretto il focus delle card Graph a 320px/48pt: la prima uscita rimane nel canvas e riceve i click anche in WebKit; risolti i due errori del gate CI ([report](docs/reports/CI-graph-focus.md)).
 - Frecce con arrivo rettilineo, selezione arco e due estremi, resto attenuato; fase sopra il titolo e tipi di passo colorati.
 - Regioni multitask riservate, meno incroci, End sulla colonna destra con colori e tratteggi distinti.
 - Nome attività e primo passo creati atomicamente con passaggio diretto all'editor.

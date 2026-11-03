@@ -119,3 +119,16 @@ it('pan/zoom/fit trasformano solo la camera: zoom ancorato e modifica sempre a d
   expect(centerAt(fit, { x: 0, y: 0, width: 240, height: 200 }, 320, 500).zoom).toBe(1);
   expect(zoomAt(original, 100, { x: 0, y: 0 }).zoom).toBe(3); expect(original.initialized).toBe(false);
 });
+
+it('focus di una card alta mantiene la prima uscita dentro il clip, anche con bordi e scala 48pt', () => {
+  const view = canvasViewSchema.parse({}); const box = { x: 100, y: 200, width: 900, height: 740 };
+  const header = 374; const row = 178; const height = 462;
+  const before = centerAt(view, box, 255, height);
+  expect(before.y + box.y + header + 4 + row / 2).toBeGreaterThan(height);
+  for (const zoom of [1, 1.25]) {
+    const focused = centerAt({ ...view, zoom }, box, 255, height, header + row + 8);
+    expect(focused.y + (box.y + header + 4 + row) * zoom).toBeLessThanOrEqual(height - 4);
+  }
+  const small = { ...box, height: 180 };
+  expect(centerAt(view, small, 320, 500, 160)).toEqual(centerAt(view, small, 320, 500));
+});
