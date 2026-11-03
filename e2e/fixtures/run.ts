@@ -13,7 +13,7 @@ export function runHarness() {
     const chunk = output?.find((entry) => entry.type === 'chunk'); if (!chunk || chunk.type !== 'chunk') throw new Error('Run harness missing'); return chunk.code;
   })(); return bundlePromise;
 }
-export async function attachRunHarness(page: Page) { await page.addScriptTag({ content: await runHarness() }); }
+export async function attachRunHarness(page: Page) { await page.evaluate(await runHarness()); }
 export async function setupRun(page: Page, kind: Parameters<typeof Harness.seedRun>[0] = 'or', endKind?: Parameters<typeof Harness.seedRun>[1]) {
   await page.goto('./#/settings'); await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible();
   await attachRunHarness(page); await page.evaluate(({ kind, endKind }) => window.NurseFlowF10.seedRun(kind, endKind), { kind, endKind });

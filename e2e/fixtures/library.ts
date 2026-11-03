@@ -18,7 +18,7 @@ export function libraryHarness() {
   })();
   return bundlePromise;
 }
-export async function attachLibraryHarness(page: Page) { await page.addScriptTag({ content: await libraryHarness() }); }
+export async function attachLibraryHarness(page: Page) { await page.evaluate(await libraryHarness()); }
 export async function seedLibrary(page: Page) {
   await page.goto('./#/settings'); await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible();
   await attachLibraryHarness(page); await page.evaluate(() => window.NurseFlowF03.seedLibrary());

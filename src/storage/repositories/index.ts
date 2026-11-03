@@ -84,9 +84,10 @@ export function createRepositories(db: NurseFlowDatabase) {
           const groups = z.array(groupSchema).parse(await db.groups.toArray()).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
           const procedures = z.array(procedureSchema).parse(await db.procedures.toArray());
           const runs = z.array(runSessionSchema).parse(await db.runSessions.where('procedureId').equals(id).toArray());
-          const resume = runs.filter((run) => run.pinnedRevisionId === ready?.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
-          if (resume && ready) assertRunReferences(resume, ready);
-          return { procedure, ready, draft, groups, tags: procedures.flatMap((item) => item.tags), resume };
+          const resume = runs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt) || a.id.localeCompare(b.id))[0];
+          const resumeReady = resume ? assertRevisionOwner(procedure, await db.revisions.get(resume.pinnedRevisionId), 'ready') : undefined;
+          if (resume && resumeReady) assertRunReferences(resume, resumeReady);
+          return { procedure, ready, draft, groups, tags: procedures.flatMap((item) => item.tags), resume, ...(resumeReady ? { resumeReady } : {}) };
         });
       },
     },

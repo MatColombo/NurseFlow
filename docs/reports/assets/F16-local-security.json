@@ -1,0 +1,158 @@
+{
+  "note": "Final CSP + jitless; Windows desktop. WebKit native Cache API failure causes one conditional PWA skip.",
+  "rawSha256": "bbdc598ac6f86530de07d67670a4cfcb68ec355868a96c0683e3eda774ed991f",
+  "stats": {
+    "startTime": "2026-11-03T07:57:48.753Z",
+    "duration": 210024.997,
+    "expected": 17,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F15 actual precache, install manifest, offline cold reload and pinned local Blob run",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F15 actual precache, install manifest, offline cold reload and pinned local Blob run",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F15 actual precache, install manifest, offline cold reload and pinned local Blob run",
+      "project": "webkit",
+      "status": "skipped",
+      "attempts": [
+        "skipped"
+      ]
+    },
+    {
+      "title": "F16 production CSP blocks inline and third-party scripts while real Settings remain durable",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 I02 ten-procedure library: group exclusion ignores search, selection survives filters, only five copies commit",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 11A keyboard preview at 320px/48pt: named accessibility tree, Escape and focus restore without mutation",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 production CSP blocks inline and third-party scripts while real Settings remain durable",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 I02 ten-procedure library: group exclusion ignores search, selection survives filters, only five copies commit",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 11A keyboard preview at 320px/48pt: named accessibility tree, Escape and focus restore without mutation",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 production CSP blocks inline and third-party scripts while real Settings remain durable",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 I02 ten-procedure library: group exclusion ignores search, selection survives filters, only five copies commit",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F16 11A keyboard preview at 320px/48pt: named accessibility tree, Escape and focus restore without mutation",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    }
+  ]
+}

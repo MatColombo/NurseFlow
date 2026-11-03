@@ -1,0 +1,975 @@
+{
+  "commit": "482741b952fcee887fd26a16103b68b7fda4b5e2",
+  "note": "Before CSP hardening; rerun in final Linux CI",
+  "rawSha256": "f298094bc514999a83957effc10a5a00c91f9f4dcc9500f4a4828acb1dac27f3",
+  "stats": {
+    "startTime": "2026-11-03T07:50:46.719Z",
+    "duration": 276599.20900000003,
+    "expected": 120,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 320px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 320px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 320px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 320px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 390px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 390px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 390px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 390px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 768px 4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 768px 13pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 768px 30pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Library 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Details 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Run 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Map 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Builder 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Editor 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Check 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    },
+    {
+      "title": "F12 matrix Settings 768px 48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ]
+    }
+  ]
+}

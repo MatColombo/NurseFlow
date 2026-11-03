@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+// Schema validation must also work with script-src 'self', without runtime
+// compilation or a CSP-violating eval capability probe.
+z.config({ jitless: true });
+
 export const idSchema = z.string().min(1);
 export const isoDateSchema = z.iso.datetime();
 export const positiveInteger = z.number().int().positive();

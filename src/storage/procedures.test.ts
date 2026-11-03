@@ -49,6 +49,16 @@ describe('transazioni F04', () => {
     db.runSessions.hook('creating', () => { throw new Error('quota'); });
     await expect(commands.startOrResumeReady('procedure', 'ready')).rejects.toThrow('quota'); expect(await db.runSessions.count()).toBe(0);
   });
+  it('F16 Details discovers a historical pinned session after a newer Ready, and resume never creates a replacement run', async () => {
+    const old = await commands.startOrResumeReady('procedure', 'ready');
+    const original = (await db.revisions.get('ready'))!;
+    await db.revisions.add({ ...original, id: 'ready-new', revisionNumber: 2 });
+    await db.procedures.update('procedure', { readyRevisionId: 'ready-new' });
+    const before = await snapshot(); const details = await createRepositories(db).procedureDetails.get('procedure');
+    expect(details.ready?.id).toBe('ready-new'); expect(details.resumeReady?.id).toBe('ready');
+    expect(details.resume).toEqual(old); expect(await commands.resumeRunSession(details.resume!.id)).toEqual(old);
+    expect(await snapshot()).toEqual(before); expect(await db.runSessions.count()).toBe(1);
+  });
   it('Resume conserva anche una sessione terminata sul suo End authored', async () => {
     const initial = await commands.startOrResumeReady('procedure', 'ready');
     const chosen = (await commands.transitionRun(initial.id, initial.saveVersion, { type: 'choose-outcome', outcomeId: 'a' }))!;

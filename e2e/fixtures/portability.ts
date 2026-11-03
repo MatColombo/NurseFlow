@@ -15,7 +15,7 @@ async function harness() {
     const output = Array.isArray(result) ? result[0]?.output : 'output' in result ? result.output : []; const chunk = output?.find((item) => item.type === 'chunk'); if (!chunk || chunk.type !== 'chunk') throw new Error('Missing F13 harness'); return chunk.code;
   })(); return bundle;
 }
-export async function attachPortable(page: Page) { await page.addScriptTag({ content: await harness() }); }
+export async function attachPortable(page: Page) { await page.evaluate(await harness()); }
 export async function setupPortable(page: Page, scale = 13, theme: 'light' | 'dark' = 'light', locale: 'it' | 'en' = 'it') {
   await page.goto('./#/settings'); await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible(); await attachPortable(page);
   const seeded = await page.evaluate(({ scale, theme, locale }) => window.NurseFlowF13.seedPortable(scale, theme, locale), { scale, theme, locale });

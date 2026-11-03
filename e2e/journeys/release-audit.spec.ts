@@ -1,6 +1,30 @@
 import { expect } from '@playwright/test';
 import { portableFile, portableState, portableTest as test, setupPortable } from '../fixtures/portability';
 
+test('F16 production CSP blocks inline and third-party scripts while real Settings remain durable', async ({ page }, info) => {
+  await page.goto('./#/settings');
+  const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+  expect(policy).toContain("script-src 'self'"); expect(policy).toContain("object-src 'none'");
+  let thirdPartyRequests = 0;
+  await page.route('https://tracker.example.net/forbidden.js', async (route) => { thirdPartyRequests++; await route.fulfill({ contentType: 'text/javascript', body: 'window.F16Foreign=true' }); });
+  await page.evaluate(() => {
+    const violations: string[] = []; Reflect.set(window, 'F16CspViolations', violations);
+    document.addEventListener('securitypolicyviolation', (event) => { if (event.effectiveDirective.startsWith('script-src')) violations.push(event.blockedURI); });
+    const inline = document.createElement('script'); inline.textContent = 'window.F16Inline=true'; document.head.append(inline);
+    const foreign = document.createElement('script'); foreign.src = 'https://tracker.example.net/forbidden.js'; document.head.append(foreign);
+  });
+  await expect.poll(() => page.evaluate(() => Reflect.get(window, 'F16CspViolations') as string[])).toContain('inline');
+  await expect.poll(() => page.evaluate(() => (Reflect.get(window, 'F16CspViolations') as string[]).some((value) => value.startsWith('https://tracker.example.net')))).toBe(true);
+  expect(await page.evaluate(() => [Reflect.get(window, 'F16Inline'), Reflect.get(window, 'F16Foreign')])).toEqual([undefined, undefined]);
+  expect(thirdPartyRequests).toBe(0);
+  await info.attach('production-csp.txt', { body: policy ?? '', contentType: 'text/plain' });
+  await page.getByRole('button', { name: 'Tema Sistema', exact: true }).click();
+  await page.getByRole('radio', { name: 'Scuro', exact: true }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Chiudi', exact: true }).click(); await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
 test('F16 I02 ten-procedure library: group exclusion ignores search, selection survives filters, only five copies commit', async ({ page }) => {
   await setupPortable(page); const before = await portableState(page);
   await page.getByRole('button', { name: 'Importa', exact: true }).click();

@@ -26,6 +26,7 @@ export function createProcedureService(storage = createNurseFlowStorage()) {
     duplicate: (id: string, suffix: string) => write(() => storage.commands.duplicateProcedure(id, suffix)),
     remove: (id: string) => write(() => storage.commands.deleteProcedure(id)),
     start: (id: string, revisionId: string) => write(() => storage.commands.startOrResumeReady(id, revisionId)),
+    resume: (runId: string) => write(() => storage.commands.resumeRunSession(runId)),
     async revision(id: string, revisionId: string): Promise<Revision> {
       await storage.open(); const revision = revisionSchema.parse(await storage.repositories.revisions.get(revisionId));
       invariant(revision.procedureId === id, 'Revision belongs to another procedure'); return revision;

@@ -35,7 +35,8 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
   const failed = useRef<(() => Promise<void>) | null>(null); const failureKey = useRef('procedure.saveError'); const [menuTop, setMenuTop] = useState(0);
   const [expandedTags, setExpandedTags] = useState(returned?.expandedTags === true); const [expandedDescription, setExpandedDescription] = useState(returned?.expandedDescription === true);
   const [descriptionOverflow, setDescriptionOverflow] = useState(false); const description = useRef<HTMLParagraphElement>(null);
-  const selected = ready ?? draft;
+  const consultationReady = details.resumeReady ?? ready;
+  const selected = consultationReady ?? draft;
   const exportPath = `/data/procedures?procedure=${encodeURIComponent(procedure.id)}`;
   const mapPath = `/procedure/${encodeURIComponent(procedure.id)}/map?revision=${encodeURIComponent(selected?.id ?? '')}`;
   const editPath = `/build/${encodeURIComponent(procedure.id)}?revision=${encodeURIComponent((draft ?? ready)?.id ?? '')}${draft ? '' : '&copy=ready'}`;
@@ -58,7 +59,7 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
     } finally { setBusy(false); }
   }
   function start() { void perform(async () => {
-    if (!ready) return; const run = await procedureService.start(procedure.id, ready.id); void navigate(`/run/${encodeURIComponent(run.id)}`);
+    if (!ready) return; const run = resume ? await procedureService.resume(resume.id) : await procedureService.start(procedure.id, ready.id); void navigate(`/run/${encodeURIComponent(run.id)}`);
   }, 'procedure.startUnavailable'); }
   function applyFacet(kind: 'groupIds' | 'tags', value: string) { void perform(async () => {
     const current = await libraryService.load(); const filters = libraryFiltersSchema.parse(current.view.filters ?? {});
@@ -71,7 +72,7 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
       <Button aria-label={t('procedure.more')} onClick={(event) => { setMenuTop(event.currentTarget.getBoundingClientRect().bottom); setModal('more'); }}>···</Button></header>
     <div className="nf-procedure-identity"><Identity procedure={procedure} /><h1>{procedure.title}</h1>
       <span className="nf-priority" aria-label={t('library.priorityLabel', { value: procedure.priority })}><span aria-hidden="true">{'!'.repeat(procedure.priority)}</span></span></div>
-    <p>{state === 'archived' ? t('procedure.archived') : ready ? t('procedure.readyVersion', { version: ready.revisionNumber }) : t('status.draft')}</p>
+    <p>{state === 'archived' ? t('procedure.archived') : consultationReady ? t('procedure.readyVersion', { version: consultationReady.revisionNumber }) : t('status.draft')}</p>
     {state === 'ready-draft' && <p className="nf-meta">{t('procedure.draftInProgress')}</p>}
     {details.groups.find((group) => group.id === procedure.groupId) && <Button className="nf-group-link" onClick={() => { if (procedure.groupId) applyFacet('groupIds', procedure.groupId); }}>
       {details.groups.find((group) => group.id === procedure.groupId)?.name}</Button>}

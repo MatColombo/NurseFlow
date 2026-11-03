@@ -14,7 +14,7 @@ async function harness() {
     return chunk.code;
   })(); return code;
 }
-export async function attachBuilderHarness(page: Page) { await page.addScriptTag({ content: await harness() }); }
+export async function attachBuilderHarness(page: Page) { await page.evaluate(await harness()); }
 export async function setupBuilder(page: Page, id = 'procedure') {
   await page.goto('./#/settings'); await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible();
   await attachBuilderHarness(page); const seeded = await page.evaluate(() => window.NurseFlowF05.seedBuilder());

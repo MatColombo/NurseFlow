@@ -9,6 +9,8 @@ try {
   const faults = []; page.on('pageerror', (error) => faults.push(error.message));
   const response = await page.goto(url.href + '#/settings');
   if (!response?.ok()) throw new Error(`Pages response: ${response?.status()}`);
+  const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+  if (!policy?.includes("script-src 'self'") || !policy.includes("object-src 'none'")) throw new Error('Missing static CSP');
   await page.getByText('Pronta offline · risorse app verificate', { exact: true }).waitFor({ timeout: 30000 });
   const manifest = await page.evaluate(async () => {
     const response = await fetch(document.querySelector('link[rel="manifest"]').href);
@@ -20,5 +22,5 @@ try {
   await page.getByRole('heading', { name: 'Impostazioni', exact: true }).waitFor();
   await page.getByText('Pronta offline · risorse app verificate', { exact: true }).waitFor();
   if (faults.length) throw new Error(faults.join('\n'));
-  console.log(`PASS Pages HTTPS, manifest, icons, controlled cache, hash route and offline reload: ${url.href}`);
+  console.log(`PASS Pages HTTPS, CSP, manifest, icons, controlled cache, hash route and offline reload: ${url.href}`);
 } finally { await browser.close(); }

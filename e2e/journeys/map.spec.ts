@@ -57,16 +57,20 @@ test('F11 Back/cambio risposta removes cached or abandoned highlights and reload
   await page.getByRole('link', { name: 'Indietro al passo' }).click(); await page.reload(); await expect(page.locator('[data-step-content="b-step"]')).toBeVisible(); expect(await runState(page)).toEqual(before);
 });
 
-test('F11 Details selects Ready over a working Draft; run still uses old pinned revision after new Ready', async ({ page }) => {
+test('F11 Details Resume and Map share the old pinned Ready; confirmed Exit exposes the latest Ready over a Draft', async ({ page }) => {
   await setupRun(page); const old = await runState(page); await page.evaluate(() => window.NurseFlowF10.publishNewReady());
   const published = await runState(page); await openMap(page); await list(page); await page.getByRole('button', { name: 'Esamina Scelta dimostrativa' }).click();
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'Percorso A o B?' })).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click(); await page.getByRole('link', { name: 'Indietro al passo' }).click(); expect((await runState(page)).runs).toEqual(old.runs);
   await page.goto('./#/procedure/procedure'); await page.getByRole('button', { name: 'Vedi mappa', exact: true }).click();
-  await expect(map(page)).toHaveAttribute('data-revision-id', published.procedure!.readyRevisionId!); await list(page);
+  await expect(map(page)).toHaveAttribute('data-revision-id', old.runs[0]!.pinnedRevisionId); await list(page);
   await expect(page.getByRole('button', { name: 'Vai al corrente' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Esamina Scelta dimostrativa' }).click(); await expect(page.getByRole('dialog').getByRole('heading', { name: 'Nuova domanda authored' })).toBeVisible();
+  await page.getByRole('button', { name: 'Esamina Scelta dimostrativa' }).click(); await expect(page.getByRole('dialog').getByRole('heading', { name: 'Percorso A o B?' })).toBeVisible();
   expect((await runState(page)).runs).toEqual(old.runs);
+  await page.getByRole('dialog').getByRole('button', { name: 'Chiudi', exact: true }).click(); await page.getByRole('link', { name: 'Indietro ai dettagli', exact: true }).click();
+  await page.getByRole('button', { name: 'Riprendi', exact: true }).click(); await expect(page).toHaveURL(new RegExp('/run/' + old.runs[0]!.id + '$'));
+  await page.getByRole('button', { name: 'Esci', exact: true }).click(); await page.getByRole('button', { name: 'Esci dall’esecuzione', exact: true }).click();
+  await page.getByRole('button', { name: 'Vedi mappa', exact: true }).click(); await expect(map(page)).toHaveAttribute('data-revision-id', published.procedure!.readyRevisionId!);
 });
 
 test('F11 incomplete Draft shows unassigned, broken and dangling paths; view creates no run or edits', async ({ page }) => {

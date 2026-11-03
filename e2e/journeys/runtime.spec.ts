@@ -14,7 +14,7 @@ test.beforeAll(async () => {
   const output = Array.isArray(bundle) ? bundle[0]?.output : 'output' in bundle ? bundle.output : [];
   const chunk = output?.find((entry) => entry.type === 'chunk'); if (!chunk || chunk.type !== 'chunk') throw new Error('Runtime harness missing'); harness = chunk.code;
 });
-async function attach(page: Page) { await page.addScriptTag({ content: harness }); }
+async function attach(page: Page) { await page.evaluate(harness); }
 async function initialize(page: Page, kind: Parameters<typeof Harness.initialize>[0] = 'and') { await page.goto('./'); await attach(page); return page.evaluate((kind) => window.NurseFlowF09.initialize(kind), kind); }
 async function act(page: Page, run: ExecutionRun, event: RunEvent) { return (await page.evaluate(({ run, event }) => window.NurseFlowF09.act(run.id, run.saveVersion, event), { run, event }))!; }
 async function reload(page: Page, run: ExecutionRun) {

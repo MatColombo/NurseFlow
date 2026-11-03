@@ -13,7 +13,7 @@ async function harness() {
     if (!chunk || chunk.type !== 'chunk') throw new Error('Settings harness missing'); return chunk.code;
   })(); return bundle;
 }
-export async function attachSettingsHarness(page: Page) { await page.addScriptTag({ content: await harness() }); }
+export async function attachSettingsHarness(page: Page) { await page.evaluate(await harness()); }
 export async function setupSettings(page: Page, scale = 13, theme: 'light' | 'dark' | 'system' = 'light', verbose = false) {
   await page.goto('./#/settings'); await expect(page.getByRole('heading', { name: 'Impostazioni', exact: true })).toBeVisible();
   await attachSettingsHarness(page); return page.evaluate(({ scale, theme, verbose }) => window.NurseFlowF12.seedSettings(scale, theme, verbose), { scale, theme, verbose });

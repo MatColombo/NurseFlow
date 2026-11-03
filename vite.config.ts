@@ -11,7 +11,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react(), VitePWA({
+    plugins: [{
+      name: 'nurseflow-static-csp', apply: 'build',
+      transformIndexHtml: { order: 'pre', handler: () => [{
+        tag: 'meta', injectTo: 'head-prepend', attrs: {
+          'http-equiv': 'Content-Security-Policy',
+          content: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'",
+        },
+      }] },
+    }, react(), VitePWA({
       strategies: 'injectManifest', srcDir: 'src', filename: 'sw.ts',
       registerType: 'prompt', injectRegister: false,
       includeAssets: ['icons/*.png'],

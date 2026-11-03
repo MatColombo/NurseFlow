@@ -39,15 +39,15 @@ test.beforeAll(async () => {
 
 test('F01: tabelle, Ready immutabile, import atomico, quota e riapertura IndexedDB', async ({ page }) => {
   await page.goto('./');
-  await page.addScriptTag({ content: harness });
+  await page.evaluate(harness);
   const state = await page.evaluate(() => window.NurseFlowF01.exerciseStorage());
   await page.reload();
-  await page.addScriptTag({ content: harness });
+  await page.evaluate(harness);
   expect(await page.evaluate((state) => window.NurseFlowF01.inspectPersisted(state), state)).toBe(true);
 });
 
 test('F01/F05: migrazione reale v1→v4 preserva lo snapshot Ready', async ({ page }) => {
   await page.goto('./');
-  await page.addScriptTag({ content: harness });
+  await page.evaluate(harness);
   expect(await page.evaluate(() => window.NurseFlowF01.exerciseMigration())).toBe(true);
 });

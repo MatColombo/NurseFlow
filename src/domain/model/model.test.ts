@@ -1,9 +1,19 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { destinationSchema, graphSchema, settingsSchema } from './index';
 import { assertGraphReferences } from './integrity';
 import { prepareImportedRecords } from '../portability/records';
 import { convergenceGraph, earlyEndGraph, exampleRecords, exampleRun, incompleteGraph, mediaGraph, multitaskGraph } from '@test/fixtures/domain';
+
+it('F16 parses graph and Settings with dynamic Function compilation forbidden by CSP', () => {
+  const compile = vi.spyOn(globalThis, 'Function').mockImplementation(() => { throw new EvalError('CSP: unsafe-eval forbidden'); });
+  try {
+    expect(graphSchema.safeParse(convergenceGraph()).success).toBe(true);
+    expect(settingsSchema.parse({ uiScalePt: 48, locale: 'en' }).uiScalePt).toBe(48);
+    expect(graphSchema.safeParse({ schemaVersion: 999 }).success).toBe(false);
+    expect(compile).not.toHaveBeenCalled();
+  } finally { compile.mockRestore(); }
+});
 
 describe('contratti dominio F01', () => {
   it.each([convergenceGraph, earlyEndGraph, incompleteGraph, mediaGraph, multitaskGraph, () => multitaskGraph(true)])(
