@@ -8,5 +8,5 @@
       "@test/*": ["./src/test/*"]
     }
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "tooling", "e2e"]
+  "include": ["vite.config.ts", "playwright.config.ts", "playwright.pages.config.ts", "tooling", "e2e"]
 }

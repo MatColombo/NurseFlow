@@ -39,7 +39,8 @@ test('F14 I07/I16 full and Settings atomic: quota at final Settings write rolls 
 test('F14 Settings consent cannot overwrite a newer Current; wrong procedure/library scope cross-routes to 11A with no writes', async ({ page }) => {
   await setupBackup(page); await importFile(page, await backupFile(page, 'settings')); await page.getByRole('button', { name: 'Sostituisci impostazioni…', exact: true }).click(); await attachBackup(page); await page.evaluate(() => window.NurseFlowF14.changeScale(30)); const before = await backupState(page);
   await dialog(page).getByRole('button', { name: 'Conferma sostituzione', exact: true }).click(); await expect(dialog(page).getByRole('alert')).toContainText('cambiate dopo il confronto'); expect(await backupState(page)).toEqual(before);
-  await dialog(page).getByRole('button', { name: 'Rileggi impostazioni attuali', exact: true }).click(); await expect(page.getByRole('region', { name: 'Confronto impostazioni' })).toContainText('30 pt'); expect(await backupState(page)).toEqual(before);
+  await dialog(page).getByRole('button', { name: 'Rileggi impostazioni attuali', exact: true }).click(); await expect(dialog(page)).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Confronto impostazioni' })).toContainText('30 pt'); expect(await backupState(page)).toEqual(before);
   for (const kind of ['procedure', 'library'] as const) { await page.getByLabel('Scegli file', { exact: true }).setInputFiles(await backupFile(page, kind)); await expect(page.getByRole('link', { name: 'Vai a Procedure e libreria', exact: true })).toBeVisible(); expect(await backupState(page)).toEqual(before); }
 });
 test('F14 I20 real full download restored into a fresh browser profile retains independent pinned OR/AND/W08 sessions, media and usable Ready without Check', async ({ page, playwright, browserName, baseURL }, info) => {

@@ -22,8 +22,9 @@ export async function inspectPortable() {
     assets: await Promise.all((await db.mediaAssets.toArray()).map(async ({ blob, ...asset }) => ({ ...asset, data: [...new Uint8Array(await blob.arrayBuffer())] }))) }; }
   finally { db.close(); }
 }
-export async function packageBytes(kind: 'single' | 'library' | 'settings' | 'full' | 'collision' | 'broken' | 'corrupt' | 'future') {
-  const records = await portableRecords(kind === 'library' ? 3 : 1); let blob: Blob;
+export async function packageBytes(kind: 'single' | 'library' | 'library-ten' | 'settings' | 'full' | 'collision' | 'broken' | 'corrupt' | 'future') {
+  const library = kind === 'library' || kind === 'library-ten';
+  const records = await portableRecords(kind === 'library-ten' ? 10 : library ? 3 : 1); let blob: Blob;
   if (kind === 'settings') blob = await sealPackage(new Map([['settings.json', jsonBytes(settingsSchema.parse({ locale: 'en', uiScalePt: 48 }))]]), { ...context, packageKind: 'settings', counts: { procedures: 0, groups: 0, revisions: 0, media: 0, runs: 0 }, missingAssets: [] });
   else {
     if (kind === 'collision') {
@@ -35,7 +36,7 @@ export async function packageBytes(kind: 'single' | 'library' | 'settings' | 'fu
       if (decision.kind === 'decision') decision.outcomes[0]!.destination = { kind: 'broken', formerNodeId: 'deleted-card', formerTitle: 'Carta rimossa' };
       graph.nodes = graph.nodes.filter((node) => node.id !== 'a-step');
     }
-    blob = await createPackage(kind === 'library' ? records : subsetRecords(records, new Set(['p-0'])), kind === 'library' ? 'library' : 'procedure', context);
+    blob = await createPackage(library ? records : subsetRecords(records, new Set(['p-0'])), library ? 'library' : 'procedure', context);
     if (kind === 'full') {
       const entries = readZip(new Uint8Array(await blob.arrayBuffer())); const manifest = manifestSchema.parse(parseJson(entries.get('manifest.json')!)); entries.delete('manifest.json'); entries.set('settings.json', jsonBytes(settingsSchema.parse({ uiScalePt: 48 })));
       blob = await sealPackage(entries, { ...manifest, packageKind: 'full' });

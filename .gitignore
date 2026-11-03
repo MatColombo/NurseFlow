@@ -3,6 +3,9 @@ dist/
 coverage/
 playwright-report/
 test-results/
+test-results-pages/
+playwright-pages-report/
+playwright-results.json
 *.tsbuildinfo
 *.log
 .env

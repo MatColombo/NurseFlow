@@ -5,9 +5,9 @@ import { expectNoBleeding, setScale } from '../fixtures/ui';
 // Same disk-backed isolation as storage.spec: Windows WebKit's private context
 // rejects even native IDB Blob writes (F01). No application storage workaround.
 const test = base.extend({
-  context: async ({ playwright, browserName, baseURL, headless, locale }, use) => {
+  context: async ({ playwright, browserName, baseURL, headless, locale, serviceWorkers }, use) => {
     const context = await playwright[browserName].launchPersistentContext('', { headless,
-      ...(baseURL ? { baseURL } : {}), ...(locale ? { locale } : {}),
+      ...(baseURL ? { baseURL } : {}), ...(locale ? { locale } : {}), ...(serviceWorkers ? { serviceWorkers } : {}),
     });
     try { await use(context); } finally { await context.close(); }
   },
@@ -79,8 +79,21 @@ test('media: upload reale, due gallerie, move/reorder/replace oltre soft cap; Bl
   await done(page); await softLimit(page, true); await openEditor(page); const rows = page.locator('[data-media-row]'); await expect(rows).toHaveCount(4);
   await expect(page.locator('[data-editor-gallery="before-note"]').getByRole('button', { name: 'Aggiungi foto', exact: true })).toBeDisabled();
   await rows.filter({ has: page.getByRole('textbox', { name: 'Didascalia', exact: true }).and(page.locator('input[value="Prima uno"]')) }).getByRole('button', { name: 'Sposta dopo la nota', exact: true }).click();
-  const afterGallery = page.locator('[data-editor-gallery="after-note"]'); await afterGallery.locator('[data-media-row]').last().getByRole('button', { name: 'Sposta su', exact: true }).click();
+  const afterGallery = page.locator('[data-editor-gallery="after-note"]'); await expect(afterGallery.locator('[data-media-row]')).toHaveCount(3);
+  await expect(afterGallery.locator('img')).toHaveCount(3);
+  // Visit lazy images before targeting controls below them: otherwise a decoded
+  // image can move the target between pointerdown and pointerup in Firefox.
+  for (const image of await afterGallery.locator('img').all()) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((element) => element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0)).toBe(true);
+  }
+  const movedItem = afterGallery.locator('[data-media-row]').filter({ has: page.locator('input[value="Prima uno"]') });
+  await movedItem.getByRole('button', { name: 'Sposta su', exact: true }).click();
   await afterGallery.getByRole('combobox', { name: 'Layout', exact: true }).selectOption('side-by-side'); await afterGallery.getByRole('combobox', { name: 'Spazio immagine', exact: true }).selectOption('large');
+  await expect.poll(async () => {
+    const step = (await records(page)).revision.graph.nodes.find((node) => node.id === 'shared');
+    return step && 'media' in step ? { item: step.media.find((item) => item.caption === 'Prima uno'), gallery: step.galleries.afterNote } : null;
+  }).toMatchObject({ item: { slot: 'after-note', order: 1 }, gallery: { layout: 'side-by-side', imageSpace: 'large' } });
   const moved = await records(page); expect(moved.assets).toEqual(before.assets); const step = moved.revision.graph.nodes.find((node) => node.id === 'shared'); if (!step || !('media' in step)) throw new Error('step');
   expect(step.media.find((item) => item.caption === 'Prima uno')).toMatchObject({ slot: 'after-note', order: 1 }); expect(step.galleries.afterNote).toEqual({ layout: 'side-by-side', imageSpace: 'large' });
   await page.getByRole('button', { name: 'Anteprima', exact: true }).click(); await expect(dialog(page).locator('.nf-gallery')).toHaveCount(2); await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); await done(page);
@@ -200,7 +213,9 @@ test('32 risposte ricercabili, rimozione separata con impatto e Undo senza perde
   await expect(page.getByRole('button', { name: /^Modifica risposta:/ })).toHaveCount(1); await page.getByRole('button', { name: 'Modifica risposta: Esito 27', exact: true }).click();
   await dialog(page).getByRole('textbox', { name: 'Nota della risposta', exact: true }).fill('Nota 27'); await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click();
   await page.getByRole('button', { name: 'Anteprima', exact: true }).click(); await dialog(page).getByRole('button', { name: 'Nota per: Esito 27', exact: true }).click(); await expect(dialog(page).getByText('Nota 27', { exact: true })).toBeVisible();
-  await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); await page.getByRole('button', { name: 'Riordina risposte', exact: true }).click();
+  await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); await expect(dialog(page)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Riordina risposte', exact: true }).click();
+  await expect(dialog(page).getByRole('heading', { name: 'Riordina risposte', exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Rimuovi risposta: Esito 27', exact: true }).click(); await expect(dialog(page)).toContainText('Prima:');
   await dialog(page).getByRole('button', { name: 'Applica modifica', exact: true }).click(); await expect(dialog(page)).toHaveCount(0); await done(page);
   const saved = await readBuilder(page, decisionsId); const decision = saved.revision.graph.nodes.find((node) => node.id === 'decision');
@@ -238,6 +253,8 @@ test('quota media: rollback include Blob, Retry mantiene proposta e inserisce un
   await dialog(page).getByRole('button', { name: 'Riprova', exact: true }).click(); await expect(dialog(page)).toHaveCount(0); await done(page); expect((await records(page)).assets).toHaveLength(1); expect((await readBuilder(page)).history.past).toHaveLength(1);
 });
 
+test.describe('Remote response interception without a service worker', () => {
+test.use({ serviceWorkers: 'block' });
 test('URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza Blob', async ({ page }) => {
   await setupBuilder(page); await page.route('https://media.example.com/card.gif', (route) => route.fulfill({ contentType: 'image/gif', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64') }));
   await openEditor(page); await expand(page, /^Media/); await page.locator('[data-editor-gallery="before-note"]').getByRole('button', { name: 'Aggiungi URL', exact: true }).click();
@@ -251,6 +268,7 @@ test('URL sicuri e GIF remota opzionale; upload SVG/GIF locale rifiutato senza B
     await dialog(page).getByLabel('Scegli immagine locale', { exact: true }).setInputFiles(file); await expect(dialog(page).getByRole('alert')).toContainText('Immagine non valida'); await expect(dialog(page).getByRole('button', { name: 'Aggiungi', exact: true })).toBeDisabled();
   }
   await dialog(page).getByRole('button', { name: 'Annulla', exact: true }).click(); await done(page); expect((await records(page)).assets).toHaveLength(0);
+});
 });
 
 for (const [width, scale] of [[320, 4], [320, 13], [320, 30], [320, 48], [390, 13], [768, 13]]) {

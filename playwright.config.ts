@@ -14,7 +14,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   workers: 2,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'playwright-results.json' }]],
   use: {
     baseURL,
     locale: 'it-IT',

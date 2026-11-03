@@ -1,0 +1,13 @@
+# Backup e recupero personale
+
+NurseFlow conserva i dati nel browser di questo dispositivo. Il grant di persistenza riduce alcuni rischi di eviction ma non garantisce la conservazione. Installare la PWA non crea un backup. Non usare dati sensibili nelle prove di recupero.
+
+1. Prima di importazioni importanti, aggiornamenti del dispositivo o cancellazioni, aprire Settings → **Backup app e impostazioni** → Export → **Backup completo** → Prepara file.
+2. Completare Download o Share e verificare nel gestore file che il `.nfbackup` esista e abbia dimensione non nulla. Il messaggio dell'app conferma la preparazione/consegna al sistema, non la conservazione del file.
+3. Conservare almeno due copie esterne al sito/browser, per esempio una sul dispositivo e una su un supporto personale separato. Mantenere anche una versione precedente con data. Esportare dopo modifiche importanti; per un uso quotidiano, controllare a fine giornata di disporre di una copia aggiornata.
+4. Periodicamente provare il recupero in un **profilo browser nuovo**, dopo avere verificato di essere nel profilo di prova. Aprire lo stesso URL NurseFlow, poi 11B → Import → scegliere il Full. Controllare anteprima/conteggi, mantenere Settings Off salvo volontà esplicita e confermare le aggiunte. Verificare una procedura, una foto locale e Resume di una sessione salvata anche offline dopo cache riuscita.
+5. L'import crea copie indipendenti: ripeterlo nella libreria abituale aggiunge duplicati, non annulla l'import precedente. Per trasferire solo procedure usare **Procedure e libreria** (11A). Il Full comprende Ready, Draft, media locali e sessioni Run salvate; non comprende permessi browser, cache, cronologia Undo o Draft Preview temporanee. I collegamenti remoti restano collegamenti e possono non funzionare offline.
+
+In caso di quota: interrompere nuove aggiunte, tentare export e conservarlo fuori dal browser, liberare spazio esterno se necessario e usare Retry. Un errore di transazione non deve essere trattato come import riuscito. Se lo storage è già stato cancellato/evicted, i dati si recuperano soltanto da un file esterno disponibile. Evitare **Clear local data** prima di avere verificato il recupero della copia; il controllo richiede due cautele ma non può ricreare dati cancellati.
+
+La candidata `0.1.0-rc.1` conserva schema v5/formato v1. Per un rollback dell'app conservare prima un Full e usare un profilo di prova con una versione compatibile; non avviare vecchie versioni sul database principale né cancellare store per forzare una migrazione. Non è previsto un downgrade automatico del database.

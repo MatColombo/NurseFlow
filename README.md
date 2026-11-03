@@ -1,6 +1,6 @@
 # NurseFlow
 
-Bootstrap **F00**, persistenza **F01**, design system **F02**, First Launch/Library **F03**, Details/New Procedure **F04**, Builder Outline **F05**, Graph **F06**, Step Editor/media **F07**, Check/Ready **F08**, motore pinned **F09**, Guided Run/End **F10**, Map/List **F11**, Settings **F12**, pacchetti/11A **F13**, backup app/11B **F14** e PWA **F15**: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale e IT/EN. Nessun contenuto clinico o fixture precaricato. Restano i gate esterni F15 di installazione mobile/deploy e la QA F16. I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
+Candidata tecnica **0.1.0-rc.1**, funzionalità F00–F15 e audit F16: React/Vite/TypeScript strict, dominio e Dexie separati dalla UI, tema pronto soccorso light/dark, scala globale 4–48pt e IT/EN. Nessun contenuto clinico o fixture precaricato. Non dichiarata pronta per l'uso operativo: prove su dispositivi fisici e screen reader reali restano necessarie. [Esito F16](docs/reports/F16.md), [note versione](CHANGELOG.md), [piano backup e recupero](docs/backup-and-recovery.md). I contratti originali sono in [docs/nurseflow](docs/nurseflow/00_START_HERE.md).
 
 ## Avvio riproducibile
 
