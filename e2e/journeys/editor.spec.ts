@@ -212,10 +212,11 @@ test('32 risposte ricercabili, rimozione separata con impatto e Undo senza perde
   await expect(page.getByRole('button', { name: '+ Risposta', exact: true })).toBeDisabled(); await page.getByRole('searchbox', { name: 'Cerca', exact: true }).fill('Esito 27');
   await expect(page.getByRole('button', { name: /^Modifica risposta:/ })).toHaveCount(1); await page.getByRole('button', { name: 'Modifica risposta: Esito 27', exact: true }).click();
   await dialog(page).getByRole('textbox', { name: 'Nota della risposta', exact: true }).fill('Nota 27'); await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click();
-  await page.getByRole('button', { name: 'Anteprima', exact: true }).click(); await dialog(page).getByRole('button', { name: 'Nota per: Esito 27', exact: true }).click(); await expect(dialog(page).getByText('Nota 27', { exact: true })).toBeVisible();
+  const preview = page.getByRole('button', { name: 'Anteprima', exact: true }); await preview.focus(); await preview.press('Enter');
+  await dialog(page).getByRole('button', { name: 'Nota per: Esito 27', exact: true }).click(); await expect(dialog(page).getByText('Nota 27', { exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); await expect(dialog(page)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Anteprima', exact: true })).toBeFocused();
-  await page.getByRole('button', { name: 'Riordina risposte', exact: true }).click();
+  await expect(preview).toBeFocused();
+  const arrange = page.getByRole('button', { name: 'Riordina risposte', exact: true }); await arrange.focus(); await arrange.press('Enter');
   await expect(dialog(page).getByRole('heading', { name: 'Riordina risposte', exact: true })).toBeVisible();
   await dialog(page).getByRole('button', { name: 'Rimuovi risposta: Esito 27', exact: true }).click(); await expect(dialog(page)).toContainText('Prima:');
   await dialog(page).getByRole('button', { name: 'Applica modifica', exact: true }).click(); await expect(dialog(page)).toHaveCount(0); await done(page);
