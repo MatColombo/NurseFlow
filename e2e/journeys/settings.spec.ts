@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { attachSettingsHarness, settingsData, setupSettings } from '../fixtures/settings';
 import { expectNoBleeding, setScale } from '../fixtures/ui';
 import { seedLibrary } from '../fixtures/library';
-import { version } from '../../package.json';
+import packageInfo from '../../package.json' with { type: 'json' };
 const sheet = (page: Page) => page.getByRole('dialog');
 async function close(page: Page) { await sheet(page).getByRole('button', { name: 'Chiudi', exact: true }).click(); }
 async function advanced(page: Page) { await page.getByRole('button', { name: /^Avanzate/ }).click(); }
@@ -69,7 +69,7 @@ test('F12 unsupported storage/update and offline checks remain truthful; About i
   await page.getByRole('button', { name: /^Spazio utilizzato/ }).click(); await expect(sheet(page)).toContainText('Non disponibile'); await close(page);
   await page.getByRole('button', { name: /^Verifica aggiornamenti/ }).click(); await expect(sheet(page).getByRole('status')).toHaveText('Aggiornamenti non disponibili in questa versione'); await close(page);
   await context.setOffline(true); await page.getByRole('button', { name: /^Verifica aggiornamenti/ }).click(); await expect(sheet(page).getByRole('status')).toHaveText('Verifica non disponibile offline'); await close(page);
-  await page.getByRole('button', { name: /^Informazioni/ }).click(); await expect(sheet(page)).toContainText('NurseFlow · ' + version); await expect(sheet(page)).toContainText('Offline'); await expect(sheet(page)).toContainText('HTTPS'); await close(page);
+  await page.getByRole('button', { name: /^Informazioni/ }).click(); await expect(sheet(page)).toContainText('NurseFlow · ' + packageInfo.version); await expect(sheet(page)).toContainText('Offline'); await expect(sheet(page)).toContainText('HTTPS'); await close(page);
   await expect(page.getByRole('button', { name: /^Installa app/ })).toHaveCount(0);
 });
 
