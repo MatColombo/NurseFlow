@@ -46,6 +46,11 @@ implicitamente. Eliminare il collettore interrompe il percorso dopo il
 completamento delle attività; non produce un falso End. Gli orfani
 restano recuperabili e possono richiedere una scelta esplicita nel Check.
 
+Il [confronto degli alberi Git](assets/RC2/compatibility.json) con il tag
+rc.1 conferma che storage, schema di dominio, motore runtime, contratti
+originali e dipendenze sono invariati. La nuova semantica editoriale è
+nei comandi Builder; la persistenza e il runtime usano gli stessi moduli.
+
 ## Verifiche
 
 | Controllo locale | Esito |
@@ -59,7 +64,12 @@ restano recuperabili e possono richiedere una scelta esplicita nel Check.
 | Snapshot componenti light/dark, Dialog/Sheet | PASS: 1 test, 4 snapshot; nessun baseline modificato |
 | Editor/media nei tre browser desktop su Windows | PASS: 69/69, zero retry |
 | Regressioni focus Outline e font alternativi, tre browser | PASS: 9/9, zero retry |
-| CI completa e deploy | Prima CI bloccata da un difetto di reflow; verifica della correzione in corso |
+| CI completa Linux, revisione finale | PASS: 801 E2E, 3 skip condizionali, zero failure e zero flaky |
+| Snapshot Windows sulla revisione finale | PASS |
+| Deploy Pages | PASS, job `125903707097` |
+| Smoke indipendente HTTPS/CSP/manifest/icone/cache/hash/offline | PASS sull'URL pubblico, profilo nuovo |
+| Versione pubblicata | PASS: `0.1.0-rc.2`, HTTP 200, zero page error |
+| Full download → import in nuovo profilo → offline Resume | PASS: 1/1, zero retry |
 
 Gli E2E mirati coprono sette casi nei tre browser: AND/Stop autorizzato,
 ritorno Details/Library, ricerca nei passi, nuovo collettore/follow-up,
@@ -95,6 +105,42 @@ visibile di almeno 44px sotto la toolbar, apertura da tastiera e grafo
 immutato. Un titolo molto grande può richiedere scroll verticale:
 non viene compresso per far entrare tutta la card nello stesso frame.
 [Misura reale dopo il salto a 48pt](assets/RC2/outline-focus.json).
+[9 regressioni nei tre browser](assets/RC2/focus-and-font.json).
+
+Correzione finale: `d10c9937ebd4c7002c4ff128e11f4d471d9dfcf1`.
+[Nuova pipeline completa](https://github.com/MatColombo/NurseFlow/actions/runs/41629065990).
+Il [report macchina della CI finale](assets/RC2/ci-final.json), scaricato
+dall'artifact con SHA-256 verificata, conta 804 casi pianificati: 801 PASS,
+3 skip, 0 failure, 0 flaky. Tutti i 120 casi di matrice passano, compreso
+il precedente FAIL Library 320px/48pt. Sono inclusi i nuovi test sul focus
+Outline e sui font alternativi nei tre browser.
+
+I tre skip riguardano soltanto la prova di errore nativo Cache API:
+Chromium/Firefox non sono il target di quella limitazione; sul WebKit
+Linux la sonda conferma che Cache API funziona. Non sono conteggiati come
+test eseguiti con PASS. Le prove offline ordinarie sono eseguite.
+
+## Verifica della pubblicazione
+
+URL reale: [NurseFlow su Pages](https://matcolombo.github.io/NurseFlow/).
+La sonda indipendente ha verificato HTTP 200, CSP, manifest e icone sotto
+`/NurseFlow/`, cache controllata dal service worker e ricaricamento offline
+di una hash route. Un secondo profilo nuovo ha letto la versione rc.2
+direttamente da Settings/About senza page error:
+[risultato](assets/RC2/pages-version.json),
+[screenshot](assets/RC2/pages-rc2.png).
+
+Eseguito nuovamente `playwright.pages.config.ts` sul sito pubblico:
+download reale Full, import tramite UI in un altro profilo vuoto,
+ricarica e Resume offline di sessioni OR/AND/W08 con media locali,
+Ready importate utilizzabili senza Check e revisione storica pinnata
+distinta dalla Ready corrente. Esito 1 PASS, 0 failure, 0 retry:
+[evidenza](assets/RC2/pages-roundtrip.json).
+
+La chiusura del report modifica soltanto documentazione/evidenze; il codice
+pubblicato e verificato resta quello di `d10c993`. Tag di riferimento:
+[`v0.1.0-rc.2`](https://github.com/MatColombo/NurseFlow/tree/v0.1.0-rc.2).
+Resta valido il [piano backup e recupero](../backup-and-recovery.md).
 
 Nuovi test: geometria/ancore/tangenti a 320/390/768px × 4/13/30/48pt;
 2/3/32 attività con follow-up, completamenti indipendenti, reload,

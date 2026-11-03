@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-03T12:02:54.259Z",
+  "url": "https://matcolombo.github.io/NurseFlow/#/settings",
+  "http": 200,
+  "version": "0.1.0-rc.2",
+  "freshProfile": true,
+  "errors": [],
+  "assets": [
+    "https://matcolombo.github.io/NurseFlow/assets/index-BjZw_TO_.js"
+  ],
+  "about": "Informazioni\nChiudi\n\nNurseFlow · 0.1.0-rc.2\n\nConnessione disponibile\n\nStrumento personale con dati locali nel browser, senza account o sincronizzazione. Ready non è una certificazione clinica. Le immagini collegate tramite URL HTTPS possono contattare i siti esterni dell’autore e non sono garantite offline.\n\nLa cache contiene solo l’app, non un backup di procedure e immagini. Il browser può rimuovere cache e dati, anche dopo l’installazione. Se l’archivio risulta vuoto, puoi importare una copia esterna; l’app non può determinarne la causa o recuperare dati rimossi.\n\nSe il browser lo supporta, usa il suo menu Installa. Su iPhone/iPad usa Condividi → Aggiungi alla schermata Home. Disponibilità e archivio possono variare fra browser e app installata."
+}

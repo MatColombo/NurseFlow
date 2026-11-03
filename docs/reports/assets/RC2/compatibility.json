@@ -1,0 +1,31 @@
+{
+  "baseline": "v0.1.0-rc.1",
+  "commit": "d10c9937ebd4c7002c4ff128e11f4d471d9dfcf1",
+  "trees": [
+    {
+      "path": "src/storage",
+      "before": "817884254e01c15fdf423c856a9a69e59ce357c4",
+      "after": "817884254e01c15fdf423c856a9a69e59ce357c4",
+      "unchanged": true
+    },
+    {
+      "path": "src/domain/model",
+      "before": "076f56b698e6faa89bc46adefbbfc2d0cee4708a",
+      "after": "076f56b698e6faa89bc46adefbbfc2d0cee4708a",
+      "unchanged": true
+    },
+    {
+      "path": "src/domain/runtime",
+      "before": "ab2e83e04a430be0ce55ebbaac5c3c1025d66497",
+      "after": "ab2e83e04a430be0ce55ebbaac5c3c1025d66497",
+      "unchanged": true
+    },
+    {
+      "path": "docs/nurseflow",
+      "before": "75f3b00f561e1e7ce0d74e95247fd026383daf66",
+      "after": "75f3b00f561e1e7ce0d74e95247fd026383daf66",
+      "unchanged": true
+    }
+  ],
+  "dependenciesUnchanged": true
+}

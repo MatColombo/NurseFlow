@@ -1,0 +1,721 @@
+{
+  "run": "https://github.com/MatColombo/NurseFlow/actions/runs/41629065990",
+  "commit": "d10c9937ebd4c7002c4ff128e11f4d471d9dfcf1",
+  "artifactId": 13227844525,
+  "artifactSha256": "67b1cf07f7b99d08cd5c92e56c692959338a2155ed7aa0e013f3f5a1cd4ef327",
+  "reportSha256": "b052d273da6b50167a51d76df369e2117ac55566fac419819baea237b0e3d397",
+  "stats": {
+    "startTime": "2026-11-03T11:40:26.729Z",
+    "duration": 1162381.172,
+    "expected": 801,
+    "skipped": 3,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "planned": 804,
+  "skipped": [
+    {
+      "title": "F15 a native Cache API write failure never shows offline ready",
+      "project": "chromium",
+      "status": "skipped",
+      "attempts": [
+        "skipped"
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Target the native Windows WebKit Cache API limitation when present.",
+          "location": {
+            "file": "/home/runner/work/NurseFlow/NurseFlow/e2e/journeys/cache-error.spec.ts",
+            "line": 5,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "title": "F15 a native Cache API write failure never shows offline ready",
+      "project": "firefox",
+      "status": "skipped",
+      "attempts": [
+        "skipped"
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Target the native Windows WebKit Cache API limitation when present.",
+          "location": {
+            "file": "/home/runner/work/NurseFlow/NurseFlow/e2e/journeys/cache-error.spec.ts",
+            "line": 5,
+            "column": 8
+          }
+        }
+      ]
+    },
+    {
+      "title": "F15 a native Cache API write failure never shows offline ready",
+      "project": "webkit",
+      "status": "skipped",
+      "attempts": [
+        "skipped"
+      ],
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "Cache API works here; offline tests cover this browser.",
+          "location": {
+            "file": "/home/runner/work/NurseFlow/NurseFlow/e2e/journeys/cache-error.spec.ts",
+            "line": 12,
+            "column": 8
+          }
+        }
+      ]
+    }
+  ],
+  "matrix": [
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F14 Page11B settings/full diff and second consent 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F13 Page11A Export/Import 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 320px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 320px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 320px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 320px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 390px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 390px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 390px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 390px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 768px 4pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 768px 13pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 768px 30pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Library 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Details 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Run 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Map 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Builder 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Editor 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Check 768px 48pt",
+      "status": "expected"
+    },
+    {
+      "title": "F12 matrix Settings 768px 48pt",
+      "status": "expected"
+    }
+  ],
+  "newCases": [
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "project": "chromium",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "project": "firefox",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "AND follow-up and external collector persist with Undo/Redo; Ready is unchanged",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Graph arrows run right to left face, with horizontal arrival and one shared node",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Light motion, reduced motion and compact default-open note preserve Run state",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/4pt",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Outline focus scrolls once under its toolbar at 320px/48pt",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    },
+    {
+      "title": "Library group header reflows at 320px/48pt with wide fallback font glyphs",
+      "project": "webkit",
+      "status": "expected",
+      "attempts": [
+        "passed"
+      ],
+      "annotations": []
+    }
+  ]
+}
