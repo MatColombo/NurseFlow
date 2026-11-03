@@ -1,5 +1,7 @@
 export const builderResources = {
   it: { builder: {
+    activityWorkflow: 'Definisci l’attività obbligatoria e il suo primo passo. Proseguirai subito nell’editor per compilare il contenuto.',
+    activityName: 'Nome dell’attività', activityFirstKind: 'Tipo del primo passo', createActivityStep: 'Crea attività e compila il primo passo', defineActivity: 'Definisci attività e primo passo', editActivityStep: 'Modifica il primo passo dell’attività',
     outline: 'Outline', graph: 'Graph', tools: 'Strumenti Builder', more: 'Azioni Builder', undo: 'Annulla modifica', redo: 'Ripeti modifica', backBuilder: 'Torna al Builder',
     noUndo: 'Nessuna modifica da annullare.', noRedo: 'Nessuna modifica da ripetere.', graphPending: 'Canvas e layout grafico disponibili nella fase F06.',
     preview: 'Anteprima', check: 'Verifica', previewNeedsDraft: 'La bozza viene creata al primo cambiamento reale.',
@@ -32,6 +34,8 @@ export const builderResources = {
       invalid: 'Operazione non valida per questa selezione.', clipboard: 'Seleziona un outlet per un passo o un gruppo per incollare un’attività.' },
   } },
   en: { builder: {
+    activityWorkflow: 'Define the required activity and its first step. Continue directly to the editor to enter its content.',
+    activityName: 'Activity name', activityFirstKind: 'First step type', createActivityStep: 'Create activity and edit its first step', defineActivity: 'Define activity and first step', editActivityStep: 'Edit activity first step',
     outline: 'Outline', graph: 'Graph', tools: 'Builder tools', more: 'Builder actions', undo: 'Undo', redo: 'Redo', backBuilder: 'Back to Builder',
     noUndo: 'Nothing to undo.', noRedo: 'Nothing to redo.', graphPending: 'Graph canvas and layout arrive in F06.',
     preview: 'Preview', check: 'Check', previewNeedsDraft: 'The first actual edit creates the working Draft.',

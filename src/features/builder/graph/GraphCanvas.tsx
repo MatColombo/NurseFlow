@@ -2,16 +2,17 @@ import { useId, useLayoutEffect, useMemo, useRef, useState, type RefCallback } f
 import { useTranslation } from 'react-i18next';
 import type { Graph } from '@domain/model';
 import type { CanvasView, EdgeRef, Selection } from '@domain/builder/model';
-import { focusPath, graphMetrics, makeScene } from '@domain/builder/scene';
+import { activityRegions, focusPath, graphMetrics, makeScene } from '@domain/builder/scene';
 import { centerAt, fitViewport, zoomAt } from '@domain/builder/viewport';
 import { connectionProblem } from '@domain/builder/targets';
-import { activityScopeKey, assertEditableGraph, edgeKey } from '@domain/builder/structure';
+import { assertEditableGraph, edgeKey } from '@domain/builder/structure';
 import { Button } from '@shared/components';
 import { edgeTitle, titleOf } from '../labels';
 import { GraphBrowse } from './GraphBrowse';
 import { GraphCard } from './GraphCard';
 import { useCanvasGestures } from './useCanvasGestures';
 import './graph.css';
+import { ArrowMarkers } from './ArrowMarkers';
 
 export type FocusRequest = { id: string; sequence: number };
 export default function GraphCanvas({ graph, view, scale, selection, picking, request, chrome, change, select, pick, clear }: {
@@ -21,6 +22,7 @@ export default function GraphCanvas({ graph, view, scale, selection, picking, re
   const { t } = useTranslation(); const viewport = useRef<HTMLDivElement>(null); const marker = useId();
   const [size, setSize] = useState({ width: 0, height: 0 }); const [browse, setBrowse] = useState<{ nodeId: string | null } | null>(null);
   const [located, setLocated] = useState<string | null>(null); const handled = useRef(-1);
+  const [focusedEdge, setFocusedEdge] = useState<string | null>(null);
   useLayoutEffect(() => {
     const node = viewport.current; if (!node) return;
     const measure = () => setSize({ width: node.clientWidth, height: node.clientHeight });
@@ -48,23 +50,25 @@ export default function GraphCanvas({ graph, view, scale, selection, picking, re
     return () => cancelAnimationFrame(frame);
   });
   const fit = () => change(fitViewport(view, scene, size.width, size.height));
-  const gestures = useCanvasGestures(viewport, view, change, fit, clear);
+  const gestures = useCanvasGestures(viewport, view, change, fit, () => { setFocusedEdge(null); clear(); });
   const selectedId = selection?.kind === 'edge' ? selection.edge.nodeId : selection?.nodeId;
   const centerId = [selectedId, located].find((id) => id && graph.nodes.some((node) => node.id === id));
   const zoom = (factor: number) => change(zoomAt(view, view.zoom * factor, { x: size.width / 2, y: size.height / 2 }));
-  const edgeAction = (edge: EdgeRef) => { if (view.zoom < .99) reveal(edge.nodeId); else if (!picking) select({ kind: 'edge', edge }); };
+  const activeEdge = scene.edges.find((edge) => edgeKey(edge.edge) === focusedEdge);
+  const edgeAction = (edge: EdgeRef) => { if (!picking) setFocusedEdge((current) => current === edgeKey(edge) ? null : edgeKey(edge)); };
   return <div className="nf-graph-shell">
     <div ref={chrome} className="nf-graph-controls nf-row" role="group" aria-label={t('canvas.controls')}>
-      <Button aria-label={t('canvas.zoomIn')} disabled={view.zoom >= 3} disabledReason={t('canvas.zoomLimit')} onClick={() => zoom(1.25)}>+</Button>
-      <Button aria-label={t('canvas.zoomOut')} disabled={view.zoom <= .05} disabledReason={t('canvas.zoomLimit')} onClick={() => zoom(.8)}>−</Button>
-      <Button onClick={fit}>{t('canvas.fit')}</Button>
-      <Button aria-label={t('canvas.center')} disabled={!centerId} disabledReason={t('canvas.noSelection')} onClick={() => { if (centerId) reveal(centerId); }}>◎</Button>
-      <Button onClick={() => setBrowse({ nodeId: null })}>{t('canvas.find')}</Button>
+      <Button purpose="view" aria-label={t('canvas.zoomIn')} disabled={view.zoom >= 3} disabledReason={t('canvas.zoomLimit')} onClick={() => zoom(1.25)}>+</Button>
+      <Button purpose="view" aria-label={t('canvas.zoomOut')} disabled={view.zoom <= .05} disabledReason={t('canvas.zoomLimit')} onClick={() => zoom(.8)}>−</Button>
+      <Button purpose="view" onClick={fit}>{t('canvas.fit')}</Button>
+      <Button purpose="view" aria-label={t('canvas.center')} disabled={!centerId} disabledReason={t('canvas.noSelection')} onClick={() => { if (centerId) reveal(centerId); }}>◎</Button>
+      <Button purpose="view" onClick={() => setBrowse({ nodeId: null })}>{t('canvas.find')}</Button>
       <output aria-label={t('canvas.zoomLevel')}>{Math.round(view.zoom * 100)}%</output>
     </div>
     {view.zoom < .99 && <p className="nf-note" role="status">{t('canvas.overview')}</p>}
     <div ref={viewport} className="nf-graph-viewport" role="region" aria-label={t('canvas.surface')} tabIndex={0} {...gestures}
       data-camera-x={view.x} data-camera-y={view.y} data-camera-zoom={view.zoom} data-camera-initialized={String(view.initialized)}
+      onPointerDownCapture={(event) => { if (!(event.target instanceof Element && event.target.closest('[data-graph-edge]'))) setFocusedEdge(null); }}
       onFocusCapture={(event) => {
         if (!(event.target instanceof Element) || !event.target.matches(':focus-visible') || event.target === event.currentTarget) return;
         const target = event.target.getBoundingClientRect(); const bounds = event.currentTarget.getBoundingClientRect();
@@ -75,31 +79,29 @@ export default function GraphCanvas({ graph, view, scale, selection, picking, re
         }
       }}>
       <svg className="nf-graph-svg" width="100%" height="100%" aria-label={t('canvas.diagram')}>
-        <defs><marker id={marker} viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse" markerUnits="strokeWidth">
-          <path d="M0 0 L10 5 L0 10 z" fill="var(--nf-primary)" />
-        </marker></defs>
+        <ArrowMarkers id={marker} />
         <g transform={`translate(${view.x} ${view.y}) scale(${view.zoom})`}>
-          {graph.nodes.filter((node) => node.kind === 'multitask').map((group) => {
-            const prefix = owners.get(group.id) ?? []; const tokens = group.activities.map((activity) => activityScopeKey(group.id, activity.id));
-            const members = scene.nodes.filter((box) => box.id === group.id || tokens.includes(owners.get(box.id)?.[prefix.length] ?? ''));
-            if (!members.length) return null;
-            const left = Math.min(...members.map((box) => box.x)) - 8; const top = Math.min(...members.map((box) => box.y)) - 8;
-            return <rect key={group.id} data-activity-region={group.id} x={left} y={top} width={Math.max(...members.map((box) => box.x + box.width)) - left + 8}
-              height={Math.max(...members.map((box) => box.y + box.height)) - top + 8} rx="12" className="nf-graph-group-region" pointerEvents="none" />;
-          })}
-          {scene.edges.filter((edge) => edge.draw).map((edge) => <g key={edgeKey(edge.edge)}>
+          {activityRegions(graph, scene.nodes, owners).map((region) => <rect key={region.id} data-activity-region={region.id}
+            x={region.x} y={region.y} width={region.width} height={region.height} rx="12" className="nf-graph-group-region" pointerEvents="none" />)}
+          {scene.edges.filter((edge) => edge.draw).map((edge) => {
+            const target = graph.nodes.find((node) => node.id === edge.targetId)!;
+            const tone = target.kind === 'end' ? target.endKind : 'primary';
+            return <g key={edgeKey(edge.edge)} data-end-kind={target.kind === 'end' ? target.endKind : undefined}
+              data-edge-focus={activeEdge ? edge === activeEdge ? 'active' : 'dimmed' : undefined}>
             <path d={edge.path} className={'nf-graph-line' + (selection?.kind === 'edge' && edgeKey(selection.edge) === edgeKey(edge.edge) ? ' nf-graph-line--selected' : '')}
-              markerEnd={`url(#${marker})`} pointerEvents="none" />
+              markerEnd={`url(#${marker}-${tone})`} pointerEvents="none" />
             <path d={edge.path} className="nf-graph-edge-hit" data-graph-edge={edgeKey(edge.edge)} data-source={edge.edge.nodeId} data-target={edge.targetId}
               data-completion={edge.completion ? 'true' : undefined} role="button" tabIndex={picking ? -1 : 0} aria-disabled={Boolean(picking)}
+              aria-pressed={edge === activeEdge}
               aria-label={t('canvas.edge', { title: edgeTitle(graph, edge.edge, t) }) + ' → ' + titleOf(graph.nodes.find((node) => node.id === edge.targetId)!, t)}
               onClick={() => edgeAction(edge.edge)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); edgeAction(edge.edge); } }}>
               <title>{edgeTitle(graph, edge.edge, t)}</title>
             </path>
-          </g>)}
+          </g>; })}
           {scene.nodes.map((box) => {
             const code = reasons.get(box.id); const reason = code ? t(code === 'connected' ? 'canvas.connected' : 'builder.errors.' + code) : null;
             return <GraphCard key={box.id} graph={graph} box={box} metrics={metrics} view={view} selection={selection} located={located === box.id}
+              edgeFocus={activeEdge ? box.id === activeEdge.edge.nodeId || box.id === activeEdge.targetId ? 'active' : 'dimmed' : undefined}
               picking={Boolean(picking)} reason={reason} select={select} pick={pick} reveal={reveal} browse={(id) => setBrowse({ nodeId: id })} />;
           })}
         </g>

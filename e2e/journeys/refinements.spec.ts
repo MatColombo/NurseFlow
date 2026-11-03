@@ -50,8 +50,8 @@ test('Graph arrows run right to left face, with horizontal arrival and one share
     return { points, targetX: Number(target.getAttribute('x')), sourceRight: Number(source.getAttribute('x')) + Number(source.getAttribute('width')) };
   }));
   for (const { points, targetX, sourceRight } of edges) {
-    const curve = points.slice(-6);
-    expect(points[0]).toBe(sourceRight); expect(curve[4]).toBe(targetX); expect(curve[4]).toBeGreaterThan(points[0]!);
+    const curve = points.slice(4, 10);
+    expect(points[0]).toBe(sourceRight); expect(points.at(-2)).toBe(targetX); expect(curve[4]).toBeGreaterThan(points[0]!);
     expect(curve[1]).toBe(points[1]); expect(curve[3]).toBe(curve[5]); expect(curve[2]).toBeLessThan(curve[4]!);
   }
   await expect(page.locator('[data-graph-node="shared"]')).toHaveCount(1);

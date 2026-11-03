@@ -1,5 +1,6 @@
 .nf-step-content .nf-button { min-block-size: max(48px, var(--nf-control-min)); }
 .nf-authored { white-space: pre-wrap; overflow-wrap: anywhere; }
+.nf-authored-list { padding-inline-start: 1.4em; }
 .nf-step-warning { border-inline-start: 3px solid var(--nf-warning); padding: min(var(--nf-card-pad), 4vw); background: var(--nf-surface-soft); }
 .nf-step-content h2 { white-space: pre-wrap; }
 .nf-step-content { line-height: 1.6; }

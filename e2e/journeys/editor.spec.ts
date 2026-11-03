@@ -48,7 +48,8 @@ test('Instruction: testo, nota, fase e Done attende il commit; reload e Ready in
 
 test('Decision: Outcome editor solo answer/nota/path, F06 cambia solo B e ritorna allo stesso outcome', async ({ page }) => {
   await setupBuilder(page); await openEditor(page, 'decision'); const before = await readBuilder(page);
-  await page.getByRole('button', { name: 'Modifica risposta: B', exact: true }).click(); await expect(dialog(page).getByRole('textbox')).toHaveCount(2); await expect(dialog(page).getByRole('combobox')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Modifica risposta: B', exact: true }).click(); await expect(dialog(page).getByRole('textbox')).toHaveCount(2);
+  await expect(dialog(page).getByRole('combobox')).toHaveCount(1); await expect(dialog(page).getByRole('combobox', { name: 'Colore testo', exact: true })).toBeVisible();
   await expect(dialog(page).getByRole('button', { name: 'Riordina risposte', exact: true })).toHaveCount(0);
   await dialog(page).getByRole('textbox', { name: 'Risposta', exact: true }).fill('B autore'); await dialog(page).getByRole('textbox', { name: 'Nota della risposta', exact: true }).fill('Nota soltanto B');
   await dialog(page).getByRole('button', { name: 'Cambia percorso: B autore', exact: true }).click(); await expect(graphSurface(page)).toBeVisible();

@@ -30,7 +30,7 @@ export const stepMediaSchema = z.strictObject({
 });
 
 export const galleryStyleSchema = z.strictObject({
-  layout: z.enum(['stacked-thumbnails', 'side-by-side', 'full-width']),
+  layout: z.enum(['stacked-thumbnails', 'side-by-side', 'full-width', 'grid-2', 'grid-4']),
   imageSpace: z.enum(['compact', 'medium', 'large', 'natural']),
 });
 export const galleryPrefsSchema = z.strictObject({

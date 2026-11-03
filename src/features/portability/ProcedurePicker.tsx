@@ -41,7 +41,7 @@ export function ProcedurePicker({ items, visible, filters, changeFilters, select
             {item.procedure.tags.length > 0 && <p className="nf-meta">{item.procedure.tags.join(' · ')}</p>}
             {duplicate.local && <p className="nf-note">{t('portable.duplicateLocal')}</p>}{duplicate.batch && <p className="nf-note">{t('portable.duplicateBatch')}</p>}
             {item.warnings.length > 0 && <p className="nf-note">{[...new Set(item.warnings.map((issue) => issue.code))].join(' · ')}</p>}
-            <Button aria-label={t('portable.previewNamed', { title: item.procedure.title })} onClick={(event) => { event.currentTarget.focus({ preventScroll: true }); preview(item); }}>{t('portable.preview')}</Button>
+            <Button purpose="preview" aria-label={t('portable.previewNamed', { title: item.procedure.title })} onClick={(event) => { event.currentTarget.focus({ preventScroll: true }); preview(item); }}>{t('portable.preview')}</Button>
           </li>;
         })}</ul>
       </section>;

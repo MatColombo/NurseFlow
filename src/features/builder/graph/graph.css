@@ -19,11 +19,29 @@
 .nf-graph-group-summary > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .nf-graph-port .nf-graph-broken { color: var(--nf-warning); border-style: dashed; }
 .nf-graph-line { fill: none; stroke: var(--nf-primary); stroke-width: 2; }
-.nf-graph-line--selected { stroke: var(--nf-focus); stroke-width: 4; }
+.nf-graph-line--selected { stroke-width: 4; }
 .nf-graph-edge-hit { fill: none; stroke: transparent; stroke-width: 32; pointer-events: stroke; cursor: pointer; }
+.nf-graph-edge-hit:focus { outline: none; }
 .nf-graph-edge-hit:focus-visible { stroke: var(--nf-primary-tint); stroke-opacity: .5; outline: none; }
 .nf-graph-group-region { fill: var(--nf-primary-tint); fill-opacity: .4; stroke: var(--nf-border); stroke-width: 2; }
 .nf-builder-scroll--graph { display: flex; overflow: hidden; }
 .nf-builder-flow .nf-builder-scroll--graph { overflow: visible; }
 .nf-builder-flow .nf-graph-shell { flex: none; inline-size: 100%; }
 .nf-builder-flow .nf-graph-viewport { flex: none; block-size: max(280px, 55dvh); }
+[data-node-kind] { --nf-node-color: var(--nf-primary); }
+[data-node-kind='decision'] { --nf-node-color: var(--nf-info); }
+[data-node-kind='alert'] { --nf-node-color: var(--nf-warning); }
+[data-node-kind='multitask'] { --nf-node-color: var(--nf-ribbon-purple); }
+[data-end-kind='completed'] { --nf-node-color: var(--nf-success); --nf-edge-dash: 12 5; }
+[data-end-kind='neutral'] { --nf-node-color: var(--nf-info); --nf-edge-dash: 3 5; }
+[data-end-kind='stopped'] { --nf-node-color: var(--nf-danger); --nf-edge-dash: 10 4 2 4; }
+[data-end-kind='escalation'] { --nf-node-color: var(--nf-warning); --nf-edge-dash: 16 4 4 4; }
+[data-node-kind] .nf-graph-card, [data-node-kind] .nf-map-graph-card { border-color: var(--nf-node-color); border-block-start: 4px solid var(--nf-node-color); }
+[data-node-kind] .nf-graph-card-head { background: color-mix(in srgb, var(--nf-node-color) 9%, var(--nf-surface)); }
+.nf-graph-phase { color: var(--nf-node-color); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
+.nf-graph-card-head .nf-graph-title { background: transparent; }
+.nf-graph-svg [data-end-kind] > .nf-graph-line, .nf-graph-svg [data-end-kind] > .nf-map-line { stroke: var(--nf-node-color); stroke-dasharray: var(--nf-edge-dash); }
+.nf-graph-line, .nf-map-line { stroke-linecap: butt; stroke-linejoin: round; }
+[data-edge-focus='dimmed'] { opacity: .2; filter: grayscale(1); }
+[data-edge-focus='active'] > .nf-graph-line, [data-edge-focus='active'] > .nf-map-line { stroke-width: 4; }
+[data-edge-focus='active'] .nf-graph-card, [data-edge-focus='active'] .nf-map-graph-card { box-shadow: inset 0 0 0 2px var(--nf-focus); }

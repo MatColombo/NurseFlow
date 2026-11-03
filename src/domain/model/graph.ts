@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { endKindSchema, idSchema } from './common';
 import { galleryPrefsSchema, stepMediaSchema } from './media';
+import { textFormatSchema } from './text';
 
 export const destinationSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('node'), nodeId: idSchema, terminateProcedure: z.literal(true).optional() }),
@@ -10,6 +11,7 @@ export const destinationSchema = z.discriminatedUnion('kind', [
 ]);
 export const stepNoteSchema = z.strictObject({
   text: z.string(), visibility: z.enum(['expandable', 'always-visible']),
+  format: textFormatSchema.optional(), bulleted: z.boolean().optional(),
 });
 export const outcomeSchema = z.strictObject({
   id: idSchema, order: z.number().int().nonnegative(), label: z.string(),
@@ -28,8 +30,8 @@ const stepFields = {
 };
 export const nodeSchema = z.discriminatedUnion('kind', [
   z.strictObject({ id: idSchema, kind: z.literal('start'), next: destinationSchema }),
-  z.strictObject({ ...stepFields, kind: z.literal('instruction'), text: z.string(), next: destinationSchema }),
-  z.strictObject({ ...stepFields, kind: z.literal('alert'), text: z.string(), additionalText: z.string().optional(), next: destinationSchema }),
+  z.strictObject({ ...stepFields, kind: z.literal('instruction'), text: z.string(), textFormat: textFormatSchema.optional(), next: destinationSchema }),
+  z.strictObject({ ...stepFields, kind: z.literal('alert'), text: z.string(), textFormat: textFormatSchema.optional(), additionalText: z.string().optional(), next: destinationSchema }),
   z.strictObject({ ...stepFields, kind: z.literal('decision'), question: z.string(), context: z.string().optional(), outcomes: z.array(outcomeSchema) }),
   z.strictObject({
     id: idSchema, kind: z.literal('multitask'), title: z.string(), phaseId: idSchema.nullable().optional(),

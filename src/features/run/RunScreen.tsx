@@ -62,7 +62,7 @@ export function RunScreen({ initial, adapter, onData }: { initial: RunData; adap
     <header className="nf-run-header">
       <Button icon="back" aria-label={t('common.back')} disabled={busy || ended && !previous} disabledReason={t(busy ? 'run.saving' : 'run.noPrevious')} onClick={back} />
       <h1 title={data.title}>{data.title}</h1>
-      <Button ref={mapButton} disabled={busy} disabledReason={t('run.saving')} onClick={() => { if (!locking.current) void navigate(mapPath, { state: { runMapContext: { scrollTop: window.scrollY } } }); }}>{t('run.map')}</Button>
+      <Button purpose="view" ref={mapButton} disabled={busy} disabledReason={t('run.saving')} onClick={() => { if (!locking.current) void navigate(mapPath, { state: { runMapContext: { scrollTop: window.scrollY } } }); }}>{t('run.map')}</Button>
       {(!ended || invalidEnd) && <Button disabled={busy} disabledReason={t('run.saving')} onClick={() => setModal('exit')}>{t('run.exit')}</Button>}
     </header>
     {data.preview && <strong role="status">{t('procedure.draftPreview')}</strong>}

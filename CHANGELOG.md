@@ -1,5 +1,15 @@
 # NurseFlow — versioni
 
+## Modifiche locali successive alla rc.2 — 3 novembre 2026
+
+- Frecce con arrivo rettilineo, selezione arco e due estremi, resto attenuato; fase sopra il titolo e tipi di passo colorati.
+- Regioni multitask riservate, meno incroci, End sulla colonna destra con colori e tratteggi distinti.
+- Nome attività e primo passo creati atomicamente con passaggio diretto all'editor.
+- Campi touch senza zoom automatico al focus, pulsanti distinti per consultazione/azione/anteprima.
+- Gallerie compatte fino a 2/4 immagini per riga, didascalie centrate; stili testo e note con elenco puntato, salvati come dati validati.
+
+[Report e limiti](docs/reports/RC2-followup.md), [addendum su richiesta utente](docs/adr/020-graph-authoring-and-text.md).
+
 ## 0.1.0-rc.2 — 3 novembre 2026
 
 - Graph e Map da sinistra a destra, ancore destra/sinistra e curve con arrivo perpendicolare; convergenze sempre su un solo nodo.

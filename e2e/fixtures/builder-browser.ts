@@ -61,6 +61,24 @@ export async function addMissingPhoto() {
   } finally { db.close(); }
 }
 
+export async function seedCompactGalleries() {
+  const canvas = document.createElement('canvas'); canvas.width = 160; canvas.height = 100;
+  const context = canvas.getContext('2d')!; context.fillStyle = '#076e79'; context.fillRect(0, 0, 160, 100);
+  const blob = await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob!), 'image/png'));
+  const sha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))].map((value) => value.toString(16).padStart(2, '0')).join('');
+  const db = new NurseFlowDatabase(); await db.open();
+  try {
+    const loaded = await createRepositories(db).builder.get('procedure'); const graph = structuredClone(loaded.revision.graph);
+    const node = graph.nodes.find((node) => node.id === 'shared'); if (node?.kind !== 'instruction') throw new Error('fixture');
+    node.note = { text: 'Nota fra le due gallerie', visibility: 'always-visible' };
+    node.galleries.beforeNote.layout = 'grid-2'; node.galleries.afterNote.layout = 'grid-4';
+    node.media = (['before-note', 'after-note'] as const).flatMap((slot) => Array.from({ length: 5 }, (_, order) => ({ id: slot + order,
+      slot, order, caption: slot + ' ' + order, source: { kind: 'local' as const, assetId: 'gallery-asset', mime: 'image/png' as const } })));
+    await createCommands(db).updateDraft({ procedureId: 'procedure', draftId: loaded.revision.id, expectedEditVersion: loaded.revision.editVersion, graph,
+      mediaAssets: [{ id: 'gallery-asset', blob, sha256, mime: 'image/png', width: 160, height: 100, bytes: blob.size }] });
+  } finally { db.close(); }
+}
+
 export async function configureCheck(mode: 'two' | 'content' | 'warnings' | 'invalid-url' | 'valid' = 'valid') {
   const db = new NurseFlowDatabase(); await db.open();
   try {

@@ -11,6 +11,7 @@ import { NurseFlowDatabase } from './db';
 import { createCommands } from './commands';
 import { createRepositories } from './repositories';
 import { schemaV1 } from './migrations/schema';
+import { activitiesGraph } from '@test/fixtures/builder';
 let db: NurseFlowDatabase; let commands: ReturnType<typeof createCommands>; let repo: ReturnType<typeof createRepositories>;
 beforeEach(async () => {
   db = new NurseFlowDatabase('F05-' + crypto.randomUUID()); await db.open(); commands = createCommands(db); repo = createRepositories(db);
@@ -29,6 +30,17 @@ async function travel(direction: 'undo' | 'redo') {
     sourceRevisionId: source.revision.id, expectedEditVersion: source.revision.editVersion, direction });
 }
 describe('unità atomiche Builder', () => {
+  it('creazione attività+primo passo: commit unico, reload, Undo/Redo e rollback quota', async () => {
+    const draft = await commands.createDraft({ procedureId: 'procedure' });
+    await commands.updateDraft({ procedureId: 'procedure', draftId: draft.draft.id, expectedEditVersion: draft.draft.editVersion, graph: activitiesGraph() });
+    const before = (await repo.builder.get('procedure')).revision.graph;
+    const edit = { type: 'create-activity', nodeId: 'tasks', name: 'Nuova attività', kind: 'instruction' } as const;
+    const saved = await commit(edit); db.close(); await db.open();
+    expect((await repo.builder.get('procedure')).revision.graph).toEqual(saved.graph);
+    expect((await travel('undo')).graph).toEqual(before); expect((await travel('redo')).graph).toEqual(saved.graph);
+    const durable = await snapshot(); db.builderStates.hook('updating', () => { throw new Error('quota-activity'); });
+    await expect(commit(edit)).rejects.toThrow('quota-activity'); expect(await snapshot()).toEqual(durable);
+  });
   it('F06: quota sul cambio mode conserva tutte le preferenze e non crea una Draft', async () => {
     await commands.saveLibraryView({ searchText: 'autore', collapsedGroupIds: ['group'] }); const before = await snapshot();
     db.uiPreferences.hook('updating', () => { throw new DOMException('quota-mode', 'QuotaExceededError'); });

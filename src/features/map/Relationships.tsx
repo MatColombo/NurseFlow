@@ -19,7 +19,7 @@ export function Relationships({ nodeId, projection, route, focusNode }: {
       const status = route.activities.get(link.key); const visited = route.visitedEdges.has(link.key);
       return <div className="nf-map-relation nf-stack" key={link.key} data-map-path={link.key} data-visited={visited}>
         <p className="nf-authored">{label}{visited && <span className="nf-meta"> · ✓ {t('map.visited')}</span>}{status && <span className="nf-meta"> · {t('map.' + status)}</span>}</p>
-        {focusNode && link.targetId && link.destination.kind === 'node' ? <Button onClick={() => focusNode(link.targetId!)} aria-label={t('map.reference', {
+        {focusNode && link.targetId && link.destination.kind === 'node' ? <Button purpose="view" onClick={() => focusNode(link.targetId!)} aria-label={t('map.reference', {
           title: titleOf(projection.byId.get(link.targetId)!, t), ref: projection.references.get(link.targetId) })}>↪ {target}</Button> : <p>→ {target}</p>}
         {note?.text.trim() && (note.visibility === 'always-visible' ? <p className="nf-note nf-authored">{note.text}</p> :
           <details><summary aria-controls={`${prefix}-${index}`}>ⓘ {t('map.note', { label })}</summary><p id={`${prefix}-${index}`} className="nf-note nf-authored">{note.text}</p></details>)}

@@ -6,7 +6,7 @@ import { graphMetrics, makeScene } from '@domain/builder/scene';
 import { useAppearance } from '@app/appearance-context';
 import { applyEdit, type Edit } from '@domain/builder/edits';
 import { assertMovable, pasteGraph, type ClipSelection, type PasteTarget } from '@domain/builder/clipboard';
-import { nodeAt } from '@domain/builder/structure';
+import { destinationAt, nodeAt } from '@domain/builder/structure';
 import { Button, Dialog, Sheet } from '@shared/components';
 import { useUnsavedNavigation } from '@features/procedures/useUnsavedNavigation';
 import { MetadataSheet } from '@features/procedures/MetadataSheet';
@@ -73,7 +73,12 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
       failed.current = operation; setHasFailure(true); setError(explain(reason));
     });
   }
-  function select(value: Selection | null) { selected.current = value; setSelection(value); setHighlight(value); if (!failed.current) setError(null); persistView(); }
+  function select(value: Selection | null) {
+    if (value?.kind === 'edge' && value.edge.slot === 'activity' && destinationAt(current.current.revision.graph, value.edge).kind === 'unassigned') {
+      value = { kind: 'activity', nodeId: value.edge.nodeId, activityId: value.edge.itemId! };
+    }
+    selected.current = value; setSelection(value); setHighlight(value); if (!failed.current) setError(null); persistView();
+  }
   function scheduleView() { if (timer.current) clearTimeout(timer.current); timer.current = setTimeout(persistView, 250); }
   function canvasChanged(value: CanvasView) { camera.current = value; setCanvas(value); scheduleView(); }
   function switchMode(value: 'outline' | 'graph') {
@@ -146,7 +151,7 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
         if (pathReturn) void navigate(editorPath(procedure.id, current.current.revision.id, pathReturn), { replace: true });
         return true;
       }
-      const proposed = { ...result, label: value.type, openEditor };
+      const proposed = { ...result, label: value.type, openEditor: openEditor || value.type === 'create-activity' };
       setError(null); if (preview) { setPlan(proposed); return false; } return commit(proposed);
     } catch (reason) { setError(explain(reason)); return false; }
   }
@@ -212,7 +217,7 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
         <Button onClick={() => setDiscard(true)}>{t('builder.reload')}</Button></div></div>}
     </header>
     <div ref={toolbarRef} className="nf-builder-toolbar nf-row" role="toolbar" aria-label={t('builder.tools')}>
-      <Button aria-pressed={displayMode === 'outline'} onClick={() => switchMode('outline')}>{t('builder.outline')}</Button><Button aria-pressed={displayMode === 'graph'} onClick={() => switchMode('graph')}>{t('builder.graph')}</Button>
+      <Button purpose="view" aria-pressed={displayMode === 'outline'} onClick={() => switchMode('outline')}>{t('builder.outline')}</Button><Button purpose="view" aria-pressed={displayMode === 'graph'} onClick={() => switchMode('graph')}>{t('builder.graph')}</Button>
       <Button aria-label={t('builder.undo')} disabled={busy || history.past.length === 0 || Boolean(plan || picking)} disabledReason={t('builder.noUndo')} onClick={() => travel('undo')}>↶</Button>
       <Button aria-label={t('builder.redo')} disabled={busy || history.future.length === 0 || Boolean(plan || picking)} disabledReason={t('builder.noRedo')} onClick={() => travel('redo')}>↷</Button>
     </div>
@@ -227,10 +232,10 @@ export function BuilderEditor({ initial, pathReturn, checkReturn, checkSelection
         picking={picking?.edge ?? null} request={focusRequest} chrome={chromeRef} change={canvasChanged} select={select} pick={pickTarget} clear={() => { if (!picking) select(null); }} />}
     </div>
     <footer ref={footerRef} className="nf-row nf-builder-footer">
-      <Button disabled={busy || hasFailure || revision.state === 'ready' || Boolean(picking)} disabledReason={t(picking ? 'canvas.chooseDestination' : 'builder.previewNeedsDraft')}
+      <Button purpose="preview" disabled={busy || hasFailure || revision.state === 'ready' || Boolean(picking)} disabledReason={t(picking ? 'canvas.chooseDestination' : 'builder.previewNeedsDraft')}
         onClick={() => { void run(async () => { await builderService.flush(); await builderService.saveView(current.current, view());
           void navigate('/run/' + encodeURIComponent(procedure.id) + '?preview=draft&revision=' + encodeURIComponent(revision.id)); }); }}>{t('builder.preview')}</Button>
-      <Button disabled={busy || hasFailure || revision.state === 'ready' || Boolean(picking)} disabledReason={t(picking ? 'canvas.chooseDestination' : 'builder.previewNeedsDraft')}
+      <Button purpose="preview" disabled={busy || hasFailure || revision.state === 'ready' || Boolean(picking)} disabledReason={t(picking ? 'canvas.chooseDestination' : 'builder.previewNeedsDraft')}
         onClick={() => { void run(async () => { await builderService.flush(); await builderService.saveView(current.current, view());
           void navigate(basePath + '/check?revision=' + encodeURIComponent(revision.id)); }); }}>{t('builder.check')}</Button>
     </footer>

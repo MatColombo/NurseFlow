@@ -22,6 +22,22 @@ afterEach(async () => { storage.close(); await db.delete(); });
 async function snapshot() { return Promise.all(db.tables.map((table) => table.toArray())); }
 async function file(selected?: string[]) { const prepared = await service.prepareExport(selected); return new File([prepared.blob], prepared.name, { type: 'application/zip' }); }
 describe('F13 durable package export and additive import I01–I04/I08–I16/E10/E11/E13/E15', () => {
+  it('formatted content and compact grids round-trip as structured data, retaining Ready and original records', async () => {
+    const records = await portableRecords(1); const source = records.revisions.find((revision) => revision.state === 'ready'); if (!source) throw new Error('fixture');
+    const node = source.graph.nodes.find((node) => node.kind === 'instruction'); if (!node || node.kind !== 'instruction') throw new Error('fixture');
+    node.textFormat = [{ start: 0, end: 2, bold: true, color: 'info' }];
+    node.note = { text: 'First\nSecond', visibility: 'always-visible', bulleted: true, format: [{ start: 0, end: 5, underline: true }] };
+    node.galleries.beforeNote.layout = 'grid-2'; node.galleries.afterNote.layout = 'grid-4';
+    const encoded = await createPackage(records, 'procedure', { packageId: 'formatted', exportedAt: fixtureDate, appVersion: '0.0.0' });
+    const before = await snapshot();
+    const stage = await service.stage([new File([encoded], 'formatted.nfproc')], 0, 0); expect(stage.rejected).toEqual([]);
+    const saved = await service.importSelected(stage.valid, new Set(stagedCandidates(stage.valid).map((item) => item.key)), true);
+    const imported = (await db.procedures.get(saved.procedureIds[0]!))!;
+    const ready = (await db.revisions.get(imported.readyRevisionId!))!;
+    const copy = ready.graph.nodes.find((item) => item.kind === 'instruction' && item.textFormat?.length);
+    expect(copy).toMatchObject({ textFormat: node.textFormat, note: node.note, galleries: node.galleries });
+    const after = await snapshot(); before.forEach((rows, index) => { for (const row of rows) expect(after[index]).toContainEqual(row); });
+  });
   it('consistent snapshot excludes sessions/settings, respects selected IDs and full-library scope includes empty groups; reads have no mutations', async () => {
     const before = await snapshot(); const one = await service.prepareExport(['p-0']); const many = await service.prepareExport(['p-0', 'p-1']); const all = await service.prepareExport();
     expect(one.kind).toBe('procedure'); expect(many.kind).toBe('library'); expect(all.count).toBe(10); expect(await snapshot()).toEqual(before);

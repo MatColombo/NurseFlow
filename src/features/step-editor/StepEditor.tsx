@@ -16,6 +16,7 @@ import { ContentFields } from './ContentFields';
 import { OutcomeSection } from './OutcomeSection';
 import { MediaEditor } from './media/MediaEditor';
 import { SourceDialog } from './media/SourceDialog';
+import { TextEditor } from './TextEditor';
 import { carryCheck, checkPath, readCheckReturn } from '@features/check/navigation';
 
 type Modal = 'preview' | 'more' | 'type' | 'phase' | 'arrange' | 'outcome' | null;
@@ -92,7 +93,7 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
   }
   return <section className="nf-step-editor nf-stack" aria-label={t('editor.title')} data-node-id={nodeId} data-revision-id={draft.snapshot.revision.id} data-revision-state={draft.snapshot.revision.state}>
     <header className="nf-row nf-editor-header"><div><h1>{t('editor.title')}</h1><p className="nf-meta">{titleOf(node, t)}</p></div>
-      <Button onClick={() => setModal('preview')}>{t('editor.preview')}</Button><Button variant="primary" onClick={() => { void leave(); }}>{t('editor.done')}</Button>
+      <Button purpose="preview" onClick={() => setModal('preview')}>{t('editor.preview')}</Button><Button variant="primary" onClick={() => { void leave(); }}>{t('editor.done')}</Button>
       <Button aria-label={t('editor.more')} onClick={() => { void open('more'); }}>···</Button></header>
     {readCheckReturn(params) && <Button onClick={() => { void leave(true); }}>{t('check.back')}</Button>}
     <p role="status" className="nf-meta">{t(error ? 'editor.saveError' : draft.dirty || busy ? 'editor.saving' : 'editor.saved')}</p>
@@ -103,15 +104,17 @@ export function StepEditor({ initial, settings, nodeId, markRevision }: { initia
       <Button onClick={() => { void changePath(); }}>{t('editor.changePath')}</Button></div>}
     {node.kind === 'decision' && <OutcomeSection node={node} graph={draft.graph} busy={busy} open={(id) => { setOutcomeId(id); setModal('outcome'); }} arrange={() => { void open('arrange'); }} add={() => { void edit({ type: 'add-outcome' }); }} />}
     <details className="nf-card nf-stack nf-editor-section" open={Boolean(node.note?.text)}><summary>{t('editor.note')}</summary>
-      <label className="nf-stack">{t('editor.noteText')}<textarea rows={4} value={node.note?.text ?? ''} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: event.target.value, visibility: node.note?.visibility ?? 'always-visible' } } })} /></label>
-      <label className="nf-stack">{t('editor.note')}<select value={node.note?.visibility ?? 'always-visible'} onChange={(event) => draft.change({ type: 'content', patch: { note: { text: node.note?.text ?? '', visibility: event.target.value as 'expandable' | 'always-visible' } } })}>
+      <TextEditor label={t('editor.noteText')} value={node.note?.text ?? ''} format={node.note?.format} bulleted={node.note?.bulleted ?? false}
+        change={(text, format, bulleted) => draft.change({ type: 'content', patch: { note: { ...node.note, text, format, bulleted: Boolean(bulleted), visibility: node.note?.visibility ?? 'always-visible' } } })} />
+      <label className="nf-stack">{t('editor.note')}<select value={node.note?.visibility ?? 'always-visible'} onChange={(event) => draft.change({ type: 'content', patch: { note: { ...node.note, text: node.note?.text ?? '', visibility: event.target.value as 'expandable' | 'always-visible' } } })}>
         <option value="expandable">{t('editor.expandable')}</option><option value="always-visible">{t('editor.alwaysVisible')}</option></select></label>
     </details>
     {'media' in node && <MediaEditor node={node} settings={settings} busy={busy} change={draft.change} edit={(value) => { void edit(value); }} source={(...args) => { void mediaSource(...args); }} />}
     <Sheet open={modal === 'outcome' && Boolean(outcome) && !plan} title={t('editor.editOutcome', { label: outcome?.label || t('builder.unnamedOutcome') })} onClose={() => setModal(null)}>
       {errorPanel}{outcome && <>
         <label className="nf-stack">{t('editor.answer')}<input data-editor-field="answer" value={outcome.label} onChange={(event) => draft.change({ type: 'outcome', id: outcome.id, label: event.target.value })} /></label>
-        <label className="nf-stack">{t('editor.outcomeNote')}<textarea rows={4} value={outcome.note?.text ?? ''} onChange={(event) => draft.change({ type: 'outcome', id: outcome.id, label: outcome.label, note: { text: event.target.value, visibility: outcome.note?.visibility ?? 'expandable' } })} /></label>
+        <TextEditor label={t('editor.outcomeNote')} value={outcome.note?.text ?? ''} format={outcome.note?.format} bulleted={outcome.note?.bulleted ?? false}
+          change={(text, format, bulleted) => draft.change({ type: 'outcome', id: outcome.id, label: outcome.label, note: { text, format, bulleted: Boolean(bulleted), visibility: outcome.note?.visibility ?? 'expandable' } })} />
         <p>{t('editor.path')}: {destinationLabel(draft.graph, outcome.destination, t)}</p><Button aria-label={t('editor.changePath') + ': ' + outcome.label} onClick={() => { void changePath(outcome.id); }}>{t('editor.changePath')}</Button>
       </>}
     </Sheet>

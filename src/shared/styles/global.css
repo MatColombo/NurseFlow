@@ -80,6 +80,20 @@ input[type='range'] { inline-size: 100%; min-block-size: var(--nf-control-min); 
 .nf-validation > p:not(:first-child) { color: var(--nf-text); }
 .nf-gallery { display: grid; gap: var(--nf-space-1); }
 .nf-gallery--side-by-side { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--nf-gallery-compact)), 1fr)); }
+.nf-gallery--grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(var(--nf-gallery-compact), calc((100% - var(--nf-space-1)) / 2))), 1fr)); }
+.nf-gallery--grid-4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(var(--nf-gallery-compact), calc((100% - 3 * var(--nf-space-1)) / 4))), 1fr)); }
+.nf-gallery--grid-2 .nf-media-zoom img, .nf-gallery--grid-4 .nf-media-zoom img { max-block-size: var(--nf-gallery-compact); }
+.nf-media-figure figcaption { text-align: center; }
+/* A readable input font prevents WebKit's focus-triggered zoom, including small UI scales.
+   Browser zoom and OS accessibility remain available. */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type='range']):not([type='checkbox']):not([type='radio']), textarea, select, [contenteditable='true'] { font-size: max(16px, var(--nf-font-base)); }
+}
+.nf-button--secondary[data-purpose='action']:enabled { background: var(--nf-primary-tint); }
+.nf-button--secondary[data-purpose='view']:enabled { color: var(--nf-info); border-color: var(--nf-info); background: color-mix(in srgb, var(--nf-info) 8%, var(--nf-surface)); }
+.nf-button--secondary[data-purpose='preview']:enabled { color: var(--nf-ribbon-purple); border-color: var(--nf-ribbon-purple); background: color-mix(in srgb, var(--nf-ribbon-purple) 8%, var(--nf-surface)); }
+.nf-button--secondary[data-purpose='view']:enabled:hover { color: var(--nf-info); background: color-mix(in srgb, var(--nf-info) 15%, var(--nf-surface)); }
+.nf-button--secondary[data-purpose='preview']:enabled:hover { color: var(--nf-ribbon-purple); background: color-mix(in srgb, var(--nf-ribbon-purple) 15%, var(--nf-surface)); }
 .nf-gallery img { display: block; max-inline-size: 100%; block-size: auto; object-fit: contain; }
 .nf-gallery--compact img { max-block-size: var(--nf-gallery-compact); }
 .nf-gallery--medium img { max-block-size: var(--nf-gallery-medium); }

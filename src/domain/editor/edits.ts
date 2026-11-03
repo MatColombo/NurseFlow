@@ -3,12 +3,13 @@ import { galleryStyleSchema, nodeSchema, stepMediaSchema, stepNoteSchema, type G
 import { applyEdit } from '../builder/edits';
 import { nodeAt, assertEditableGraph } from '../builder/structure';
 import { requireEdit } from '../builder/model';
+import { textFormatSchema } from '../model/text';
 
 export type EditableStep = Exclude<Node, { kind: 'start' | 'multitask' }>;
 export function editableStep(node: Node): EditableStep { requireEdit(node.kind !== 'start' && node.kind !== 'multitask'); return node; }
 const content = z.strictObject({ title: z.string().optional(), text: z.string().optional(), question: z.string().optional(),
   context: z.string().optional(), additionalText: z.string().optional(), heading: z.string().optional(), message: z.string().optional(),
-  endKind: z.enum(['completed', 'stopped', 'escalation', 'neutral']).optional(), phaseId: z.string().nullable().optional(), note: stepNoteSchema.optional() });
+  endKind: z.enum(['completed', 'stopped', 'escalation', 'neutral']).optional(), phaseId: z.string().nullable().optional(), note: stepNoteSchema.optional(), textFormat: textFormatSchema.optional() });
 export type StepEdit =
   | { type: 'content'; patch: z.input<typeof content> }
   | { type: 'outcome'; id: string; label: string; note?: z.infer<typeof stepNoteSchema> }
@@ -38,7 +39,7 @@ export function editStep(source: Graph, nodeId: string, edit: StepEdit, settings
   if (edit.type === 'content') {
     const patch = content.parse(edit.patch);
     const allowed = new Set(['phaseId', 'note', ...(node.kind === 'end' ? ['heading', 'message', 'endKind'] : node.kind === 'decision' ?
-      ['title', 'question', 'context'] : node.kind === 'alert' ? ['title', 'text', 'additionalText'] : ['title', 'text'])]);
+      ['title', 'question', 'context'] : node.kind === 'alert' ? ['title', 'text', 'textFormat', 'additionalText'] : ['title', 'text', 'textFormat'])]);
     requireEdit(Object.keys(patch).every((key) => allowed.has(key))); Object.assign(node, patch);
   } else if (edit.type === 'outcome') {
     requireEdit(node.kind === 'decision'); const outcome = node.outcomes.find((item) => item.id === edit.id); requireEdit(outcome);
@@ -57,7 +58,8 @@ export function editStep(source: Graph, nodeId: string, edit: StepEdit, settings
       beforeNote: { layout: 'stacked-thumbnails', imageSpace: 'compact' }, afterNote: { layout: 'full-width', imageSpace: 'natural' } } };
     const changed = nodeSchema.parse(edit.kind === 'end' ? { ...common, kind: 'end', endKind: 'neutral', heading: title, message: body } :
       edit.kind === 'decision' ? { ...common, ...media, kind: 'decision', title, question: '', context: body, outcomes: [0, 1].map((order) => ({ id: newId(), order, label: '', destination: { kind: 'unassigned' } })) } :
-        { ...common, ...media, kind: edit.kind, title, text: body, next: 'next' in node ? node.next : { kind: 'unassigned' } });
+        { ...common, ...media, kind: edit.kind, title, text: body,
+          ...('textFormat' in node && node.textFormat ? { textFormat: node.textFormat } : {}), next: 'next' in node ? node.next : { kind: 'unassigned' } });
     graph.nodes[graph.nodes.findIndex((item) => item.id === node.id)] = changed;
   } else {
     requireEdit('media' in node);

@@ -22,7 +22,8 @@ test('Graph legge lo stesso DAG: shared una volta, due frecce dirette, selezione
   await locateGraphNode(page, 'Scelta dimostrativa'); await graphNode(page, 'decision').getByRole('button', { name: 'B · Percorso B', exact: true }).click();
   await expect(sheet(page)).toContainText('Scelta dimostrativa / B'); await sheet(page).getByRole('button', { name: 'Annulla', exact: true }).click();
   const edge = page.locator('[data-graph-edge][data-source="a-step"][data-target="shared"]');
-  await edge.focus(); await edge.press('Enter'); await expect(sheet(page)).toContainText('Percorso A / Passo successivo');
+  await edge.focus(); await edge.press('Enter'); await expect(edge).toHaveAttribute('aria-pressed', 'true');
+  await expect(sheet(page)).toHaveCount(0); await expect(page.locator('foreignObject[data-edge-focus="active"]')).toHaveCount(2);
   expect((await readBuilder(page)).revision.graph).toEqual(before.revision.graph); expect((await readBuilder(page)).history.past).toEqual([]);
 });
 

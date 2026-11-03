@@ -12,6 +12,7 @@ export type Edit =
   | { type: 'delete'; nodeId: string }
   | { type: 'rename'; nodeId: string; title: string; phaseId?: string | null }
   | { type: 'add-item'; nodeId: string }
+  | { type: 'create-activity'; nodeId: string; itemId?: string; name: string; kind: 'instruction' | 'alert' }
   | { type: 'rename-item'; nodeId: string; itemId: string; text: string }
   | { type: 'remove-item'; nodeId: string; itemId: string }
   | { type: 'reorder-item'; nodeId: string; itemId: string; delta: -1 | 1 }
@@ -86,7 +87,18 @@ export function applyEdit(source: Graph, edit: Edit, newId: () => string): { gra
   } else {
     const node = nodeAt(graph, edit.nodeId); requireEdit(node.kind === 'decision' || node.kind === 'multitask');
     const items = node.kind === 'decision' ? node.outcomes : node.activities;
-    if (edit.type === 'add-item') {
+    if (edit.type === 'create-activity') {
+      requireEdit(node.kind === 'multitask' && edit.name.trim().length > 0);
+      requireEdit(edit.kind === 'instruction' || edit.kind === 'alert');
+      const existing = edit.itemId ? node.activities.find((item) => item.id === edit.itemId) : undefined;
+      if (edit.itemId) requireEdit(existing && existing.first.kind === 'unassigned');
+      else requireEdit(items.length < 32, 'limit');
+      const child = freshNode(edit.kind, newId); requireEdit(child.kind === 'instruction' || child.kind === 'alert');
+      child.title = edit.name.trim(); child.next = { kind: 'activity-complete' };
+      graph.nodes.push(child); createdId = child.id;
+      if (existing) { existing.name = edit.name.trim(); existing.first = { kind: 'node', nodeId: child.id }; }
+      else node.activities.push({ id: newId(), name: edit.name.trim(), order: items.length, required: true, first: { kind: 'node', nodeId: child.id } });
+    } else if (edit.type === 'add-item') {
       requireEdit(items.length < 32, 'limit');
       if (node.kind === 'decision') node.outcomes.push({ id: newId(), order: items.length, label: '', destination: { kind: 'unassigned' } });
       else node.activities.push({ id: newId(), order: items.length, name: '', required: true, first: { kind: 'unassigned' } });

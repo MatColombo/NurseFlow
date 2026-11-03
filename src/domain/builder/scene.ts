@@ -12,8 +12,65 @@ export type Scene = { nodes: SceneNode[]; edges: SceneEdge[]; width: number; hei
 export function horizontalPath(start: Point, end: Point, gap: number) {
   // Keep long completion edges inside their activity lane until the final column gap.
   const turn = Math.max(start.x, end.x - gap * 3);
-  const bend = (end.x - turn) / 2;
-  return `M${start.x},${start.y} L${turn},${start.y} C${turn + bend},${start.y} ${end.x - bend},${end.y} ${end.x},${end.y}`;
+  const landing = end.x - Math.min(gap, (end.x - start.x) / 4);
+  const bend = (landing - turn) / 2;
+  return `M${start.x},${start.y} L${turn},${start.y} C${turn + bend},${start.y} ${landing - bend},${end.y} ${landing},${end.y} L${end.x},${end.y}`;
+}
+
+export function activityRegions(graph: Graph, boxes: SceneNode[], scopes: ReadonlyMap<string, string[]>) {
+  return graph.nodes.filter((node) => node.kind === 'multitask').flatMap((group) => {
+    const prefix = scopes.get(group.id) ?? []; const tokens = group.activities.map((activity) => activityScopeKey(group.id, activity.id));
+    const members = boxes.filter((box) => box.id === group.id || tokens.includes(scopes.get(box.id)?.[prefix.length] ?? ''));
+    if (!members.length) return [];
+    const x = Math.min(...members.map((box) => box.x)) - 8; const y = Math.min(...members.map((box) => box.y)) - 8;
+    return [{ id: group.id, members, x, y, width: Math.max(...members.map((box) => box.x + box.width)) - x + 8,
+      height: Math.max(...members.map((box) => box.y + box.height)) - y + 8 }];
+  });
+}
+
+/** View-only ordering: median sweeps reduce crossings without rewriting authored order. */
+export function layoutGraph(graph: Graph, boxes: SceneNode[], sourceRanks: ReadonlyMap<string, number>, metrics: SceneMetrics,
+  scopes: ReadonlyMap<string, string[]>, links: { source: string; target: string; port?: number }[]) {
+  const ranks = new Map(sourceRanks); const terminalRank = Math.max(0, ...ranks.values()) + 1;
+  const ends = graph.nodes.filter((node) => node.kind === 'end');
+  for (const node of ends) ranks.set(node.id, terminalRank);
+  const order = new Map(boxes.map((box, index) => [box.id, index]));
+  for (let pass = 0; pass < 6; pass++) {
+    const forward = pass % 2 === 0;
+    for (const rank of [...new Set(ranks.values())].sort((a, b) => forward ? a - b : b - a)) {
+      const layer = boxes.filter((box) => ranks.get(box.id) === rank);
+      const score = (id: string) => {
+        const neighbors = links.filter((link) => forward ? link.target === id : link.source === id)
+          .map((link) => (order.get(forward ? link.source : link.target) ?? 0) * 64 + (forward ? link.port ?? 0 : 0)).sort((a, b) => a - b);
+        return neighbors.length ? neighbors[Math.floor(neighbors.length / 2)]! : order.get(id)!;
+      };
+      layer.sort((a, b) => score(a.id) - score(b.id) || order.get(a.id)! - order.get(b.id)!);
+      layer.forEach((box, index) => order.set(box.id, index));
+    }
+  }
+  const kinds = ['completed', 'neutral', 'stopped', 'escalation'];
+  boxes.sort((a, b) => {
+    const endA = ends.find((node) => node.id === a.id); const endB = ends.find((node) => node.id === b.id);
+    return endA && endB ? kinds.indexOf(endA.endKind) - kinds.indexOf(endB.endKind) || endA.heading.localeCompare(endB.heading) : order.get(a.id)! - order.get(b.id)!;
+  });
+  layoutColumns(boxes, ranks, metrics, scopes);
+  // Reserve the full rectangle, including empty columns between unequal arms.
+  // Move a whole external lane together so its follow-ups remain aligned.
+  for (let pass = 0; pass < boxes.length; pass++) {
+    let moved = false;
+    for (const region of activityRegions(graph, boxes, scopes)) for (const box of boxes) {
+      if (region.members.includes(box) || box.x >= region.x + region.width || box.x + box.width <= region.x ||
+        box.y >= region.y + region.height || box.y + box.height <= region.y) continue;
+      const owner = scopes.get(region.id) ?? [];
+      // An ancestor's containing card is not an unrelated node.
+      if (activityRegions(graph, boxes, scopes).some((parent) => parent.id === box.id && parent.members.some((member) => member.id === region.id))) continue;
+      const lane = JSON.stringify(scopes.get(box.id) ?? []); const delta = region.y + region.height + metrics.gap - box.y;
+      for (const peer of boxes) if (!region.members.includes(peer) && JSON.stringify(scopes.get(peer.id) ?? []) === lane &&
+        (lane !== JSON.stringify(owner) || peer.id === box.id)) peer.y += delta;
+      moved = true;
+    }
+    if (!moved) break;
+  }
 }
 
 /** Tolerant view-only scopes also support an incomplete or cyclic Draft in Map. */
@@ -72,7 +129,7 @@ export function layoutColumns(boxes: SceneNode[], ranks: ReadonlyMap<string, num
 export function graphMetrics(scale: number, viewportWidth: number): SceneMetrics {
   const font = scale * 4 / 3; const ratio = scale / 13;
   const pad = Math.min(10 * (scale - 4) / 9, viewportWidth * .04);
-  return { width: Math.max(112, 244 * ratio), header: Math.max(48, 2 * font * 1.4) + Math.max(2, scale - 2) * 4 / 3 * 1.4 + 2 * pad,
+  return { width: Math.max(112, 244 * ratio), header: Math.max(48, 2 * font * 1.4) + 2 * Math.max(2, scale - 2) * 4 / 3 * 1.4 + 2 * pad,
     row: Math.max(48, 48 * ratio, font * 1.4 + 2 * pad), gap: Math.max(28, 28 * ratio), ratio };
 }
 function windowItems<T extends { id: string }>(items: T[], selected: string | undefined, count: number) {
@@ -154,11 +211,12 @@ export function makeScene(graph: Graph, focus: Record<string, string>, viewportW
     return { id, x: 0, y: 0,
       width: metrics.width, height: metrics.header + (visibleOutlets.length + browseRows) * metrics.row + 4, ports: visibleOutlets, total };
   });
-  layoutColumns(sceneNodes, rank, metrics, owners);
+  layoutGraph(graph, sceneNodes, rank, metrics, owners, connections.map((edge) => ({ source: edge.edge.nodeId, target: edge.targetId,
+    port: ports.get(edge.edge.nodeId)!.findIndex((port) => edgeKey(port.edge) === edgeKey(edge.edge)) })));
   const byId = new Map(sceneNodes.map((node) => [node.id, node]));
   const edges = connections.map((edge) => {
     const source = byId.get(edge.edge.nodeId)!; const target = byId.get(edge.targetId)!;
-    const inbound = connections.filter((item) => item.draw && item.targetId === edge.targetId);
+    const inbound = connections.filter((item) => item.draw && item.targetId === edge.targetId).sort((a, b) => byId.get(a.edge.nodeId)!.y - byId.get(b.edge.nodeId)!.y);
     const index = inbound.indexOf(edge);
     const start = { x: source.x + source.width, y: source.y + metrics.header + (source.ports.findIndex((port) => edgeKey(port.edge) === edgeKey(edge.edge)) + .5) * metrics.row };
     const end = { x: target.x, y: target.y + metrics.header * (index + 1) / (inbound.length + 1) };

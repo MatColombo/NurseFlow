@@ -5,7 +5,8 @@ import { edgeKey, nodeAt, reachable } from '@domain/builder/structure';
 import type { SceneNode, SceneMetrics } from '@domain/builder/scene';
 import { Button } from '@shared/components';
 import { destinationLabel, titleOf } from '../labels';
-export function GraphCard({ graph, box, metrics, view, selection, located, picking, reason, select, pick, reveal, browse }: {
+export function GraphCard({ graph, box, metrics, view, selection, located, picking, reason, select, pick, reveal, browse, edgeFocus }: {
+  edgeFocus?: 'active' | 'dimmed' | undefined;
   graph: Graph; box: SceneNode; metrics: SceneMetrics; view: CanvasView; selection: Selection | null; located: boolean;
   picking: boolean; reason: string | null; select(value: Selection): void; pick(id: string): void; reveal(id: string): void; browse(id: string): void;
 }) {
@@ -18,13 +19,16 @@ export function GraphCard({ graph, box, metrics, view, selection, located, picki
     edge.slot === 'activity' && node.kind === 'multitask' ? node.activities.find((item) => item.id === edge.itemId)?.name || t('builder.unnamedActivity') :
       t(edge.slot === 'afterAll' ? 'builder.afterAll' : node.kind === 'start' ? 'builder.firstStep' : 'builder.next');
   const act = (value: Selection) => { if (view.zoom < .99) reveal(node.id); else select(value); };
-  return <foreignObject x={box.x} y={box.y} width={box.width} height={box.height} data-graph-node={node.id}>
+  const phase = 'phaseId' in node ? graph.phases.find((phase) => phase.id === node.phaseId)?.name : undefined;
+  return <foreignObject x={box.x} y={box.y} width={box.width} height={box.height} data-graph-node={node.id}
+    data-edge-focus={edgeFocus} data-node-kind={node.kind} data-end-kind={node.kind === 'end' ? node.endKind : undefined}>
     <div className={'nf-graph-card' + (located || selection && (selection.kind === 'edge' ? selection.edge.nodeId : selection.nodeId) === node.id ? ' nf-graph-card--selected' : '')}>
       <div className="nf-graph-card-head" style={{ height: metrics.header }}>
+        <p className="nf-meta nf-graph-phase" title={phase}>{phase || '\u00a0'}</p>
         <Button id={'graph-node-' + node.id} className="nf-graph-title" title={title} data-target-reason={reason ?? undefined}
           aria-label={picking ? t('canvas.choose', { title }) : title} disabled={picking && Boolean(reason)} disabledReason={reason ?? ''}
           onClick={() => { if (view.zoom < .99) reveal(node.id); else if (picking) pick(node.id); else select({ kind: 'node', nodeId: node.id }); }}>{title}</Button>
-        <p className="nf-meta nf-graph-meta" title={reason ?? undefined}>{reason ?? (!reachable(graph).has(node.id) ? t('builder.unreachable') : t('builder.kinds.' + node.kind))}</p>
+        <p className="nf-meta nf-graph-meta" title={reason ?? undefined}>{reason ?? (!reachable(graph).has(node.id) ? t('builder.unreachable') : t('builder.kinds.' + node.kind))}{node.kind === 'end' && <> · {t('builder.ends.' + node.endKind)}</>}</p>
       </div>
       {box.ports.map(({ edge, destination }) => <div className="nf-graph-port" key={edgeKey(edge)} style={{ height: metrics.row }}>
         {edge.slot === 'activity' && !picking && <Button aria-label={t('builder.activityActions', { title: outletName(edge) })}

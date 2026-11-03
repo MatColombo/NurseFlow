@@ -5,3 +5,4 @@
 .nf-gallery--natural .nf-media-zoom img { max-block-size: none; }
 .nf-gallery--medium .nf-media-zoom img { max-block-size: var(--nf-gallery-medium); }
 .nf-gallery--large .nf-media-zoom img { max-block-size: var(--nf-gallery-large); }
+.nf-gallery:is(.nf-gallery--grid-2, .nf-gallery--grid-4) .nf-media-zoom img { max-block-size: var(--nf-gallery-compact); }

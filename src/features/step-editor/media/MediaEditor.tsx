@@ -24,7 +24,7 @@ export function MediaEditor({ node, settings, busy, change, edit, source }: {
         <div className="nf-row"><Button disabled={busy || blocked} disabledReason={t('media.limit', { count: Math.min(32, limit) })} onClick={() => source('photo', slot)}>{t('media.addPhoto')}</Button>
           <Button disabled={busy || blocked} disabledReason={t('media.limit', { count: Math.min(32, limit) })} onClick={() => source('url', slot)}>{t('media.addUrl')}</Button></div>
         <label className="nf-stack">{t('media.layout')}<select value={style.layout} disabled={busy} onChange={(event) => edit({ type: 'gallery', slot, style: { ...style, layout: event.target.value as typeof style.layout } })}>
-          {(['stacked-thumbnails', 'side-by-side', 'full-width'] as const).map((value, index) => <option key={value} value={value}>{t('media.' + ['stacked', 'side', 'full'][index])}</option>)}</select></label>
+          {(['stacked-thumbnails', 'side-by-side', 'full-width', 'grid-2', 'grid-4'] as const).map((value, index) => <option key={value} value={value}>{t('media.' + ['stacked', 'side', 'full', 'grid2', 'grid4'][index])}</option>)}</select></label>
         <label className="nf-stack">{t('media.space')}<select value={style.imageSpace} disabled={busy} onChange={(event) => edit({ type: 'gallery', slot, style: { ...style, imageSpace: event.target.value as typeof style.imageSpace } })}>
           {(['compact', 'medium', 'large', 'natural'] as const).map((value) => <option key={value} value={value}>{t('media.' + value)}</option>)}</select></label>
         <ol className="nf-list nf-stack">{items.map((item, index) => <li className="nf-stack nf-card" key={item.id} data-media-row={item.id}>

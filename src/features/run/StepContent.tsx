@@ -5,6 +5,7 @@ import type { EditableStep } from '@domain/editor/edits';
 import { Button, Dialog, GalleryFrame } from '@shared/components';
 import { MediaImage } from '@features/step-editor/media/MediaImage';
 import './step-content.css';
+import { FormattedNote, FormattedText } from '@shared/components/FormattedText';
 
 /** Shared content. Page08's local preview has inert actions; Guided Draft Preview uses RunScreen's explicit mode. */
 export function StepContent({ node, phase, preview, inspection = false, allowRemote = true, onContinue, onChoose, busy = false, continueLabel, showEndType = true, stopOutcomeIds = [], finishOutcomeIds = [] }: {
@@ -27,20 +28,20 @@ export function StepContent({ node, phase, preview, inspection = false, allowRem
     {phase && <p className="nf-meta">{phase}</p>}
     {node.kind === 'end' && showEndType && <p>{t('builder.ends.' + node.endKind)}</p>}
     <h2 tabIndex={-1}>{title || t('editor.incomplete')}</h2>
-    {node.kind === 'instruction' && <p className="nf-authored">{node.text}</p>}
-    {node.kind === 'alert' && <><p className="nf-step-warning nf-authored" role="alert">{node.text || t('editor.incomplete')}</p>{node.additionalText && <p className="nf-authored">{node.additionalText}</p>}</>}
+    {node.kind === 'instruction' && <p className="nf-authored"><FormattedText text={node.text} format={node.textFormat} /></p>}
+    {node.kind === 'alert' && <><p className="nf-step-warning nf-authored" role="alert"><FormattedText text={node.text || t('editor.incomplete')} format={node.textFormat} /></p>{node.additionalText && <p className="nf-authored">{node.additionalText}</p>}</>}
     {node.kind === 'decision' && node.context && <p className="nf-authored">{node.context}</p>}
     {node.kind === 'end' && <p className="nf-authored">{node.message}</p>}
     {gallery('before-note')}
     {note && <section className="nf-stack nf-step-note" aria-label={t('editor.note')}>
-      {note.visibility === 'expandable' && <Button className="nf-note-toggle" aria-expanded={noteOpen} onClick={() => setNoteOpen((value) => !value)}>{t(noteOpen ? 'editor.hideNote' : 'editor.showNote')}</Button>}
-      {(note.visibility === 'always-visible' || noteOpen) && <p className="nf-authored">{note.text}</p>}
+      {note.visibility === 'expandable' && <Button purpose="view" className="nf-note-toggle" aria-expanded={noteOpen} onClick={() => setNoteOpen((value) => !value)}>{t(noteOpen ? 'editor.hideNote' : 'editor.showNote')}</Button>}
+      {(note.visibility === 'always-visible' || noteOpen) && <FormattedNote note={note} />}
     </section>}
     {gallery('after-note')}
     {!inspection && node.kind === 'decision' && <div className="nf-stack">{[...node.outcomes].sort((a, b) => a.order - b.order).map((item) => <div className="nf-row" key={item.id} data-preview-outcome={item.id}>
       <Button action disabled={preview || busy} disabledReason={t(preview ? 'editor.previewOnly' : 'run.saving')} onClick={() => onChoose?.(item.id)}>{item.label || t('builder.unnamedOutcome')}{stopOutcomeIds.includes(item.id) && <small className="nf-meta"> · {t('run.stop')}</small>}{finishOutcomeIds.includes(item.id) && <small className="nf-meta"> · {t('run.finishActivity')}</small>}</Button>
-      {item.note?.text.trim() && (item.note.visibility === 'always-visible' ? <p className="nf-authored nf-note">{item.note.text}</p> : <><Button aria-label={t('editor.outcomeInfo', { label: item.label })} aria-expanded={outcomeNote === item.id} onClick={() => setOutcomeNote(outcomeNote === item.id ? null : item.id)}>ⓘ</Button>
-        {outcomeNote === item.id && <p className="nf-authored nf-note">{item.note.text}</p>}</>)}
+      {item.note?.text.trim() && (item.note.visibility === 'always-visible' ? <div className="nf-note"><FormattedNote note={item.note} /></div> : <><Button purpose="view" aria-label={t('editor.outcomeInfo', { label: item.label })} aria-expanded={outcomeNote === item.id} onClick={() => setOutcomeNote(outcomeNote === item.id ? null : item.id)}>ⓘ</Button>
+        {outcomeNote === item.id && <div className="nf-note"><FormattedNote note={item.note} /></div>}</>)}
     </div>)}</div>}
     {!inspection && node.kind !== 'decision' && node.kind !== 'end' && <Button action disabled={preview || busy} disabledReason={t(preview ? 'editor.previewOnly' : 'run.saving')} onClick={onContinue}>{continueLabel ?? t('editor.continue')}</Button>}
     <Dialog open={Boolean(zoomed)} title={t('media.image')} onClose={() => setZoomed(null)}>

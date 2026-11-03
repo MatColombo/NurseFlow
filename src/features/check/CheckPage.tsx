@@ -70,7 +70,7 @@ export default function CheckPage() {
         {checked.result.warnings.map((issue) => <div key={issue.id} data-issue-id={issue.id}><ValidationRow severity="warning" code={issue.code as `W${string}`} message={t('check.rules.' + issue.code)} location={location(issue)} onAction={() => action(issue)} /></div>)}</section>}
     </>}
     <p className="nf-note nf-check-scope">{t('check.scope')}</p>
-    <footer className="nf-row"><Button disabled={busy || !checked} disabledReason={t('check.checking')} onClick={() => { if (checked) void navigate('/run/' + encodeURIComponent(id) + '?preview=draft&revision=' + encodeURIComponent(checked.draftId)); }}>{t('check.preview')}</Button>
+    <footer className="nf-row"><Button purpose="preview" disabled={busy || !checked} disabledReason={t('check.checking')} onClick={() => { if (checked) void navigate('/run/' + encodeURIComponent(id) + '?preview=draft&revision=' + encodeURIComponent(checked.draftId)); }}>{t('check.preview')}</Button>
       <Button variant="primary" disabled={blocked} disabledReason={t(error ? 'check.errors.' + error : 'check.resolve')} onClick={openConfirmation}>{t('check.mark')}</Button></footer>
     <Dialog open={confirm} title={t('check.confirmTitle')} onClose={() => { if (!busy) setConfirm(false); }}>
       {checked && <><p>{t('check.version', { version: checked.nextReadyVersion })}</p>{checked.previousReadyVersion && <p>{t('check.previous', { version: checked.previousReadyVersion })}</p>}

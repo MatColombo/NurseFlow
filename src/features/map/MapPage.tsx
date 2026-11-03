@@ -65,7 +65,7 @@ function MapScreen({ data }: { data: MapData }) {
     <header className="nf-map-header">
       <Link className="nf-button" to={data.returnPath} replace state={returnState} aria-label={t(backKey)}>‹</Link>
       <h1 ref={header} tabIndex={-1} title={data.title}>{data.title}</h1>
-      <Button onClick={() => setMode(mode === 'graph' ? 'list' : 'graph')}>{t(mode === 'graph' ? 'map.list' : 'map.graph')}</Button>
+      <Button purpose="view" onClick={() => setMode(mode === 'graph' ? 'list' : 'graph')}>{t(mode === 'graph' ? 'map.list' : 'map.graph')}</Button>
     </header>
     {data.revision.state === 'working-draft' && <strong className="nf-map-draft" role="status">{t(data.preview ? 'procedure.draftPreview' : 'status.draft')}</strong>}
     <div className="nf-map-body">

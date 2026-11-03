@@ -86,11 +86,11 @@ function DetailsContent({ details, reload }: { details: Details; reload(): Promi
       {state === 'archived' ? <Button action variant="primary" onClick={() => { void perform(async () => { await procedureService.archive(procedure.id, false); await reload(); }); }}>{t('procedure.restore')}</Button>
         : ready ? <><Button action variant="primary" disabled={busy} disabledReason={t('common.loading')} onClick={start}>
           {resume ? t('procedure.resume') : t(state === 'ready-draft' ? 'procedure.startReady' : 'procedure.start')}</Button>
-          <div className="nf-row"><Button ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button>
+          <div className="nf-row"><Button purpose="view" ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button>
             <Button onClick={() => { void navigate(editPath); }}>{t(state === 'ready-draft' ? 'procedure.continueEditing' : 'procedure.edit')}</Button></div></>
         : <><Button action variant="primary" onClick={() => { void navigate(editPath); }}>{t('procedure.edit')}</Button>
-          <div className="nf-row"><Button onClick={() => { void navigate(`/run/${encodeURIComponent(procedure.id)}?preview=draft&revision=${encodeURIComponent(draft?.id ?? '')}`); }}>{t('procedure.preview')}</Button>
-            <Button ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button></div></>}
+          <div className="nf-row"><Button purpose="preview" onClick={() => { void navigate(`/run/${encodeURIComponent(procedure.id)}?preview=draft&revision=${encodeURIComponent(draft?.id ?? '')}`); }}>{t('procedure.preview')}</Button>
+            <Button purpose="view" ref={mapButton} onClick={openMap}>{t('procedure.map')}</Button></div></>}
     </div>
     <Sheet open={modal === 'more'} title={t('procedure.more')} className="nf-procedure-menu"
       style={{ '--nf-menu-top': `${menuTop}px` } as CSSProperties} onClose={() => setModal(null)}>

@@ -6,6 +6,8 @@ Candidata tecnica **0.1.0-rc.2**, funzionalità F00–F15, audit F16 e [correzio
 
 ## Avvio riproducibile
 
+Le [correzioni locali successive alla rc.2](docs/reports/RC2-followup.md) coprono frecce, attività, colori, immagini e testo formattato; il report distingue i test locali dalla pubblicazione e dalle prove su dispositivi fisici.
+
 Richiesti **Node 26.13.0 LTS** e **npm 11.20.0**, fissati in `.nvmrc`, `.node-version`, `package.json` e ADR-001. Con nvm, eseguire `nvm install` e `nvm use` (su nvm-windows specificare `26.13.0`).
 
 ```sh

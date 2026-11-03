@@ -53,12 +53,12 @@ export function useCanvasGestures(element: RefObject<HTMLDivElement | null>, vie
     if (!points.current.size) panning.current = false;
   }
   function keyboard(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') { clear(); return; }
     if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey || event.altKey) return;
     const offsets: Record<string, Point> = { ArrowLeft: { x: 64, y: 0 }, ArrowRight: { x: -64, y: 0 }, ArrowUp: { x: 0, y: 64 }, ArrowDown: { x: 0, y: -64 } };
     const delta = offsets[event.key];
     if (delta) { event.preventDefault(); emit({ ...current.current, initialized: true, x: current.current.x + delta.x, y: current.current.y + delta.y }); }
     else if (event.key === 'Home') { event.preventDefault(); fit(); }
-    else if (event.key === 'Escape') clear();
     else if (event.key === '+' || event.key === '-') {
       event.preventDefault(); const node = element.current;
       if (node) emit(zoomAt(current.current, current.current.zoom * (event.key === '+' ? 1.25 : .8), { x: node.clientWidth / 2, y: node.clientHeight / 2 }, minimumZoom));

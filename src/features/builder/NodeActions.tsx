@@ -19,6 +19,9 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
   const activity = node.kind === 'multitask' ? node.activities.find((item) => item.id === activityId) : undefined;
   const [form, setForm] = useState<string | null>(null); const [text, setText] = useState(''); const [query, setQuery] = useState('');
   const [phaseId, setPhaseId] = useState('phaseId' in node ? node.phaseId ?? '' : '');
+  const [activityForm, setActivityForm] = useState<{ itemId?: string; name: string; kind: 'instruction' | 'alert' } | null>(
+    activity?.first.kind === 'unassigned' ? { itemId: activity.id, name: activity.name, kind: 'instruction' } : null);
+  const defineActivity = (item?: Activity) => setActivityForm({ ...(item ? { itemId: item.id } : {}), name: item?.name ?? '', kind: 'instruction' });
   const items: (Outcome | Activity)[] = node.kind === 'decision' ? [...node.outcomes].sort((a, b) => a.order - b.order) :
     node.kind === 'multitask' ? [...node.activities].sort((a, b) => a.order - b.order) : [];
   const clipSelection: ClipSelection = activityId ? { kind: 'activity', nodeId: node.id, activityId } : { kind: 'node', nodeId: node.id };
@@ -26,7 +29,16 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
   return <Sheet open title={activity ? activity.name || t('builder.unnamedActivity') : titleOf(node, t)} onClose={close}>
     {error && <div><p role="alert">{error}</p>{retryable && <Button onClick={retry}>{t('common.retry')}</Button>}</div>}
     {node.kind !== 'start' && <fieldset disabled={busy} className="nf-stack nf-metadata-fields">
-      {form ? <form className="nf-stack" onSubmit={(event) => {
+      {activityForm ? <form className="nf-stack" onSubmit={(event) => {
+        event.preventDefault(); void edit({ type: 'create-activity', nodeId: node.id, ...activityForm }, false);
+      }}>
+        <p>{t('builder.activityWorkflow')}</p>
+        <label className="nf-stack">{t('builder.activityName')}<input autoFocus value={activityForm.name} onChange={(event) => setActivityForm({ ...activityForm, name: event.target.value })} /></label>
+        <label className="nf-stack">{t('builder.activityFirstKind')}<select value={activityForm.kind} onChange={(event) => setActivityForm({ ...activityForm, kind: event.target.value as 'instruction' | 'alert' })}>
+          <option value="instruction">{t('builder.kinds.instruction')}</option><option value="alert">{t('builder.kinds.alert')}</option></select></label>
+        <div className="nf-row"><Button onClick={() => setActivityForm(null)}>{t('common.cancel')}</Button>
+          <Button type="submit" variant="primary" disabled={!activityForm.name.trim()} disabledReason={t('builder.activityName')}>{t('builder.createActivityStep')}</Button></div>
+      </form> : form ? <form className="nf-stack" onSubmit={(event) => {
         event.preventDefault();
         void edit(form === '$node' ? { type: 'rename', nodeId: node.id, title: text, phaseId: phaseId || null } :
           { type: 'rename-item', nodeId: node.id, itemId: form, text }, false).then((saved) => { if (saved) setForm(null); });
@@ -37,6 +49,8 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
       </form> : <>
         {!activity && <>{node.kind !== 'multitask' && <Button onClick={() => openEditor(node.id)}>{t('builder.editStep')}</Button>}
           <Button onClick={() => startForm('$node', 'title' in node ? node.title ?? '' : node.kind === 'end' ? node.heading : '')}>{t('builder.rename')}</Button></>}
+        {activity && activity.first.kind === 'unassigned' && <Button variant="primary" onClick={() => defineActivity(activity)}>{t('builder.defineActivity')}</Button>}
+        {activity && activity.first.kind === 'node' && <Button onClick={() => openEditor(activity.first.kind === 'node' ? activity.first.nodeId : '')}>{t('builder.editActivityStep')}</Button>}
         {activity && <><Button onClick={() => startForm(activity.id, activity.name)}>{t('builder.rename')}</Button>
           <Button onClick={() => select({ kind: 'edge', edge: { nodeId: node.id, slot: 'activity', itemId: activity.id } })}>{t('builder.setPath')}</Button></>}
         <div className="nf-row"><Button onClick={() => copy('copy', clipSelection)}>{t('builder.copy')}</Button>
@@ -52,7 +66,7 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
           <p>{t(node.kind === 'decision' ? 'builder.outcomeCount' : 'builder.activityCount', { count: items.length })}</p>
           <label className="nf-stack">{t('common.search')}<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
           <ul className="nf-list nf-stack">{items.filter((item) => normalize('label' in item ? item.label : item.name).includes(normalize(query))).map((item, index) => <li key={item.id} className="nf-stack">
-            <Button onClick={() => startForm(item.id, 'label' in item ? item.label : item.name)}>{('label' in item ? item.label : item.name) || t(node.kind === 'decision' ? 'builder.unnamedOutcome' : 'builder.unnamedActivity')}</Button>
+            <Button onClick={() => { if ('first' in item && item.first.kind === 'unassigned') defineActivity(item); else startForm(item.id, 'label' in item ? item.label : item.name); }}>{('label' in item ? item.label : item.name) || t(node.kind === 'decision' ? 'builder.unnamedOutcome' : 'builder.unnamedActivity')}</Button>
             <div className="nf-row"><Button onClick={() => select(node.kind === 'decision' ? { kind: 'edge', edge: { nodeId: node.id, slot: 'outcome', itemId: item.id } } :
               { kind: 'activity', nodeId: node.id, activityId: item.id })}>{t('builder.setPath')}</Button>
               {([-1, 1] as const).map((delta) => <Button key={delta} disabled={items.indexOf(item) + delta < 0 || items.indexOf(item) + delta >= items.length}
@@ -60,7 +74,7 @@ export function NodeActions({ graph, selection, close, edit, copy, pasteActivity
               <Button variant="danger" aria-label={t('builder.removeNumber', { count: index + 1 })}
                 onClick={() => { void edit({ type: 'remove-item', nodeId: node.id, itemId: item.id }, true); }}>{t('builder.removeItem')}</Button></div>
           </li>)}</ul>
-          <Button disabled={items.length >= 32} disabledReason={t('builder.limit')} onClick={() => { void edit({ type: 'add-item', nodeId: node.id }, false); }}>
+          <Button disabled={items.length >= 32} disabledReason={t('builder.limit')} onClick={() => { if (node.kind === 'multitask') defineActivity(); else void edit({ type: 'add-item', nodeId: node.id }, false); }}>
             {t(node.kind === 'decision' ? 'builder.addOutcome' : 'builder.addActivity')}</Button>
           {node.kind === 'multitask' && <>
             <Button onClick={() => select({ kind: 'edge', edge: { nodeId: node.id, slot: 'afterAll' } })}>{t('builder.afterAll')}</Button>

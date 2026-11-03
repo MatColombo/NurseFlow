@@ -64,10 +64,12 @@ it('property: geometria finita, senza sovrapposizioni dei nodi a 320/390/768px Ã
       const target = scene.nodes.find((node) => node.id === edge.targetId)!;
       expect(edge.end.x).toBe(target.x); expect(edge.end.x).toBeGreaterThan(edge.start.x);
       const coordinates = edge.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
-      const curve = coordinates.slice(-6);
+      const curve = coordinates.slice(4, 10);
       expect(curve[1]).toBe(edge.start.y); // first control is horizontally aligned
       expect(curve[3]).toBe(edge.end.y); // terminal tangent is perpendicular to left face
       expect(curve[2]).toBeLessThan(edge.end.x);
+      expect(coordinates.slice(-2)).toEqual([edge.end.x, edge.end.y]);
+      expect(curve[4]).toBeLessThan(edge.end.x); expect(curve[5]).toBe(edge.end.y);
     }
   }
 });
